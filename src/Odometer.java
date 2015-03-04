@@ -4,9 +4,9 @@ public class Odometer extends Thread {
 	private OdometryCorrector odometryCorrctor;
 	Object lock;
 	
-	public Odometer(Object lock) {
+	public Odometer(OdometryCorrector corrector, Object lock) {
 		this.lock = lock;
-		odometryCorrctor = new OdometryCorrector(lock);
+		odometryCorrctor = corrector;
 	}
 	
 	public void setX(double x) {
