@@ -10,20 +10,21 @@ public class RobinHood {
 									usPort1 = SensorPort.S3, usPort2 = SensorPort.S4; //TODO: check the ports when connecting to hardware
 	private final static NXTRegulatedMotor[] wheelMotor = {Motor.A, Motor.B};
 	private final static NXTRegulatedMotor launcherMotor = Motor.C;
+	public final static double wheelRadius = 2.75, wheelsDistance = 15.75;
 	private Object lock;
 	private Odometer odometer;
 	private OdometryCorrector odometryCorrector;
 	private Navigator navigator;
 	private Launcher launcher;
 	private LCDPrinter lcdPrinter;
-	private ColorSensor lsSensor[];
-	private UltrasonicSensor usSensor[];
+	private ColorSensor[] lsSensor;
+	private UltrasonicSensor[] usSensor;
 	private LSController lsController;
 	private USController usController;
 
-/**
- * Constructor method. The variables are initialized here.
-*/
+	/**
+	 * Constructor method. The variables are initialized here.
+	*/
 	public RobinHood() {
 		usSensor = new UltrasonicSensor[2];
 		lsSensor = new ColorSensor[2];
@@ -35,8 +36,8 @@ public class RobinHood {
 		
 		lsController = new LSController(lsSensor);
 		usController = new USController(usSensor);
+		odometer = new Odometer(wheelMotor, lock);
 		odometryCorrector = new OdometryCorrector(odometer, lsController, lock);
-		odometer = new Odometer(odometryCorrector, lock);
 		navigator = new Navigator(odometer, wheelMotor, usController);
 		launcher = new Launcher(odometer, launcherMotor);
 		lcdPrinter = new LCDPrinter(odometer, lock);
@@ -60,14 +61,6 @@ public class RobinHood {
 	
 	public LCDPrinter getLcdPrinter() {
 		return lcdPrinter;
-	}
-
-	/**
-	 * Calibrates the light sensor using moving average method.
-	 * @return true if the calibration is done successfully, false otherwise.
-	 */
-	public boolean calibrateLightSensor() {
-		return true; //if the calibration is successful, false otherwise.
 	}
 	
 	public void run() {

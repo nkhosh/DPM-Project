@@ -5,24 +5,24 @@ import lejos.nxt.NXTRegulatedMotor;
 
 public class Odometer extends Thread {
 	private double x, y, angle;
-	private OdometryCorrector odometryCorrector;
 	Object lock;
 	private double radius, width;
-	private final NXTRegulatedMotor leftMotor = Motor.A, rightMotor = Motor.B;
+	private final NXTRegulatedMotor[] wheels;
 	private double[] tachometer;
 	private double dc, dt;
 	private static final long ODOMETER_PERIOD = 25;
 	
-	public Odometer(OdometryCorrector corrector, Object lock) {
+	public Odometer(NXTRegulatedMotor[] wheels, Object lock) {
 		this.lock = lock;
-		odometryCorrector = corrector;
 		x = 0.0;
 		y = 0.0;
 		angle = 0.0;
+		tachometer = new double[2];
 		tachometer[0] = 0;
 		tachometer[1] = 0;
-		leftMotor.resetTachoCount();
-		rightMotor.resetTachoCount();
+		this.wheels = wheels;
+		wheels[0].resetTachoCount();
+		wheels[1].resetTachoCount();
 	}
 	
 	public void setX(double x) {
@@ -36,12 +36,20 @@ public class Odometer extends Thread {
 	public void setAngle(double angle) {
 		this.angle = angle;
 	}
+	
 	public void setRadius(double r) {
 		radius = r;
+	}
+	public double getRadius() {
+		return radius;
 	}
 	public void setWidth(double w) {
 		width = w;
 	}
+	public double getWidth() {
+		return width;
+	}
+	
 	public double getX() {
 		return x;
 	}
@@ -75,8 +83,8 @@ public class Odometer extends Thread {
 		while (true) {
 			updateStart = System.currentTimeMillis();
 			// put (some of) your odometer code here
-			double tachoCounterL = (leftMotor.getTachoCount())*Math.PI/180;
-			double tachoCounterR = (rightMotor.getTachoCount())*Math.PI/180;
+			double tachoCounterL = (wheels[0].getTachoCount())*Math.PI/180;
+			double tachoCounterR = (wheels[1].getTachoCount())*Math.PI/180;
 			tachometer[0] = tachoCounterL - tachometer[0];
 			tachometer[1] = tachoCounterR - tachometer[1];
 			dc = (tachometer[1]*radius + tachometer[0]*radius)/2;

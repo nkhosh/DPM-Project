@@ -17,6 +17,7 @@ public class Navigator {
 		this.odometer = odometer;
 		this.wheels = wheels;
 		this.state = State.NO_OBSTACLE;
+		this.usController = usController;
 	}
 	
 	public void processUSData(UltrasonicSensor us) {
@@ -34,7 +35,9 @@ public class Navigator {
 			this.turnTo(minAng, false);
 			this.setSpeeds(FAST, FAST);
 		}
-		this.setSpeeds(0, 0);		
+		this.setSpeeds(0, 0);	
+//		wheels[0].rotate(Navigator.convertDistance(odometer.getRadius(), y), true);
+//		wheels[1].rotate(Navigator.convertDistance(odometer.getRadius(), y), false);
 	}
 
 	/*
@@ -66,6 +69,7 @@ public class Navigator {
 			this.setSpeeds(0, 0);
 		}
 	}
+	
 	public void setSpeeds(int lSpd, int rSpd) {
 		this.wheels[0].setSpeed(lSpd);
 		this.wheels[1].setSpeed(rSpd);
@@ -79,11 +83,11 @@ public class Navigator {
 			this.wheels[1].forward();
 	}
 
-	private static int convertDistance(double radius, double distance) {
-		return (int) ((180.0 * distance) / (Math.PI * radius));
+	public static double convertDistance(double radius, double distance) {
+		return ((180.0 * distance) / (Math.PI * radius));
 	}
 
-	private static int convertAngle(double radius, double width, double angle) {
+	public static double convertAngle(double radius, double width, double angle) {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}
 }
