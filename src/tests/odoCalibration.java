@@ -15,8 +15,6 @@ public class odoCalibration {
 	private static RobinHood robinhood;
 	
 	public static void main(String[] args){
-		robinhood = new RobinHood();
-		robinhood.getOdometer().start();
 		while ( true ) {
 			LCD.clear();
 			LCD.drawString("< Left | Right >", 0, 2);

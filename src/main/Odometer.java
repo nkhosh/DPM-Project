@@ -23,6 +23,10 @@ public class Odometer extends Thread {
 		this.wheels = wheels;
 		wheels[0].resetTachoCount();
 		wheels[1].resetTachoCount();
+		
+		// radius and width determined after calibration
+		radius = 2.075; 
+		width = 16.22;
 	}
 	
 	public void setX(double x) {
@@ -92,9 +96,9 @@ public class Odometer extends Thread {
 			
 			synchronized (lock) {
 				// don't use the variables x, y, or theta anywhere but here!
-				x += dc * Math.cos(heading + dt/2);
-				y += dc * Math.sin(heading + dt/2);
-				heading += dt;
+				y += dc * Math.cos(heading + dt/2);
+				x += dc * Math.sin(heading + dt/2);
+				heading -= dt;
 			}
 			
 			tachometer[0] = tachoCounterL;

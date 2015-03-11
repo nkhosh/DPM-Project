@@ -8,8 +8,6 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 	 // x and y components of the distance between the midpoint between the wheels and each sensor (when the robot is facing 0 degrees)
 	private static double xLSdistance;
 	private static double yLSdistance;
-	
-	private static double lsDistance; // distance between the midpoint between the wheels and each sensor
 
 	double odometerX;
 	double odometerY;
@@ -25,7 +23,6 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 		this.lsController = lsController;
 		xLSdistance = 5;
 		yLSdistance = 12.5;
-		lsDistance = Math.sqrt(xLSdistance*xLSdistance + yLSdistance*yLSdistance);
 	}
 	
 	private void processLSData() { 
@@ -44,11 +41,18 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 			heading = odometer.getHeading();
 
 			// if the sensor passes over a black line
+			if( (leftSensorData < LIGHT_THRESHOLD && rightSensorData < LIGHT_THRESHOLD)) {
+				
+				// ... 
+				
+			}
+			
+			// if the sensor passes over a black line
 			if( (leftSensorData < LIGHT_THRESHOLD)) {
 				
 				// Sensor position determined by trigonometry based on the rotation angle
 				// theta and the distance from the sensor to the midpoint between the wheels
-				double leftSensorX = odometerX - xLSdistance*Math.cos(heading) - yLSdistance*Math.sin(heading);
+				double leftSensorX = odometerX - yLSdistance*Math.sin(heading) - xLSdistance*Math.cos(heading);
 				double leftSensorY = odometerY - yLSdistance*Math.cos(heading) + xLSdistance*Math.sin(heading);
 				
 				double errorX = (leftSensorX%30)-15;

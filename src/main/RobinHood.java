@@ -44,7 +44,7 @@ public class RobinHood {
 	}
 	
 	public Odometer getOdometer() {
-	return odometer;
+		return odometer;
 	}
 	
 	public OdometryCorrector getOdometryCorrector() {
