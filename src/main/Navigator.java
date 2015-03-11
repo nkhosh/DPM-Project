@@ -46,10 +46,10 @@ public class Navigator {
 	 */
 	public void turnTo(double targetAngle, boolean stop) {
 		
-		while(Math.abs(Odometer.minAngleFromTo(odometer.getAngle(),targetAngle))>DEG_ERR){
+		while(Math.abs(Odometer.minAngleFromTo(odometer.getHeading(),targetAngle))>DEG_ERR){
 			
 			// If the robot has to turn counterclockwise
-			if(Odometer.minAngleFromTo(odometer.getAngle(),targetAngle)<0){
+			if(Odometer.minAngleFromTo(odometer.getHeading(),targetAngle)<0){
 				wheels[0].backward();
 				wheels[1].forward();
 

@@ -4,7 +4,7 @@ import lejos.nxt.Motor;
 import lejos.nxt.NXTRegulatedMotor;
 
 public class Odometer extends Thread {
-	private double x, y, angle;
+	private double x, y, heading;
 	Object lock;
 	private double radius, width;
 	private final NXTRegulatedMotor[] wheels;
@@ -16,7 +16,7 @@ public class Odometer extends Thread {
 		this.lock = lock;
 		x = 0.0;
 		y = 0.0;
-		angle = 0.0;
+		heading = 0.0;
 		tachometer = new double[2];
 		tachometer[0] = 0;
 		tachometer[1] = 0;
@@ -33,8 +33,8 @@ public class Odometer extends Thread {
 		this.y = y;
 	}
 	
-	public void setAngle(double angle) {
-		this.angle = angle;
+	public void setHeading(double heading) {
+		this.heading = heading;
 	}
 	
 	public void setRadius(double r) {
@@ -58,8 +58,8 @@ public class Odometer extends Thread {
 		return y;
 	}
 	
-	public double getAngle() {
-		return angle;
+	public double getHeading() {
+		return heading;
 	}
 	
 	public static double minAngleFromTo(double fromAngle, double toAngle) {
@@ -92,9 +92,9 @@ public class Odometer extends Thread {
 			
 			synchronized (lock) {
 				// don't use the variables x, y, or theta anywhere but here!
-				x += dc * Math.cos(angle + dt/2);
-				y += dc * Math.sin(angle + dt/2);
-				angle += dt;
+				x += dc * Math.cos(heading + dt/2);
+				y += dc * Math.sin(heading + dt/2);
+				heading += dt;
 			}
 			
 			tachometer[0] = tachoCounterL;

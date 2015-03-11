@@ -6,8 +6,8 @@ import lejos.nxt.SensorPort;
 import lejos.nxt.UltrasonicSensor;
 
 public class RobinHood {
-	private final static SensorPort lsPort1 = SensorPort.S1, lsPort2 = SensorPort.S2,
-									usPort1 = SensorPort.S3, usPort2 = SensorPort.S4; //TODO: check the ports when connecting to hardware
+	private final static SensorPort lsLeftPort = SensorPort.S1, lsRightPort = SensorPort.S2,
+									usLeftPort = SensorPort.S3, usFrontPort = SensorPort.S4; //TODO: check the ports when connecting to hardware
 	private final static NXTRegulatedMotor[] wheelMotor = {Motor.A, Motor.B};
 	private final static NXTRegulatedMotor launcherMotor = Motor.C;
 	public final static double wheelRadius = 2.75, wheelsDistance = 15.75;
@@ -28,10 +28,10 @@ public class RobinHood {
 	public RobinHood() {
 		usSensor = new UltrasonicSensor[2];
 		lsSensor = new ColorSensor[2];
-		usSensor[0] = new UltrasonicSensor(usPort1);
-		usSensor[1] = new UltrasonicSensor(usPort2);
-		lsSensor[0] = new ColorSensor(lsPort1);
-		lsSensor[1] = new ColorSensor(lsPort2);
+		usSensor[0] = new UltrasonicSensor(usLeftPort);
+		usSensor[1] = new UltrasonicSensor(usFrontPort);
+		lsSensor[0] = new ColorSensor(lsLeftPort);
+		lsSensor[1] = new ColorSensor(lsRightPort);
 		lock = new Object();
 		
 		lsController = new LSController(lsSensor);
