@@ -90,4 +90,5 @@ public class Navigator {
 	public static double convertAngle(double radius, double width, double angle) {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}
+	
 }

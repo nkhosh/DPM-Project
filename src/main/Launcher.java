@@ -17,7 +17,7 @@ public class Launcher {
 	public void launch(int balls){
 		for(int i=0; i<balls; i++){
 			launcherMotor.setSpeed(shootingSpeed);
-			launcherMotor.rotate(180);
+			launcherMotor.rotate(-180);
 			if(ballsInQuiver!=0)
 				reload();
 		}
@@ -25,7 +25,7 @@ public class Launcher {
 	
 	private void reload(){
 		launcherMotor.setSpeed(reloadSpeeds[ballsInQuiver - 1]);
-		launcherMotor.rotate(180);
+		launcherMotor.rotate(-180);
 		ballsInQuiver--;
 	}
 }

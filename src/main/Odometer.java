@@ -38,7 +38,7 @@ public class Odometer extends Thread {
 	}
 	
 	public void setHeading(double heading) {
-		this.heading = heading;
+		this.heading = fixRadAngle(heading);
 	}
 	
 	public void setRadius(double r) {
@@ -81,6 +81,14 @@ public class Odometer extends Thread {
 		
 		return angle % 360.0;
 	}
+	
+	public static double fixRadAngle(double angle) {		
+		if (angle < 0.0)
+			angle = Math.PI*2 + (angle % Math.PI*2);
+		
+		return angle % Math.PI*2;
+	}
+	
 	public void run() {
 		long updateStart, updateEnd;
 
@@ -116,5 +124,10 @@ public class Odometer extends Thread {
 				}
 			}
 		}
+	}
+	
+
+	public boolean isTurning(){
+		return !(wheels[0].getSpeed() == wheels[1].getSpeed());
 	}
 }

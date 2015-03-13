@@ -5,6 +5,8 @@ public class LSController {
 	ColorSensor cs[];
 	public LSController(ColorSensor[] colorSensor) {
 		cs = colorSensor;
+		cs[0].setFloodlight(true);
+		cs[1].setFloodlight(true);
 	}
 	/**
 	 * Calibrates the light sensor using moving average method.
