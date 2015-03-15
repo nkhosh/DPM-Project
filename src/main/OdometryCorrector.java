@@ -54,8 +54,8 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 		leftCrossedY = false;
 		
 		// TODO: calibrate...
-		xLSdistance = 3;
-		yLSdistance = 12.5;
+		xLSdistance = 3.1;
+		yLSdistance = 12.3;
 		lightThreshold = 41;
 	}
 	
@@ -100,7 +100,7 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 						if(rightCrossedX){
 							secondGridCrossingX = odometerX;
 							secondGridCrossingY = odometerX;
-//							xHeadingCorrection(secondGridCrossingX - firstGridCrossingX);
+							xHeadingCorrection(secondGridCrossingX - firstGridCrossingX);
 							rightCrossedX = false;
 						}
 						else{
@@ -121,7 +121,7 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 						if(rightCrossedY){
 							secondGridCrossingX = odometerX;
 							secondGridCrossingY = odometerX;
-//							yHeadingCorrection(secondGridCrossingY - firstGridCrossingY);
+							yHeadingCorrection(secondGridCrossingY - firstGridCrossingY);
 							rightCrossedY = false;
 						}
 						else{
@@ -139,7 +139,7 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 			if(rightSensorData < lightThreshold) {
 				Sound.beep();
 				rightSensorX = odometerX - yLSdistance*Math.sin(heading) + xLSdistance*Math.cos(heading);
-				rightSensorY = odometerY - yLSdistance*Math.cos(heading) - xLSdistance*Math.sin(heading); /// + yLS..
+				rightSensorY = odometerY - yLSdistance*Math.cos(heading) - xLSdistance*Math.sin(heading);
 				
 				if (rightSensorX%30 > 15)
 					rightErrorX = (rightSensorX%30) - 30;
@@ -151,10 +151,6 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 				else
 					rightErrorY = (rightSensorY%30);
 				
-				
-				rightErrorX = (rightSensorX%30)-15;
-				rightErrorY = (rightSensorY%30)-15;
-				
 				// If the sensor is closer to a x grid line
 				if(Math.abs(rightErrorX) < Math.abs(rightErrorY)){
 					xRightCorrection(rightSensorX);
@@ -163,7 +159,7 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 						if(leftCrossedX){
 							secondGridCrossingX = odometerX;
 							secondGridCrossingY = odometerX;
-//							xHeadingCorrection(secondGridCrossingX - firstGridCrossingX);
+							xHeadingCorrection(secondGridCrossingX - firstGridCrossingX);
 							leftCrossedX = false;
 						}
 						else{
@@ -184,7 +180,7 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 						if(leftCrossedY){
 							secondGridCrossingX = odometerX;
 							secondGridCrossingY = odometerX;
-//							yHeadingCorrection(secondGridCrossingY - firstGridCrossingY);
+							yHeadingCorrection(secondGridCrossingY - firstGridCrossingY);
 							leftCrossedY = false;
 						}
 						else{

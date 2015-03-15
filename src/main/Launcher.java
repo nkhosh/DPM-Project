@@ -16,12 +16,17 @@ public class Launcher {
 	}
 	
 	public void launch(int balls){
+		
+		// fire specified number of balls, reloading in between each shot
 		for(int i=0; i<balls; i++){
 			launcherMotor.setSpeed(shootingSpeed);
 			launcherMotor.rotate(-180);
 			if(ballsInQuiver!=0)
 				reload();
 		}
+		
+		// return to initial position
+		launcherMotor.rotate(-180);
 	}
 	
 	private void reload(){
