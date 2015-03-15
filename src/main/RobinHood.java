@@ -66,4 +66,9 @@ public class RobinHood {
 	public void run() {
 		odometer.start();
 	}
+
+	public LSController getLScontroller() {
+		// TODO Auto-generated method stub
+		return lsController;
+	}
 }

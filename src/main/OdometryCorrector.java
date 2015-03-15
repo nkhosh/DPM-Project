@@ -54,9 +54,9 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 		leftCrossedY = false;
 		
 		// TODO: calibrate...
-		xLSdistance = 5;
+		xLSdistance = 3;
 		yLSdistance = 12.5;
-		lightThreshold = 140;
+		lightThreshold = 41;
 	}
 	
 	private void processLSData() { 
@@ -100,7 +100,7 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 						if(rightCrossedX){
 							secondGridCrossingX = odometerX;
 							secondGridCrossingY = odometerX;
-							xHeadingCorrection(secondGridCrossingX - firstGridCrossingX);
+//							xHeadingCorrection(secondGridCrossingX - firstGridCrossingX);
 							rightCrossedX = false;
 						}
 						else{
@@ -121,7 +121,7 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 						if(rightCrossedY){
 							secondGridCrossingX = odometerX;
 							secondGridCrossingY = odometerX;
-							yHeadingCorrection(secondGridCrossingY - firstGridCrossingY);
+//							yHeadingCorrection(secondGridCrossingY - firstGridCrossingY);
 							rightCrossedY = false;
 						}
 						else{
@@ -163,7 +163,7 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 						if(leftCrossedX){
 							secondGridCrossingX = odometerX;
 							secondGridCrossingY = odometerX;
-							xHeadingCorrection(secondGridCrossingX - firstGridCrossingX);
+//							xHeadingCorrection(secondGridCrossingX - firstGridCrossingX);
 							leftCrossedX = false;
 						}
 						else{
@@ -184,7 +184,7 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 						if(leftCrossedY){
 							secondGridCrossingX = odometerX;
 							secondGridCrossingY = odometerX;
-							yHeadingCorrection(secondGridCrossingY - firstGridCrossingY);
+//							yHeadingCorrection(secondGridCrossingY - firstGridCrossingY);
 							leftCrossedY = false;
 						}
 						else{
@@ -201,19 +201,19 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 
 
 			// if both sensors pass over a grid line (x or y) at the same time
-			if( leftSensorData < lightThreshold && rightSensorData < lightThreshold && ( (leftCrossedX&&rightCrossedX)||(leftCrossedY&&rightCrossedY) ) ) {
-				// correct heading...
-				if(heading>=Math.PI*7/4 && heading<Math.PI/4)
-					heading = 0;
-				else if(heading>=Math.PI/4 && heading<Math.PI*3/4)
-					heading = Math.PI/2;
-				else if(heading>=Math.PI*3/4 && heading<Math.PI*5/4)
-					heading = Math.PI;
-				else
-					heading = Math.PI*3/2;
-				odometer.setHeading(heading);
-			}
-			
+//			if( leftSensorData < lightThreshold && rightSensorData < lightThreshold && ( (leftCrossedX&&rightCrossedX)||(leftCrossedY&&rightCrossedY) ) ) {
+//				// correct heading...
+//				if(heading>=Math.PI*7/4 && heading<Math.PI/4)
+//					heading = 0;
+//				else if(heading>=Math.PI/4 && heading<Math.PI*3/4)
+//					heading = Math.PI/2;
+//				else if(heading>=Math.PI*3/4 && heading<Math.PI*5/4)
+//					heading = Math.PI;
+//				else
+//					heading = Math.PI*3/2;
+//				odometer.setHeading(heading);
+//			}
+//			
 			
 			// this ensure the odometry correction occurs only once every period
 			correctionEnd = System.currentTimeMillis();

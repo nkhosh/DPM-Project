@@ -13,8 +13,12 @@ public class reloaderTest {
 		launcher = robinHood.getLauncher();
 		
 		int buttonChoice = Button.waitForAnyPress();
-		if(buttonChoice == Button.ID_ENTER)
-			launcher.launch(6);
+		
+		while(buttonChoice!=Button.ID_ESCAPE){
+			if(buttonChoice == Button.ID_ENTER)
+				launcher.launch(6);
+			buttonChoice = Button.waitForAnyPress();
+		}
 		
 		buttonChoice = Button.waitForAnyPress();
 		while(buttonChoice!=Button.ID_ESCAPE);
