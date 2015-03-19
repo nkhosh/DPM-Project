@@ -25,20 +25,29 @@ public class Odometer extends Thread {
 		wheels[1].resetTachoCount();
 		
 		// radius and width determined after calibration
-		radius = 2.075; 
-		width = 16.22;
+//		radius = 2.075; 
+//		width = 16.22;
+		
+		radius = 2.063; 
+		width = 16.23;
 	}
 	
 	public void setX(double x) {
-		this.x = x;
+		synchronized(lock){
+			this.x = x;
+		}
 	}
 	
 	public void setY(double y) {
-		this.y = y;
+		synchronized(lock){
+			this.y = y;
+		}
 	}
 	
 	public void setHeading(double heading) {
-		this.heading = fixRadAngle(heading);
+		synchronized(lock){
+			this.heading = fixRadAngle(heading);
+		}
 	}
 	
 	public void setRadius(double r) {
@@ -55,15 +64,21 @@ public class Odometer extends Thread {
 	}
 	
 	public double getX() {
-		return x;
+		synchronized(lock){
+			return x;
+		}
 	}
 	
 	public double getY() {
-		return y;
+		synchronized(lock){
+			return y;
+		}
 	}
 	
 	public double getHeading() {
-		return heading;
+		synchronized(lock){
+			return fixRadAngle(heading);
+		}
 	}
 	
 	public static double minAngleFromTo(double fromAngle, double toAngle) {

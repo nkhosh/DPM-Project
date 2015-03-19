@@ -10,7 +10,7 @@ public class RobinHood {
 									usLeftPort = SensorPort.S3, usFrontPort = SensorPort.S4; //TODO: check the ports when connecting to hardware
 	private final static NXTRegulatedMotor[] wheelMotor = {Motor.A, Motor.B};
 	private final static NXTRegulatedMotor launcherMotor = Motor.C;
-	public final static double wheelRadius = 2.75, wheelsDistance = 15.75;
+	public final static double wheelRadius = 2.075, wheelsDistance = 16.22; // do we need this?
 	private Object lock;
 	private Odometer odometer;
 	private OdometryCorrector odometryCorrector;
