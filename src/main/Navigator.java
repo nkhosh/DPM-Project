@@ -8,11 +8,12 @@ public class Navigator extends Thread {
 	private boolean state;
 	
 	// Variables for the speed of the movement
-	final static int FAST = 200, SLOW = 100, NORMAL=200, ACCELERATION = 4000;
+	final static int FAST_SPEED = 200, SLOW_SPEED = 100, NORMAL_SPEED=200, ACCELERATION = 4000;
 	private final static int ROTATION_SPEED = 100;
 	
 	// The error and threshold values
 	final static double DEG_ERR = 3.0, CM_ERR = 1.0;
+	private static final int THREAD_PERIOD = 15;	
 	final static int POSITION_BANDWIDTH = 1;
 	private static final int FRONT_THRESHOLD = 15;
 //	private static final double LOW_ANGLE_BANDWIDTH = 2*Math.PI/180; // Used when the robot is turning slow enough
@@ -42,7 +43,7 @@ public class Navigator extends Thread {
 		this.state = NO_OBSTACLE;
 		this.usController = usController;
 		this.speed = new int[2];
-		this.speed[LEFT] = this.speed[RIGHT] = NORMAL;
+		this.speed[LEFT] = this.speed[RIGHT] = NORMAL_SPEED;
 		this.isNavigating = false;
 		position = new Vector(0, 0);
 		destination = new Vector();
@@ -54,17 +55,17 @@ public class Navigator extends Thread {
 	 * Moves the robot straight.
 	 */
 	protected void moveStraight() {
-		speed[LEFT]=NORMAL;
-		speed[RIGHT]=NORMAL;
+		speed[LEFT]=NORMAL_SPEED;
+		speed[RIGHT]=NORMAL_SPEED;
 	}
 	/**
 	 * Turns right instantaneously when there is a close wall in front.
 	 * Rotates about the center axis of the robot.
 	 */
 	protected void turnRight() {
-		speed[LEFT]=NORMAL;
+		speed[LEFT]=NORMAL_SPEED;
 		wheels[RIGHT].backward();
-		speed[RIGHT]=NORMAL;
+		speed[RIGHT]=NORMAL_SPEED;
 		updateSpeed();
 		wheels[RIGHT].forward();
 	}
@@ -73,19 +74,19 @@ public class Navigator extends Thread {
 	 * Rotates about the center axis of the robot.
 	 */
 	protected void turnLeft() {
-		speed[RIGHT]=NORMAL;
+		speed[RIGHT]=NORMAL_SPEED;
 		wheels[LEFT].backward();
-		speed[LEFT]=NORMAL;
+		speed[LEFT]=NORMAL_SPEED;
 		updateSpeed();
 		wheels[LEFT].forward();
 	}	
 	protected void moveLeft() {
-		speed[LEFT] = SLOW;
-		speed[RIGHT] = FAST;
+		speed[LEFT] = SLOW_SPEED;
+		speed[RIGHT] = FAST_SPEED;
 	}
 	protected void moveRight() {
-		speed[LEFT] = FAST;
-		speed[RIGHT] = SLOW;
+		speed[LEFT] = FAST_SPEED;
+		speed[RIGHT] = SLOW_SPEED;
 	}
 	protected void updateSpeed() {
 		wheels[LEFT].setSpeed(speed[LEFT]);		     
@@ -166,8 +167,8 @@ public class Navigator extends Thread {
 					turnTo((destination.subtract(position)).getOrientation());
 					wheels[LEFT].forward();
 					wheels[RIGHT].forward();
-					wheels[LEFT].setSpeed(NORMAL);
-					wheels[RIGHT].setSpeed(NORMAL);
+					wheels[LEFT].setSpeed(NORMAL_SPEED);
+					wheels[RIGHT].setSpeed(NORMAL_SPEED);
 				}
 			}
 			updatePosition();
@@ -307,6 +308,28 @@ public class Navigator extends Thread {
 	
 	//TODO
 	public void run() {
+		wheels[LEFT].forward();
+		wheels[RIGHT].forward();
+		wheels[LEFT].setSpeed(NORMAL_SPEED);
+		wheels[RIGHT].setSpeed(NORMAL_SPEED);
+		long updateEnd,updateStart;
+		while(true) {
+			updateStart = System.currentTimeMillis();
+			
+			travelTo(destinationArray[destinationIndex][0], destinationArray[destinationIndex][1]);
+			
+			// this ensures that the odometer only runs once every period
+			updateEnd = System.currentTimeMillis();
+			if (updateEnd - updateStart < THREAD_PERIOD) {
+				try {
+					Thread.sleep(THREAD_PERIOD - (updateEnd - updateStart));
+				} catch (InterruptedException e) {
+					// there is nothing to be done here because it is not
+					// expected that the odometer will be interrupted by
+					// another thread
+				}
+			}
+		}
 
 	}
 
