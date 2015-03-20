@@ -28,8 +28,9 @@ public class Odometer extends Thread {
 //		radius = 2.075; 
 //		width = 16.22;
 		
-		radius = 2.063; 
-		width = 16.23;
+		radius = 2.1; //without shade friction
+//		width = 16.19;
+		width = 16.13;
 	}
 	
 	public void setX(double x) {
@@ -99,9 +100,9 @@ public class Odometer extends Thread {
 	
 	public static double fixRadAngle(double angle) {		
 		if (angle < 0.0)
-			angle = Math.PI*2 + (angle % Math.PI*2);
+			angle = Math.PI*2 + (angle % (Math.PI*2));
 		
-		return angle % Math.PI*2;
+		return angle % (Math.PI*2);
 	}
 	
 	public void run() {

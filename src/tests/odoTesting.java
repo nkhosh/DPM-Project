@@ -4,6 +4,8 @@ import lejos.nxt.Button;
 import lejos.nxt.LCD;
 import lejos.nxt.Motor;
 import lejos.nxt.NXTRegulatedMotor;
+import lejos.nxt.SensorPort;
+import lejos.nxt.TouchSensor;
 import main.LCDPrinter;
 import main.Odometer;
 import main.RobinHood;
@@ -18,6 +20,7 @@ public class odoTesting {
 	private static int buttonChoice;
 	private static Odometer odometer;
 	private static LCDPrinter lcdPrinter;
+	private static TouchSensor touchSensor = new TouchSensor(SensorPort.S4);
 
 	private final static NXTRegulatedMotor[] wheelMotor = {Motor.A, Motor.B};
 	
@@ -58,7 +61,7 @@ public class odoTesting {
 			drive(wheelMotor[0],wheelMotor[1], radius, radius, width );
 			buttonChoice = Button.waitForAnyPress();
 			while(buttonChoice != Button.ID_ESCAPE){
-				if(buttonChoice==Button.ID_RIGHT){
+				if(buttonChoice==Button.ID_LEFT){
 					odometer.setX(0);
 					odometer.setY(0);
 					odometer.setHeading(0);

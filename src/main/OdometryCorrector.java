@@ -56,9 +56,10 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 		
 		// TODO: calibrate...
 		xLSdistance = 3.15;
-		yLSdistance = 12.3;
+		yLSdistance = 12.8;
 //		lightThreshold = 41;
-		lightThreshold = 45;
+//		lightThreshold = 45;
+		lightThreshold = 50; // with shades
 	}
 	
 	private void processLSData() { 
@@ -135,37 +136,39 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 			}
 
 
-			// if both sensors pass over an x gridline at the same time
-			if(leftCrossingX&&rightCrossingX) {
-				Sound.beep();
-				// correct heading (2 possibilities)
-				if(heading>=Math.PI/4 && heading<Math.PI*3/4)
-					heading = Math.PI/2;
-				else
-					heading = Math.PI*3/2;
-				odometer.setHeading(heading);
-				
-				// take an average correction of the position, using both sensors
-				xAverageCorrection(leftSensorX, rightSensorX);
-			}
-			
-			// if both sensors pass over a y gridline at the same time
-			else if(leftCrossingY&&rightCrossingY){
-				Sound.twoBeeps();
-				// correct heading (2 possibilities)
-				if(heading>=Math.PI*7/4 && heading<Math.PI/4)
-					heading = 0;
-				else if(heading>=Math.PI*3/4 && heading<Math.PI*5/4)
-					heading = Math.PI;
-				odometer.setHeading(heading);
-				
-				// take an average correction of the position, using both sensors
-				yAverageCorrection(leftSensorY, rightSensorY);
-			}
+//			// if both sensors pass over an x gridline at the same time
+//			if(leftCrossingX&&rightCrossingX) {
+//				Sound.beep();
+//				// correct heading (2 possibilities)
+//				if(heading>=Math.PI/4 && heading<Math.PI*3/4)
+//					heading = Math.PI/2;
+//				else
+//					heading = Math.PI*3/2;
+//				odometer.setHeading(heading);
+//				
+//				// take an average correction of the position, using both sensors
+//				xAverageCorrection(leftSensorX, rightSensorX);
+//			}
+//			
+//			// if both sensors pass over a y gridline at the same time
+//			else if(leftCrossingY&&rightCrossingY){
+//				Sound.twoBeeps();
+//				// correct heading (2 possibilities)
+//				if(heading>=Math.PI*7/4 && heading<Math.PI/4)
+//					heading = 0;
+//				else if(heading>=Math.PI*3/4 && heading<Math.PI*5/4)
+//					heading = Math.PI;
+//				odometer.setHeading(heading);
+//				
+//				// take an average correction of the position, using both sensors
+//				yAverageCorrection(leftSensorY, rightSensorY);
+//			}
 			
 			
 			// correct with both sensors separately
-			else if(crossingGrid){
+//			else if(crossingGrid){
+			if(crossingGrid){
+//				Sound.beep();
 				if(leftCrossingX){
 					xLeftCorrection(leftSensorX);
 				}
