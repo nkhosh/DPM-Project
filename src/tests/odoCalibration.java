@@ -170,7 +170,6 @@ public class odoCalibration {
 		}
 
 //		robinhood.getNavigator().travelTo(0, FORWARD_DISTANCE);
-
 		wheelMotor[0].rotate((int)Navigator.convertDistance(radius, FORWARD_DISTANCE), true);
 		wheelMotor[1].rotate((int)Navigator.convertDistance(radius, FORWARD_DISTANCE), false);
 	}
