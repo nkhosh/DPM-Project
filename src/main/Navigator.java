@@ -91,7 +91,7 @@ public class Navigator extends Thread {
 		wheels[LEFT].setSpeed(speed[LEFT]);		     
 		wheels[RIGHT].setSpeed(speed[RIGHT]);	
 	}
-
+	
 	/**
 	 * Updates the position vector and the unit orientation vector of the robot based
 	 * on the odometer x, y and theta
