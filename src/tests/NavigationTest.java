@@ -13,22 +13,23 @@ public class NavigationTest {
 		Navigator navigator;
 		SensorPort port = SensorPort.S4;
 		TouchSensor touchSensor = new TouchSensor(port);
-		
+//		double[][] destination = {{60,60}};
 		while(!touchSensor.isPressed());
 		
 		// Test travelTo
 		navigator = robin.getNavigator();
 		robin.getOdometer().start();
 		robin.getOdometryCorrector().start();
+		robin.getLcdPrinter().start();
+//		navigator.setDestinationArray(destination);
 		navigator.start();
-		navigator.travelTo(0, 60);
-		LCD.drawString("Navigator is running", 0, 0);
+		navigator.turnTo(180);
+//		navigator.travelTo(0, 60);
 		
 		// Test turnTo
 		
 		//Exit
-		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
+		while(true) { if(touchSensor.isPressed()) break;}
 		System.exit(0);
-		
 	}
 }

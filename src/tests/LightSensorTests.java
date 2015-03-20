@@ -5,7 +5,7 @@ import main.LSController;
 import main.Odometer;
 import main.RobinHood;
 
-public class lightSensorTests {
+public class LightSensorTests {
 	Odometer odometer;
 	private static LSController lsController;
 	static int[] data;

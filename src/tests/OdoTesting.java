@@ -10,7 +10,7 @@ import main.LCDPrinter;
 import main.Odometer;
 import main.RobinHood;
 
-public class odoTesting {
+public class OdoTesting {
 	private static double radius;
 	private static double width;
 	private static int forwardSpeed;

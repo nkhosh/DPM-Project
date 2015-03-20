@@ -6,7 +6,7 @@ import lejos.nxt.NXTRegulatedMotor;
 import main.Navigator;
 import main.RobinHood;
 
-public class odoCalibration {
+public class OdoCalibration {
 	private static double radius = 2.08, width = 16.19;
 	private static int buttonChoice;
 	private final static NXTRegulatedMotor[] wheelMotor = {Motor.A, Motor.B};

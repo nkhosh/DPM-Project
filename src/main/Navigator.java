@@ -29,7 +29,7 @@ public class Navigator extends Thread {
 	private Vector position, destination;
 	private Vector unitOrientationVector;
 	boolean isNavigating;	
-	private int[][] destinationArray;
+	private double[][] destinationArray;
 	private int destinationIndex;
 	
 	private final static int LEFT=0, FRONT=1, RIGHT=1;
@@ -45,11 +45,14 @@ public class Navigator extends Thread {
 		this.speed = new int[2];
 		this.speed[LEFT] = this.speed[RIGHT] = NORMAL_SPEED;
 		this.isNavigating = false;
-		position = new Vector(0, 0);
 		destination = new Vector();
+		position = new Vector(0, 0);
+		destinationIndex = 0;
 		unitOrientationVector = new Vector();
-		
-	}	
+		this.destinationArray = new double[1][2];
+		this.destinationArray[0][0] = destination.getX();
+		this.destinationArray[0][1] = destination.getY();
+	}
 	
 	/**
 	 * Moves the robot straight.
@@ -129,10 +132,11 @@ public class Navigator extends Thread {
 //		wheels[0].rotate(Navigator.convertDistance(odometer.getRadius(), y), true);
 //		wheels[1].rotate(Navigator.convertDistance(odometer.getRadius(), y), false);
 		
+		
 		isNavigating = true;
 		destination.setX(x);
 		destination.setY(y);
-		double frontDistance = (double)usController.getDistance(FRONT);
+//		double frontDistance = (double)usController.getDistance(FRONT);
 		double relativeTargetOrientation = minimizeAngle( (destination.subtract(position)).getOrientation() );
 		
 		// If the robot isn't close enough to its destination
@@ -149,27 +153,27 @@ public class Navigator extends Thread {
 			}
 			else if( state == NO_OBSTACLE ) {
 				// If there's an obstacle directly in front of the robot
-				if( frontDistance<=FRONT_THRESHOLD ) {
+//				if( frontDistance<=FRONT_THRESHOLD ) {
 					// Keep rotating right until the sensor doesn't detect the wall
-					while(usController.getDistance(FRONT) <= FRONT_THRESHOLD){
-						wheels[RIGHT].backward();
-						wheels[LEFT].forward();
-						wheels[LEFT].setSpeed(ROTATION_SPEED);
-						wheels[RIGHT].setSpeed(ROTATION_SPEED);
-						updatePosition();
-					}
-					state = OBSTACLE_AVOIDING;
-					wheels[RIGHT].forward();
-					wheels[LEFT].forward();
-				}
+//					while(usController.getDistance(FRONT) <= FRONT_THRESHOLD){
+//						wheels[RIGHT].backward();
+//						wheels[LEFT].forward();
+//						wheels[LEFT].setSpeed(ROTATION_SPEED);
+//						wheels[RIGHT].setSpeed(ROTATION_SPEED);
+//						updatePosition();
+//					}
+//					state = OBSTACLE_AVOIDING;
+//					wheels[RIGHT].forward();
+//					wheels[LEFT].forward();
+//				}
 				// There's no obstacle in the way, turn towards the destination
-				else {
+//				else {
 					turnTo((destination.subtract(position)).getOrientation());
 					wheels[LEFT].forward();
 					wheels[RIGHT].forward();
 					wheels[LEFT].setSpeed(NORMAL_SPEED);
 					wheels[RIGHT].setSpeed(NORMAL_SPEED);
-				}
+//				}
 			}
 			updatePosition();
 		}
@@ -194,10 +198,10 @@ public class Navigator extends Thread {
 	 */
 	public void turnTo(double targetAngle) {
 		
-		while(Math.abs(Odometer.minAngleFromTo(odometer.getHeading(),targetAngle))>DEG_ERR){
+		while(Math.abs(Odometer.minAngleFromTo(odometer.getHeading()*Math.PI/180,targetAngle))>DEG_ERR){
 			
 			// If the robot has to turn counterclockwise
-			if(Odometer.minAngleFromTo(odometer.getHeading(),targetAngle)<0){
+			if(Odometer.minAngleFromTo(odometer.getHeading()*Math.PI/180,targetAngle)<0){
 				wheels[0].backward();
 				wheels[1].forward();
 
@@ -246,7 +250,7 @@ public class Navigator extends Thread {
 	 * The initial destination is set to be the first element of the array.
 	 * @param destinationArray
 	 */
-	public void setDestinationArray(int[][] destinationArray) {
+	public void setDestinationArray(double[][] destinationArray) {
 		this.destinationArray = destinationArray;
 		destination.setX(destinationArray[0][0]);
 		destination.setY(destinationArray[0][1]);
@@ -265,7 +269,7 @@ public class Navigator extends Thread {
 			moveStraight();
 		}
 		// Sensor is to the left
-		int gapCheck=0, GAPFILTER=1, bandCenter=0, gapThreshold=0, bandwidth=0;
+		int gapCheck=0, GAPFILTER=1, bandCenter=0, gapThreshold=0, bandwidth=0;	//TODO: Values are meaningless
 		int distError = distance[LEFT]-bandCenter;
 		// Potential concave turn
 		if( gapCheck == GAPFILTER ) {
@@ -316,7 +320,7 @@ public class Navigator extends Thread {
 		while(true) {
 			updateStart = System.currentTimeMillis();
 			
-			travelTo(destinationArray[destinationIndex][0], destinationArray[destinationIndex][1]);
+			travelTo(destination.getX(), destination.getY());
 			
 			// this ensures that the odometer only runs once every period
 			updateEnd = System.currentTimeMillis();
