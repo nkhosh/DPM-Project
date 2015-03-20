@@ -15,6 +15,7 @@ public class lightSensorTests {
 		// TODO Auto-generated method stub
 		RobinHood robinHood = new RobinHood();
 		lsController = robinHood.getLScontroller();
+		lsController.activateLS();
 		
 		while(true){
 			data = lsController.readFilteredLSdata();
