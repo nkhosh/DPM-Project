@@ -28,9 +28,9 @@ public class Odometer extends Thread {
 //		radius = 2.075; 
 //		width = 16.22;
 		
-		radius = 2.1; //without shade friction
+		radius = 2.05; //without shade friction
 //		width = 16.19;
-		width = 16.13;
+		width = 16.3;
 	}
 	
 	public void setX(double x) {

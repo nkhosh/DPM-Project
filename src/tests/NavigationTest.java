@@ -13,7 +13,8 @@ public class NavigationTest {
 		Navigator navigator;
 		SensorPort port = SensorPort.S4;
 		TouchSensor touchSensor = new TouchSensor(port);
-		double[][] destination = {{0,60.96},{60.96,60.96},{0,0}};
+//		double[][] destination = {{0,60.96},{60.96,60.96},{0,0},{30,30}};
+		double[][] destination = {{0,60.96},{60.96,60.96},{60.96,0},{0,0}};
 		while(!touchSensor.isPressed());
 	
 		int buttonChoice;
@@ -23,6 +24,7 @@ public class NavigationTest {
 		robin.getLcdPrinter().start();
 		navigator.setDestinationArray(destination);
 		navigator.start();
+		navigator.turnTo(0,true);
 		
 		buttonChoice = Button.waitForAnyPress();
 		while(buttonChoice!=Button.ID_ESCAPE) {
