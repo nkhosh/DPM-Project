@@ -76,6 +76,7 @@ public class Odometer extends Thread {
 		}
 	}
 	
+	
 	public double getHeading() {
 		synchronized(lock){
 			return fixRadAngle(heading);

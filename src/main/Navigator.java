@@ -1,5 +1,6 @@
 package main;
 import lejos.nxt.NXTRegulatedMotor;
+import lejos.nxt.Sound;
 
 
 public class Navigator extends Thread {
@@ -12,12 +13,12 @@ public class Navigator extends Thread {
 	private final static int ROTATION_SPEED = 100;
 	
 	// The error and threshold values
-	final static double DEG_ERR = 3.0, CM_ERR = 1.0;
+	final static double DEG_ERR = 2.0, CM_ERR = 1.0;
 	private static final int THREAD_PERIOD = 15;	
 	final static int POSITION_BANDWIDTH = 1;
 	private static final int FRONT_THRESHOLD = 15;
 //	private static final double LOW_ANGLE_BANDWIDTH = 2*Math.PI/180; // Used when the robot is turning slow enough
-	private static final double ANGLE_BANDWIDTH = 4*Math.PI/180; // Used when the robot is possibly turning fast
+	private static final double ANGLE_BANDWIDTH = 2*Math.PI/180; // Used when the robot is possibly turning fast
 	
 	// Objects used by the navigator
 	private Odometer odometer;
@@ -45,13 +46,10 @@ public class Navigator extends Thread {
 		this.speed = new int[2];
 		this.speed[LEFT] = this.speed[RIGHT] = NORMAL_SPEED;
 		this.isNavigating = false;
-		destination = new Vector();
+		destination = new Vector(0, 0);
 		position = new Vector(0, 0);
 		destinationIndex = 0;
 		unitOrientationVector = new Vector();
-		this.destinationArray = new double[1][2];
-		this.destinationArray[0][0] = destination.getX();
-		this.destinationArray[0][1] = destination.getY();
 	}
 	
 	/**
@@ -134,10 +132,10 @@ public class Navigator extends Thread {
 		
 		
 		isNavigating = true;
-		destination.setX(x);
-		destination.setY(y);
+//		destination.setX(x);
+//		destination.setY(y);
 //		double frontDistance = (double)usController.getDistance(FRONT);
-		double relativeTargetOrientation = minimizeAngle( (destination.subtract(position)).getOrientation() );
+		double relativeTargetOrientation = minimizeAngle( (destination.subtract(position)).getOrientation() )*180/Math.PI;
 		
 		// If the robot isn't close enough to its destination
 		if( !position.approxEquals(destination) ) {
@@ -168,7 +166,7 @@ public class Navigator extends Thread {
 //				}
 				// There's no obstacle in the way, turn towards the destination
 //				else {
-					turnTo((destination.subtract(position)).getOrientation());
+					turnTo(relativeTargetOrientation, false);
 					wheels[LEFT].forward();
 					wheels[RIGHT].forward();
 					wheels[LEFT].setSpeed(NORMAL_SPEED);
@@ -176,6 +174,7 @@ public class Navigator extends Thread {
 //				}
 			}
 			updatePosition();
+			relativeTargetOrientation = minimizeAngle( (destination.subtract(position)).getOrientation() )*180/Math.PI;
 		}
 		
 		// If the robot reached its destination
@@ -195,30 +194,31 @@ public class Navigator extends Thread {
 	/**
 	 * TurnTo function which takes an angle and boolean as arguments The boolean controls whether or not to stop the
 	 * motors when the turn is completed
+	 * @param targetAngle The angle in degrees
 	 */
-	public void turnTo(double targetAngle) {
+	public void turnTo(double targetAngle, boolean stop) {
 		
-		while(Math.abs(Odometer.minAngleFromTo(odometer.getHeading()*Math.PI/180,targetAngle))>DEG_ERR){
+		while(Math.abs(Odometer.minAngleFromTo(odometer.getHeading()*180/Math.PI,targetAngle))>DEG_ERR){
 			
 			// If the robot has to turn counterclockwise
-			if(Odometer.minAngleFromTo(odometer.getHeading()*Math.PI/180,targetAngle)<0){
-				wheels[0].backward();
-				wheels[1].forward();
+			if(Odometer.minAngleFromTo(odometer.getHeading()*180/Math.PI,targetAngle)<0){
+				wheels[LEFT].backward();
+				wheels[RIGHT].forward();
 
-				wheels[0].setSpeed(ROTATION_SPEED);
-				wheels[1].setSpeed(ROTATION_SPEED);
+				wheels[LEFT].setSpeed(ROTATION_SPEED);
+				wheels[RIGHT].setSpeed(ROTATION_SPEED);
 			}
 			// Else if the robot has to turn clockwise
 			else{
-				wheels[1].backward();
-				wheels[0].forward();
+				wheels[RIGHT].backward();
+				wheels[LEFT].forward();
 
-				wheels[0].setSpeed(ROTATION_SPEED);
-				wheels[1].setSpeed(ROTATION_SPEED);
+				wheels[LEFT].setSpeed(ROTATION_SPEED);
+				wheels[RIGHT].setSpeed(ROTATION_SPEED);
 			}
 		}
-		this.setSpeeds(0, 0);
-		
+		if( stop )
+			this.setSpeeds(0, 0);
 	}
 		
 	
@@ -230,7 +230,7 @@ public class Navigator extends Thread {
 	}
 	/**
 	 * Minimizes an angle so that it is within the range from -180 degrees to 180 if not already in that range
-	 * @param angle
+	 * @param angle in radians
 	 * @return
 	 */
 	public double minimizeAngle(double angle){
