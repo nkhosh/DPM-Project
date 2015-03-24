@@ -11,6 +11,10 @@ public class Navigator extends Thread {
 	// Variables for the speed of the movement
 	final static int FAST_SPEED = 200, SLOW_SPEED = 100, NORMAL_SPEED=200, ACCELERATION = 4000;
 	private final static int ROTATION_SPEED = 100;
+	public static final double LEFT_RADIUS = 2.1428;
+	public static final double RIGHT_RADIUS = 2.1428;
+	private static final double WIDTH = 15.9;
+	private double rotationSpeed;
 	
 	// The error and threshold values
 	final static double DEG_ERR = 2.0, CM_ERR = 1.0;
@@ -119,6 +123,23 @@ public class Navigator extends Thread {
 	 * TravelTo function which takes as arguments the x and y position in cm Will travel to designated position, while
 	 * constantly updating it's heading
 	 */
+
+	public void navigateMap(double[][]map) {
+	
+	for(int i = 0; i > map.length ; i++)
+		{
+			travelTo(map[i][0],map[i][1]);		
+		}
+
+
+	}
+	
+	public void travelTo(double x, double y) {
+	//takes a point x,y and moves the robot to x,y
+	// that's it.
+	}
+	
+	/*
 	public void travelTo(double x, double y) {
 //		double minAng;
 //		while (Math.abs(x - odometer.getX()) > CM_ERR || Math.abs(y - odometer.getY()) > CM_ERR) {
@@ -190,6 +211,7 @@ public class Navigator extends Thread {
 			}
 		}
 	}
+*/
 
 	/**
 	 * TurnTo function which takes an angle and boolean as arguments The boolean controls whether or not to stop the
@@ -218,7 +240,7 @@ public class Navigator extends Thread {
 			}
 		}
 		if( stop )
-			this.setSpeeds(0, 0);
+			this.stop();
 	}
 		
 	
@@ -336,7 +358,51 @@ public class Navigator extends Thread {
 		}
 
 	}
+	public void setRotationSpeed(double speed) {
+		rotationSpeed = speed;
+		setSpeeds(rotationSpeed);
+	}
+	
+	public void setSpeeds( double rotationalSpeed) {
+		double leftSpeed, rightSpeed;
 
+		this.rotationSpeed = rotationalSpeed; 
+
+		leftSpeed = (  rotationalSpeed * WIDTH * Math.PI / 360.0) *
+				180.0 / (LEFT_RADIUS * Math.PI);
+		rightSpeed = (-rotationalSpeed * WIDTH * Math.PI / 360.0) *
+				180.0 / (LEFT_RADIUS * Math.PI);
+
+		// set motor directions
+		if (leftSpeed > 0.0)
+			wheels[LEFT].forward();
+		else {
+			wheels[LEFT].backward();
+			leftSpeed = -leftSpeed;
+		}
+		
+		if (rightSpeed > 0.0)
+			wheels[RIGHT].forward();
+		else {
+			wheels[RIGHT].backward();
+			rightSpeed = -rightSpeed;
+		}
+		
+		// set motor speeds
+		if (leftSpeed > 900.0)
+			wheels[LEFT].setSpeed(900);
+		else
+			wheels[LEFT].setSpeed((int)leftSpeed);
+		
+		if (rightSpeed > 900.0)
+			wheels[RIGHT].setSpeed(900);
+		else
+			wheels[RIGHT].setSpeed((int)rightSpeed);
+	}
+	void stop(){
+		wheels[LEFT].stop();
+		wheels[RIGHT].stop();
+	}
 	/**
 	 * Implementation of a 2D vector.
 	 *

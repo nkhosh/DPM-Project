@@ -82,6 +82,12 @@ public class Odometer extends Thread {
 			return fixRadAngle(heading);
 		}
 	}
+	public double getHeadingDeg() {
+		synchronized(lock){
+			return fixDegAngle(Math.toDegrees(heading));
+			
+		}
+	}
 	
 	public static double minAngleFromTo(double fromAngle, double toAngle) {
 		double d = fixDegAngle(toAngle - fromAngle);
@@ -104,6 +110,24 @@ public class Odometer extends Thread {
 			angle = Math.PI*2 + (angle % (Math.PI*2));
 		
 		return angle % (Math.PI*2);
+<<<<<<< HEAD
+	}
+	public void getPosition(double [] pos) {
+		synchronized (lock) {
+			pos[0] = x;
+			pos[1] = y;
+			pos[2] = Math.toDegrees(heading);
+		}
+	}
+	
+	public void setPosition(double [] pos, boolean [] update) {
+		synchronized (lock) {
+			if (update[0]) x = pos[0];
+			if (update[1]) y = pos[1];
+			if (update[2]) heading = fixRadAngle(Math.toRadians(pos[2]));
+		}
+=======
+>>>>>>> origin/master
 	}
 	
 	public void run() {
