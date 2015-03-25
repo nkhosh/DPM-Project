@@ -6,7 +6,8 @@ public class Localizer {
 	public enum LocalizationType { FALLING_EDGE, RISING_EDGE };
 	public static double ROTATION_SPEED = 30;
 	public static final int LIMIT = 65;
-	public static final double OFFSET = 6.0;
+	public static final double OFFSETY = 6.0;
+	public static final double OFFSETX = 4.8;
 	public static final int ERROR = 3;
 	public static final int COMPENSATION = 20;
 	public static int phase;
@@ -21,10 +22,15 @@ public class Localizer {
 	public static boolean isIncreasing;
 	public static int distancePrevious;
 	public static int distanceSide;
+	public static int l;
+	
+	public static int r;
+	
+	public static double dupCounterL,dupCounterR;
 	
 	public ColorSensor left;
 	public ColorSensor right;
-	private final double sensorD = 11.9;//13
+	private final double sensorD = 13.18;//13
 	public static int gridCounter;
 	public static int leftValue;
 	public static int rightValue;
@@ -51,8 +57,8 @@ public class Localizer {
 	
 	public void doLocalization() {
 		
-		//doUSLocalization();
-		doLSLocalization();
+		doUSLocalization();
+		//doLSLocalization();
 	}
 	
 	public void doUSLocalization(){
@@ -103,8 +109,8 @@ public class Localizer {
 										//Sound.beep();
 										angle = odo.getHeading();
 										isRunning = false;
-										xDistance = this.getFilteredData(front);
-										yDistance = distanceSide + OFFSET;
+										xDistance = this.getFilteredData(front) + OFFSETX;
+										yDistance = distanceSide + OFFSETY;
 										
 									}
 								}
@@ -133,18 +139,16 @@ public class Localizer {
 
 	}
 	public void doLSLocalization(){
-		Button.waitForAnyPress();
+		
 		//travel to a relatively close point. I chose (-4,-4)
 		//Sound.beep();
 		//Sound.beep();
-		Button.waitForAnyPress();
-		nav.travelTo(2, 2); 
-		Button.waitForAnyPress();
+		//nav.travelTo(2, 2); 
 		gridCounter = 0;
-		 double dupCounterL = 0;
-		 double dupCounterR = 0;
-		 int l = 0;
-		 int r = 0;
+		  dupCounterL = 0;
+		  dupCounterR = 0;
+		  l = 0;
+		  r = 0;
 		 double gridAngleL[] = {0,0,0,0};
 		 double gridAngleR[] = {0,0,0,0};
 		 
@@ -167,15 +171,26 @@ public class Localizer {
 		{
 			leftValue = left.getNormalizedLightValue();
 			rightValue = right.getNormalizedLightValue();
-			if((leftValue < 390)&&(dupCounterL > 50)) 
+			
+			if((leftValue < 580)&&(dupCounterL > 50)) 
 			{
+				
+				//Sound.beep();
 				leftDetected = true;
 				dupCounterL = 0;
+				//nav.stop();
+				//Button.waitForAnyPress();
+				//nav.setRotationSpeed(ROTATION_SPEED);
 			}
-			if((leftValue < 390)&&(dupCounterR > 50)) 
+			if((rightValue < 580)&&(dupCounterR > 50)) 
+
 			{
+				//Sound.buzz();
 				rightDetected = true;
 				dupCounterR = 0;
+				//nav.stop();
+				//Button.waitForAnyPress();
+				//nav.setRotationSpeed(ROTATION_SPEED);
 			}
 			if(gridCounter == 8)
 			{
@@ -191,22 +206,25 @@ public class Localizer {
 				
 				if(leftDetected && l<4)
 					{
-					//Sound.beep();
+					
 						odo.getPosition(pos);
 						gridAngleL[l] = pos[2];
 						gridCounter ++;
 						l++;
+						leftDetected = false;
 					}
 				if(rightDetected && r<4)
 				{
-					//Sound.beep();
+					
 					odo.getPosition(pos);
 					gridAngleR[r] = pos[2];
 					gridCounter ++;
 					r++;
+					rightDetected = false;
+					
 				}
-				leftDetected = false;
-				rightDetected = false;
+				
+				
 
 			}
 			dupCounterL++;
@@ -249,12 +267,12 @@ public class Localizer {
 		
 		
 		//update these values, travel to (0,0), and turn to 0 degrees
-		odo.setPosition(new double [] {x, y, pos[2]+delta}, new boolean [] {true, true, true});
+		odo.setPosition(new double [] {x, y, pos[2]+delta + 4}, new boolean [] {true, true, true});
 		
 		Button.waitForAnyPress();
 		odo.getPosition(pos);
-		nav.travelTo(0, 0);
-		Button.waitForAnyPress();
+		//nav.travelTo(0, 0);
+		//Button.waitForAnyPress();
 		odo.getPosition(pos);
 		nav.turnTo(0,true);
 
