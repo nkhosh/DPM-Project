@@ -33,7 +33,8 @@ public class Navigator{
 	boolean isNavigating;	
 	
 	// Obstacle avoidance variables
-	private int obstacleAvoidanceGapCounter=0; 
+	private boolean isObstacleAvoidanceEnabled = true;
+	private int obstacleAvoidanceGapCounter = 0; 
 	private static final int OBSTACLE_AVOIDANCE_GAP_FILTER=3, OBSTACLE_MAX_DISTANCE=100, OBSTACLE_DISTANCE_THRESHOLD=3;
 	
 	
@@ -120,7 +121,13 @@ public class Navigator{
 			this.wheels[1].forward();
 	}
 
-
+	public void enableObstacleAvoidance() {
+		isObstacleAvoidanceEnabled = true;
+	}
+	public void disableObstacleAvoidance() {
+		isObstacleAvoidanceEnabled = false;
+	}
+	
 	public void navigateMap(double[][]map) {
 	
 	for(int i = 0; i < map.length ; i++)
@@ -141,7 +148,7 @@ public class Navigator{
 		
 		// If the robot isn't close enough to its destination
 		while( !position.approxEquals(destination) ) {
-			if( state == OBSTACLE_AVOIDING ) {
+			if( isObstacleAvoidanceEnabled && state == OBSTACLE_AVOIDING ) {
 				// If the robot is facing close enough to the destination OR it has reached the destination
 				if( Math.abs(relativeTargetOrientation - (unitOrientationVector.getOrientation())) <= ANGLE_BANDWIDTH 
 					|| position.approxEquals(destination)) {
@@ -151,9 +158,9 @@ public class Navigator{
 					avoidObstacle();
 				}
 			}
-			else if( state == NO_OBSTACLE ) {
+			else if( !isObstacleAvoidanceEnabled || state == NO_OBSTACLE ) {
 				// If there's an obstacle directly in front of the robot
-				if( distance[FRONT]<=MAX_FRONT_DISTANCE ) {
+				if( isObstacleAvoidanceEnabled && distance[FRONT]<=MAX_FRONT_DISTANCE ) {
 					// Keep rotating right until the sensor doesn't detect the wall
 					while(usController.getDistance(FRONT) <= DISTANCE_THRESHOLD){
 						wheels[RIGHT].backward();
