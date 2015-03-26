@@ -16,8 +16,7 @@ public class Navigator extends Thread {
 	final static double DEG_ERR = 2.0, CM_ERR = 1.0;
 	private static final int THREAD_PERIOD = 15;	
 	final static int POSITION_BANDWIDTH = 1;
-	private static final int FRONT_THRESHOLD = 15;
-//	private static final double LOW_ANGLE_BANDWIDTH = 2*Math.PI/180; // Used when the robot is turning slow enough
+	private static final int DISTANCE_THRESHOLD = 15;
 	private static final double ANGLE_BANDWIDTH = 2*Math.PI/180; // Used when the robot is possibly turning fast
 	
 	// Objects used by the navigator
@@ -32,6 +31,11 @@ public class Navigator extends Thread {
 	boolean isNavigating;	
 	private double[][] destinationArray;
 	private int destinationIndex;
+	
+	// Obstacle avoidance variables
+	private int obstacleAvoidanceGapCounter=0; 
+	private static final int OBSTACLE_AVOIDANCE_GAP_FILTER=3, OBSTACLE_MAX_DISTANCE=100, OBSTACLE_DISTANCE_THRESHOLD=3;
+	
 	
 	private final static int LEFT=0, FRONT=1, RIGHT=1;
 	private final static int MAX_FRONT_DISTANCE = 20;
@@ -120,21 +124,7 @@ public class Navigator extends Thread {
 	 * constantly updating it's heading
 	 */
 	public void travelTo(double x, double y) {
-//		double minAng;
-//		while (Math.abs(x - odometer.getX()) > CM_ERR || Math.abs(y - odometer.getY()) > CM_ERR) {
-//			minAng = (Math.atan2(x - odometer.getX(),y - odometer.getY() )) * (180.0 / Math.PI);
-//			this.turnTo(minAng, false);
-//			this.setSpeeds(FAST, FAST);
-//		}
-//		this.setSpeeds(0, 0);	
-//		wheels[0].rotate(Navigator.convertDistance(odometer.getRadius(), y), true);
-//		wheels[1].rotate(Navigator.convertDistance(odometer.getRadius(), y), false);
-		
-		
 		isNavigating = true;
-//		destination.setX(x);
-//		destination.setY(y);
-//		double frontDistance = (double)usController.getDistance(FRONT);
 		double relativeTargetOrientation = minimizeAngle( (destination.subtract(position)).getOrientation() )*180/Math.PI;
 		
 		// If the robot isn't close enough to its destination
@@ -146,32 +136,32 @@ public class Navigator extends Thread {
 					state = NO_OBSTACLE;
 				}
 				else {
-					avoidObstacle(); //TODO
+					avoidObstacle();
 				}
 			}
 			else if( state == NO_OBSTACLE ) {
 				// If there's an obstacle directly in front of the robot
-//				if( frontDistance<=FRONT_THRESHOLD ) {
+				if( distance[FRONT]<=MAX_FRONT_DISTANCE ) {
 					// Keep rotating right until the sensor doesn't detect the wall
-//					while(usController.getDistance(FRONT) <= FRONT_THRESHOLD){
-//						wheels[RIGHT].backward();
-//						wheels[LEFT].forward();
-//						wheels[LEFT].setSpeed(ROTATION_SPEED);
-//						wheels[RIGHT].setSpeed(ROTATION_SPEED);
-//						updatePosition();
-//					}
-//					state = OBSTACLE_AVOIDING;
-//					wheels[RIGHT].forward();
-//					wheels[LEFT].forward();
-//				}
+					while(usController.getDistance(FRONT) <= DISTANCE_THRESHOLD){
+						wheels[RIGHT].backward();
+						wheels[LEFT].forward();
+						wheels[LEFT].setSpeed(ROTATION_SPEED);
+						wheels[RIGHT].setSpeed(ROTATION_SPEED);
+						updatePosition();
+					}
+					state = OBSTACLE_AVOIDING;
+					wheels[RIGHT].forward();
+					wheels[LEFT].forward();
+				}
 				// There's no obstacle in the way, turn towards the destination
-//				else {
+				else {
 					turnTo(relativeTargetOrientation, false);
 					wheels[LEFT].forward();
 					wheels[RIGHT].forward();
 					wheels[LEFT].setSpeed(NORMAL_SPEED);
 					wheels[RIGHT].setSpeed(NORMAL_SPEED);
-//				}
+				}
 			}
 			updatePosition();
 			relativeTargetOrientation = minimizeAngle( (destination.subtract(position)).getOrientation() )*180/Math.PI;
@@ -256,7 +246,12 @@ public class Navigator extends Thread {
 		destination.setY(destinationArray[0][1]);
 	}
 	
-	public void processUSData() {
+	/**
+	 * This class controls the movement of the robot when an obstacle is detected.
+	 * If there is an obstacle in front, it turns right.
+	 * Otherwise it follows an obstacle with the same logic as lab 1 wall follower Patbot.
+	 */
+	private void avoidObstacle() {
 		this.distance[FRONT] = usController.getDistance(FRONT);
 		this.distance[LEFT] = usController.getDistance(LEFT);
 		
@@ -269,27 +264,26 @@ public class Navigator extends Thread {
 			moveStraight();
 		}
 		// Sensor is to the left
-		int gapCheck=0, GAPFILTER=1, bandCenter=0, gapThreshold=0, bandwidth=0;	//TODO: Values are meaningless
-		int distError = distance[LEFT]-bandCenter;
+		int distError = distance[LEFT]-DISTANCE_THRESHOLD;
 		// Potential concave turn
-		if( gapCheck == GAPFILTER ) {
-			gapCheck = 0;
+		if( obstacleAvoidanceGapCounter == OBSTACLE_AVOIDANCE_GAP_FILTER ) {
+			obstacleAvoidanceGapCounter = 0;
 			// It's not a gap, the robot has to turn left
 			// Turn left
 			turnLeft();
 		}
 		
-		distError = distance[RIGHT]-bandCenter;
+		distError = distance[RIGHT]-DISTANCE_THRESHOLD;
 		// Potential gap to the left
-		if (distance[FRONT] > gapThreshold) {
-			gapCheck++;
+		if (distance[FRONT] > OBSTACLE_MAX_DISTANCE) {
+			obstacleAvoidanceGapCounter++;
 			moveStraight();
 		}
 		// Wall to the left
 		else {
-			gapCheck = 0;
+			obstacleAvoidanceGapCounter = 0;
 			/* Case 1:  Error in bounds  */
-			if (Math.abs(distError) <= bandwidth) {
+			if (Math.abs(distError) <= OBSTACLE_DISTANCE_THRESHOLD) {
 				moveStraight();
 			}
 			/* Case 2: Negative error, moving too close to wall */
@@ -303,14 +297,10 @@ public class Navigator extends Thread {
 		}
 		updateSpeed();
 	}
-
 	
-	//TODO
-	public void avoidObstacle() {
-		
-	}
-	
-	//TODO
+	/**
+	 * Initiates the movement of Robin Hood when started. Calls the method travelTo on the specified destinations.
+	 */
 	public void run() {
 		wheels[LEFT].forward();
 		wheels[RIGHT].forward();
