@@ -3,19 +3,23 @@ import lejos.nxt.Button;
 import lejos.nxt.LCD;
 import lejos.nxt.Motor;
 import lejos.nxt.NXTRegulatedMotor;
+import lejos.util.Delay;
 import main.Navigator;
 import main.RobinHood;
 
 public class OdoCalibration {
-	private static double radius = 2.065, width = 16.164; // 16.37
+	private static double radius = 2.085, width = 16.2; // 16.37
 	private static int buttonChoice;
 	private final static NXTRegulatedMotor[] wheelMotor = {Motor.A, Motor.B};
 	private double[] tachometer;
+	private static Navigator nav;
 	
 	private static RobinHood robinhood;
 	
 	public static void main(String[] args){
 		robinhood = new RobinHood();
+		nav = robinhood.getNavigator();
+		robinhood.getOdometer().start();
 		while ( true ) {
 			LCD.clear();
 			LCD.drawString("< Left | Right >", 0, 2);
@@ -164,38 +168,45 @@ public class OdoCalibration {
 	}
 	public static void goForward() {
 		final double FORWARD_DISTANCE = (5*30.48);
-
-		wheelMotor[0].setSpeed(200);
-		wheelMotor[1].setSpeed(200);
-		// wait 5 seconds
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			// there is nothing to be done here because it is not expected that
-			// the odometer will be interrupted by another thread
-		}
-
-//		robinhood.getNavigator().travelTo(0, FORWARD_DISTANCE);
-		wheelMotor[0].rotate((int)Navigator.convertDistance(radius, FORWARD_DISTANCE), true);
-		wheelMotor[1].rotate((int)Navigator.convertDistance(radius, FORWARD_DISTANCE), false);
+		nav.travelTo(0, FORWARD_DISTANCE, false);
+//		wheelMotor[0].setSpeed(200);
+//		wheelMotor[1].setSpeed(200);
+//		// wait 5 seconds
+//		try {
+//			Thread.sleep(2000);
+//		} catch (InterruptedException e) {
+//			// there is nothing to be done here because it is not expected that
+//			// the odometer will be interrupted by another thread
+//		}
+//
+////		robinhood.getNavigator().travelTo(0, FORWARD_DISTANCE);
+//		wheelMotor[0].rotate((int)Navigator.convertDistance(radius, FORWARD_DISTANCE), true);
+//		wheelMotor[1].rotate((int)Navigator.convertDistance(radius, FORWARD_DISTANCE), false);
 	}
 	public static void turnAngle() {
-		final double ROTATION_ANGLE = 360.0*4;
-
-		wheelMotor[0].setSpeed(200);
-		wheelMotor[1].setSpeed(200);
+		nav.turnTo(90, true);
+		Delay.msDelay(500);
+		nav.turnTo(180, true);
+		Delay.msDelay(500);
+		nav.turnTo(270, true);
+		Delay.msDelay(500);
+		nav.turnTo(0, true);
+//		final double ROTATION_ANGLE = 360.0*4;
+//
+//		wheelMotor[0].setSpeed(200);
+//		wheelMotor[1].setSpeed(200);
 
 		// wait 5 seconds
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			// there is nothing to be done here because it is not expected that
-			// the odometer will be interrupted by another thread
-		}
+//		try {
+//			Thread.sleep(2000);
+//		} catch (InterruptedException e) {
+//			// there is nothing to be done here because it is not expected that
+//			// the odometer will be interrupted by another thread
+//		}
 
 //		robinhood.getNavigator().turnTo(ROTATION_ANGLE, true);
 
-		wheelMotor[0].rotate((int)Navigator.convertAngle(radius, width, ROTATION_ANGLE), true);
-		wheelMotor[1].rotate(-(int)Navigator.convertAngle(radius, width, ROTATION_ANGLE), false);
+//		wheelMotor[0].rotate((int)Navigator.convertAngle(radius, width, ROTATION_ANGLE), true);
+//		wheelMotor[1].rotate(-(int)Navigator.convertAngle(radius, width, ROTATION_ANGLE), false);
 	}
 }

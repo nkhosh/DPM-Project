@@ -45,6 +45,8 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 	private boolean rightCrossingX;
 	private boolean rightCrossingY;
 	
+	
+	
 	Object lock;
 	Odometer odometer;
 	LSController lsController;
@@ -56,8 +58,8 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 		
 		// TODO: calibrate...
 //		xLSdistance = 3.15;
-		xLSdistance = 3.75;
-		yLSdistance = 13.4;
+		xLSdistance = 3.1;
+		yLSdistance = 12.5;
 //		lightThreshold = 41;
 //		lightThreshold = 45;
 		lightThreshold = 50; // with shades
@@ -199,35 +201,6 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 			}
 		}
 	}
-	
-	
-//	private void positionCorrection(double leftSensorPosition, double rightSensorPosition){
-//		int roundLeftSensorPosition = (int)Math.round(leftSensorPosition);
-//		double leftGridPosition;
-//		if(roundLeftSensorPosition%30.48<15){
-//			leftGridPosition = (roundLeftSensorPosition/30) * 30.0;
-//		}
-//		else{
-//			leftGridPosition = (roundLeftSensorPosition/30 + 1) * 30.0;
-//		}
-//		
-//		int roundRightSensorPosition = (int)Math.round(rightSensorPosition);
-//		double rightGridPosition;
-//		if(roundRightSensorPosition%30<15){
-//			rightGridPosition = (roundRightSensorPosition/30) * 30.0;
-//		}
-//		else{
-//			rightGridPosition = (roundRightSensorPosition/30 + 1) * 30.0;
-//		}
-//		
-//		
-//		
-//		if(leftCrossingX && rightCrossingX){
-//		}
-//		else if(leftCrossingY && rightCrossingY){
-//			
-//		}
-//	}
 	
 	/**
 	 * Corrects the x-position of the odometer (between the wheels) based on the sensor x-position
@@ -373,6 +346,15 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 		double averageCorrectX = (leftCorrectX + rightCorrectX)/2;
 		
 		odometer.setX(averageCorrectX);
+	}
+	
+	/**
+	 * Heading correction when crossing a y grid line
+	 * @param deltaY
+	 */
+	private void headingCorrection(double deltaX, double deltaY) {
+		double correctHeading = Math.atan2(deltaX,deltaY);
+		odometer.setHeading(correctHeading);
 	}
 	
 	

@@ -1,25 +1,22 @@
 package tests;
 
-import lejos.nxt.Button;
-import lejos.nxt.SensorPort;
-import lejos.nxt.TouchSensor;
-import main.Navigator;
-import main.RobinHood;
+import lejos.nxt.*;
+import main.*;
 
-public class NavigationTest {
+public class DemoTest {
 	public static void main (String[] args) {
 		RobinHood robin = new RobinHood();
 		Navigator navigator;
 		SensorPort port = SensorPort.S4;
+		double segment = 30.48;
 //		TouchSensor touchSensor = new TouchSensor(port);
 //		double[][] destination = {{0,60.96},{60.96,60.96},{0,0},{30,30}};
-		double[][] destination = {{60.96,60.96},{0,60.96},{30.48,30.48},{60.96,30.48},{0,0}};
+		double[][] demo = {{-.5*segment,2*segment},{-.5*segment, 5.5*segment},{1.5*segment,5.5*segment},{1.5*segment,6.5*segment},{4.5*segment,6.5*segment}};
 //		double[][] destination = {{-30.48/2,60.96},{30.48/2,30.48/2},{60.96,60.96},{60.96,30.48/2},{0,0}};
 //		while(!touchSensor.isPressed());
 		
 		navigator = robin.getNavigator();
 		robin.getOdometer().start();
-		robin.getOdometryCorrector().start();
 		robin.getLcdPrinter().start();
 //		navigator.setDestinationArray(destination);
 
@@ -31,7 +28,13 @@ public class NavigationTest {
 //		for(int i=0;i<4;i++){
 //			navigator.travelTo(destination[i][0], destination[i][1]);
 //		}
-		navigator.navigateMap(destination);
+		robin.getLocalizer().doLocalization();
+		Button.waitForAnyPress();
+
+		robin.getOdometryCorrector().start();
+		navigator.navigateMap(demo);
+		Button.waitForAnyPress();
+		//navigator.fireAt(9*segment, 9*segment, xMin, xMax, yMin, yMax, numBalls);
 		
 		
 //		navigator.travelTo(60.96,60.96, true);

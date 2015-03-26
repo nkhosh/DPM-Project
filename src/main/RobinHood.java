@@ -21,6 +21,7 @@ public class RobinHood {
 	private UltrasonicSensor[] usSensor;
 	private LSController lsController;
 	private USController usController;
+	private Localizer localizer;
 
 	/**
 	 * Constructor method. The variables are initialized here.
@@ -28,24 +29,30 @@ public class RobinHood {
 	public RobinHood() {
 		usSensor = new UltrasonicSensor[2];
 		lsSensor = new ColorSensor[2];
-		usSensor[0] = new UltrasonicSensor(usLeftPort);
-		usSensor[1] = new UltrasonicSensor(usFrontPort);
+		usSensor[0] = new UltrasonicSensor(usFrontPort);
+		usSensor[1] = new UltrasonicSensor(usLeftPort);
 		lsSensor[0] = new ColorSensor(lsLeftPort);
 		lsSensor[1] = new ColorSensor(lsRightPort);
+		
 		lock = new Object();
 		
 		lsController = new LSController(lsSensor);
 		usController = new USController(usSensor);
 		odometer = new Odometer(wheelMotor, lock);
 		odometryCorrector = new OdometryCorrector(odometer, lsController, lock);
-		navigator = new Navigator(odometer, wheelMotor, usController);
-		launcher = new Launcher(odometer, launcherMotor);
+		launcher = new Launcher(odometer, launcherMotor, 6);
+		navigator = new Navigator(odometer, wheelMotor, usController, launcher);
 		lcdPrinter = new LCDPrinter(odometer, lock);
+		localizer = new Localizer(odometer,navigator,usSensor,lsSensor);
 	}
 	
 	public Odometer getOdometer() {
 		return odometer;
 	}
+	public Localizer getLocalizer() {
+		return localizer;
+	}
+	
 	
 	public OdometryCorrector getOdometryCorrector() {
 		return odometryCorrector;

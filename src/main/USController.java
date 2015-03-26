@@ -4,7 +4,7 @@ import lejos.nxt.UltrasonicSensor;
 
 
 public class USController {
-	private final static int LEFT=0, FRONT=1;
+	private final static int FRONT=0, LEFT=1; 
 	private final static int DISTANCE_THRESHOLD = 20;
 	UltrasonicSensor[] us;
 	

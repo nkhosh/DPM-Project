@@ -58,6 +58,8 @@ public class Localizer {
 	public void doLocalization() {
 		
 		doUSLocalization();
+		nav.travelTo(-7, 2,false);
+		nav.turnTo(0, true);
 		doLSLocalization();
 	}
 	
@@ -201,7 +203,7 @@ public class Localizer {
 			}		
 			if (leftDetected || rightDetected)
 			{
-				
+				Sound.beep();
 				
 				if(leftDetected && l<4)
 					{
@@ -272,6 +274,12 @@ public class Localizer {
 		nav.travelTo(0, 0,false);
 		odo.getPosition(pos);
 		nav.turnTo(0,true);
+		//Button.waitForAnyPress();
+		//odo.getPosition(pos);
+		//nav.travelTo(0, 0);
+		//Button.waitForAnyPress();
+		//odo.getPosition(pos);
+		//nav.turnTo(0,true);
 
 		
 		nav.stop();
