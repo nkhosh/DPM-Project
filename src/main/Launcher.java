@@ -12,10 +12,10 @@ public class Launcher {
 	private NXTRegulatedMotor launcherMotor;
 	private int ballsInQuiver;
 	
-	public Launcher(Odometer odometer, NXTRegulatedMotor launcherMotor) {
+	public Launcher(Odometer odometer, NXTRegulatedMotor launcherMotor,int startingBalls) {
 		this.odometer = odometer;
 		this.launcherMotor = launcherMotor;
-		ballsInQuiver = 5;
+		ballsInQuiver = startingBalls;
 	}
 	
 	public void launch(int balls){

@@ -9,7 +9,7 @@ public class Localizer {
 	public static final double OFFSETY = 6.0;
 	public static final double OFFSETX = 4.8;
 	public static final int ERROR = 3;
-	public static final int COMPENSATION = 20;
+	public static final int COMPENSATION = 25;
 	public static int phase;
 	public static double testAngle;
 	public static double distance;
@@ -58,7 +58,7 @@ public class Localizer {
 	public void doLocalization() {
 		
 		doUSLocalization();
-		//doLSLocalization();
+		doLSLocalization();
 	}
 	
 	public void doUSLocalization(){
@@ -108,9 +108,9 @@ public class Localizer {
 									{
 										//Sound.beep();
 										angle = odo.getHeading();
-										isRunning = false;
 										xDistance = this.getFilteredData(front) + OFFSETX;
 										yDistance = distanceSide + OFFSETY;
+										isRunning = false;
 										
 									}
 								}
@@ -129,21 +129,20 @@ public class Localizer {
 		
 			
 			//double correctAngle = angle + COMPENSATION;
-			Button.waitForAnyPress();
+			nav.stop();
+			//Sound.beep();
 			double[] pos = {0,0,0};
 			odo.getPosition(pos);
 			odo.setPosition(new double [] {xDistance-30.48, yDistance-30.48, 270 - angle  }, new boolean [] {true, true, true});
 			
-			Button.waitForAnyPress();
-			nav.turnTo(0,true);
-
+			
 	}
 	public void doLSLocalization(){
 		
 		//travel to a relatively close point. I chose (-4,-4)
-		//Sound.beep();
-		//Sound.beep();
-		//nav.travelTo(2, 2); 
+		//Sound.buzz();
+		nav.travelTo(-7.5, -1,false);
+		nav.turnTo(0, true);
 		gridCounter = 0;
 		  dupCounterL = 0;
 		  dupCounterR = 0;
@@ -267,12 +266,10 @@ public class Localizer {
 		
 		
 		//update these values, travel to (0,0), and turn to 0 degrees
-		odo.setPosition(new double [] {x, y, pos[2]+delta + 4}, new boolean [] {true, true, true});
+		odo.setPosition(new double [] {x, y, pos[2]+delta + 4.5}, new boolean [] {true, true, true});
 		
-		Button.waitForAnyPress();
 		odo.getPosition(pos);
-		//nav.travelTo(0, 0);
-		//Button.waitForAnyPress();
+		nav.travelTo(0, 0,false);
 		odo.getPosition(pos);
 		nav.turnTo(0,true);
 
