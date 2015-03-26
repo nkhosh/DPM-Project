@@ -43,7 +43,7 @@ public class Navigator{
 	
 	private final static int LEFT=0, FRONT=1, RIGHT=1;
 	private final static int MAX_FRONT_DISTANCE = 20;
-	private int[] distance;
+	private int[] distance = {255,255};
 	
 	
 	public Navigator(Odometer odometer, NXTRegulatedMotor[] wheels, USController usController)	{
@@ -52,7 +52,8 @@ public class Navigator{
 		this.state = NO_OBSTACLE;
 		this.usController = usController;
 		this.speed = new int[2];
-		this.speed[LEFT] = this.speed[RIGHT] = NORMAL_SPEED;
+		this.speed[LEFT] =  NORMAL_SPEED;
+		this.speed[RIGHT] = NORMAL_SPEED;
 		this.isNavigating = false;
 		destination = new Vector(0, 0);
 		position = new Vector(0, 0);
@@ -146,6 +147,7 @@ public class Navigator{
 		
 		// If the robot isn't close enough to its destination
 		while( !position.approxEquals(destination) ) {
+			
 			if( state == OBSTACLE_AVOIDING ) {
 				// If the robot is facing close enough to the destination OR it has reached the destination
 				if( Math.abs(relativeTargetOrientation - (unitOrientationVector.getOrientation())) <= ANGLE_BANDWIDTH 
@@ -157,7 +159,9 @@ public class Navigator{
 				}
 			}
 			else if( state == NO_OBSTACLE ) {
+				
 				// If there's an obstacle directly in front of the robot
+				this.distance[FRONT] = usController.getDistance(FRONT);
 				if( distance[FRONT]<=MAX_FRONT_DISTANCE ) {
 					// Keep rotating right until the sensor doesn't detect the wall
 					while(usController.getDistance(FRONT) <= DISTANCE_THRESHOLD){
