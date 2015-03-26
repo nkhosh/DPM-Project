@@ -1,6 +1,5 @@
 package main;
 import lejos.nxt.NXTRegulatedMotor;
-import lejos.nxt.Sound;
 
 
 public class Navigator{
@@ -18,7 +17,6 @@ public class Navigator{
 	
 	// The error and threshold values
 	final static double DEG_ERR = 2.0, CM_ERR = 1.0;
-	private static final int THREAD_PERIOD = 15;	
 	final static int POSITION_BANDWIDTH = 1;
 	private static final int DISTANCE_THRESHOLD = 15;
 	private static final double ANGLE_BANDWIDTH = 2*Math.PI/180; // Used when the robot is possibly turning fast
@@ -33,8 +31,6 @@ public class Navigator{
 	private Vector position, destination;
 	private Vector unitOrientationVector;
 	boolean isNavigating;	
-	private double[][] destinationArray;
-	private int destinationIndex;
 	
 	// Obstacle avoidance variables
 	private int obstacleAvoidanceGapCounter=0; 
@@ -56,7 +52,7 @@ public class Navigator{
 		this.isNavigating = false;
 		destination = new Vector(0, 0);
 		position = new Vector(0, 0);
-		destinationIndex = 0;
+//		destinationIndex = 0;
 		unitOrientationVector = new Vector();
 		updatePosition();
 	}
@@ -185,7 +181,6 @@ public class Navigator{
 		}
 		
 		// If the robot reached its destination
-
 		isNavigating = false;
 		wheels[LEFT].stop();
 		wheels[RIGHT].stop();
@@ -245,16 +240,6 @@ public class Navigator{
 			minimizedAngle = angle-2*pi;
 		}
 		return minimizedAngle;
-	}
-	/**
-	 * Sets the array of coordinates to be reached.
-	 * The initial destination is set to be the first element of the array.
-	 * @param destinationArray
-	 */
-	public void setDestinationArray(double[][] destinationArray) {
-		this.destinationArray = destinationArray;
-		destination.setX(destinationArray[0][0]);
-		destination.setY(destinationArray[0][1]);
 	}
 	
 	/**
