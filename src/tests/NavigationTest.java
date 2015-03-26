@@ -24,9 +24,10 @@ public class NavigationTest {
 //		navigator.setDestinationArray(destination);
 
 //		navigator.turnTo(0,true);
-		for(int i=0;i<4;i++){
-			navigator.travelTo(destination[i][0], destination[i][1]);
-		}
+//		for(int i=0;i<4;i++){
+//			navigator.travelTo(destination[i][0], destination[i][1]);
+//		}
+		navigator.navigateMap(destination);
 		navigator.turnTo(0,true);
 		
 		int buttonChoice;

@@ -52,7 +52,6 @@ public class Navigator{
 		this.isNavigating = false;
 		destination = new Vector(0, 0);
 		position = new Vector(0, 0);
-//		destinationIndex = 0;
 		unitOrientationVector = new Vector();
 		updatePosition();
 	}
