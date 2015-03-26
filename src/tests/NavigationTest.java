@@ -22,9 +22,9 @@ public class NavigationTest {
 //		robin.getOdometryCorrector().start();
 		robin.getLcdPrinter().start();
 		navigator.setDestinationArray(destination);
-		navigator.start();
 
 		navigator.turnTo(0,true);
+		navigator.travelTo(destination[0][0], destination[0][1]);
 		
 		int buttonChoice;
 		buttonChoice = Button.waitForAnyPress();
@@ -32,7 +32,7 @@ public class NavigationTest {
 			robin.getOdometer().setX(0);
 			robin.getOdometer().setY(0);
 			robin.getOdometer().setHeading(0);
-			navigator.setDestinationArray(destination);
+//			navigator.setDestinationArray(destination);
 			buttonChoice = Button.waitForAnyPress();
 		}
 	}

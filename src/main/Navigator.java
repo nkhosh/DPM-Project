@@ -3,7 +3,7 @@ import lejos.nxt.NXTRegulatedMotor;
 import lejos.nxt.Sound;
 
 
-public class Navigator extends Thread {
+public class Navigator{
 	// Variables for the state of the movement
 	private final static boolean NO_OBSTACLE = true, OBSTACLE_AVOIDING = false;
 	private boolean state;
@@ -123,10 +123,7 @@ public class Navigator extends Thread {
 		else
 			this.wheels[1].forward();
 	}
-	/**
-	 * TravelTo function which takes as arguments the x and y position in cm Will travel to designated position, while
-	 * constantly updating it's heading
-	 */
+
 
 	public void navigateMap(double[][]map) {
 	
@@ -134,22 +131,20 @@ public class Navigator extends Thread {
 		{
 			travelTo(map[i][0],map[i][1]);		
 		}
-
-
 	}
 	
-	public void travelTo(double x, double y) {
-	//takes a point x,y and moves the robot to x,y
-	// that's it.
-	}
-	
-	/*
+	/**
+	 * This function takes as arguments the x and y position in cm Will travel to designated position, while
+	 * constantly updating it's heading
+	 */
 	public void travelTo(double x, double y) {
 		isNavigating = true;
+		destination.setX(x);
+		destination.setY(y);
 		double relativeTargetOrientation = minimizeAngle( (destination.subtract(position)).getOrientation() )*180/Math.PI;
 		
 		// If the robot isn't close enough to its destination
-		if( !position.approxEquals(destination) ) {
+		while( !position.approxEquals(destination) ) {
 			if( state == OBSTACLE_AVOIDING ) {
 				// If the robot is facing close enough to the destination OR it has reached the destination
 				if( Math.abs(relativeTargetOrientation - (unitOrientationVector.getOrientation())) <= ANGLE_BANDWIDTH 
@@ -189,19 +184,12 @@ public class Navigator extends Thread {
 		}
 		
 		// If the robot reached its destination
-		else {
-			isNavigating = false;
-			wheels[LEFT].stop();
-			wheels[RIGHT].stop();
-			// Set the destination to the next set of coordinates in the destinationArray
-			if(destinationIndex < destinationArray.length - 1 ){
-				destinationIndex++;
-				destination.setX(destinationArray[destinationIndex][0]);
-				destination.setY(destinationArray[destinationIndex][1]);
-			}
-		}
+
+		isNavigating = false;
+		wheels[LEFT].stop();
+		wheels[RIGHT].stop();
 	}
-*/
+
 
 	/**
 	 * TurnTo function which takes an angle and boolean as arguments The boolean controls whether or not to stop the
@@ -320,34 +308,6 @@ public class Navigator extends Thread {
 		updateSpeed();
 	}
 	
-	/**
-	 * Initiates the movement of Robin Hood when started. Calls the method travelTo on the specified destinations.
-	 */
-	public void run() {
-		wheels[LEFT].forward();
-		wheels[RIGHT].forward();
-		wheels[LEFT].setSpeed(NORMAL_SPEED);
-		wheels[RIGHT].setSpeed(NORMAL_SPEED);
-		long updateEnd,updateStart;
-		while(true) {
-			updateStart = System.currentTimeMillis();
-			
-			travelTo(destination.getX(), destination.getY());
-			
-			// this ensures that the odometer only runs once every period
-			updateEnd = System.currentTimeMillis();
-			if (updateEnd - updateStart < THREAD_PERIOD) {
-				try {
-					Thread.sleep(THREAD_PERIOD - (updateEnd - updateStart));
-				} catch (InterruptedException e) {
-					// there is nothing to be done here because it is not
-					// expected that the odometer will be interrupted by
-					// another thread
-				}
-			}
-		}
-
-	}
 	public void setRotationSpeed(double speed) {
 		rotationSpeed = speed;
 		setSpeeds(rotationSpeed);
