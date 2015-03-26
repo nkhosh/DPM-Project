@@ -58,8 +58,6 @@ public class Localizer {
 	public void doLocalization() {
 		
 		doUSLocalization();
-		nav.travelTo(-7, 2,false);
-		nav.turnTo(0, true);
 		doLSLocalization();
 	}
 	
@@ -71,8 +69,9 @@ public class Localizer {
 			angle = 0;
 			double xDistance = -1;
 			double yDistance = -1;
-			int delayCountLimit = 50;
+			int delayCountLimit = 20;
 			int delayCount = 0;
+			
 			
 			while(isRunning)
 			{
@@ -99,7 +98,6 @@ public class Localizer {
 								{
 									
 									delayCount = 0;
-									isIncreasing = true;
 									nav.stop();
 									nav.turnTo(odo.getHeadingDeg()-COMPENSATION,true);
 
@@ -116,6 +114,7 @@ public class Localizer {
 										
 									}
 								}
+								isIncreasing = true;
 							}
 							else if (change < 0 )
 							{
@@ -203,7 +202,7 @@ public class Localizer {
 			}		
 			if (leftDetected || rightDetected)
 			{
-				Sound.beep();
+				
 				
 				if(leftDetected && l<4)
 					{
@@ -269,17 +268,12 @@ public class Localizer {
 		
 		//update these values, travel to (0,0), and turn to 0 degrees
 		odo.setPosition(new double [] {x, y, pos[2]+delta + 4.5}, new boolean [] {true, true, true});
-		
+		//Button.waitForAnyPress();
 		odo.getPosition(pos);
 		nav.travelTo(0, 0,false);
 		odo.getPosition(pos);
 		nav.turnTo(0,true);
-		//Button.waitForAnyPress();
-		//odo.getPosition(pos);
-		//nav.travelTo(0, 0);
-		//Button.waitForAnyPress();
-		//odo.getPosition(pos);
-		//nav.turnTo(0,true);
+		
 
 		
 		nav.stop();

@@ -115,7 +115,7 @@ public class Odometer extends Thread {
 		synchronized (lock) {
 			pos[0] = x;
 			pos[1] = y;
-			pos[2] = Math.toDegrees(heading);
+			pos[2] = fixDegAngle(Math.toDegrees(heading));
 		}
 	}
 	
