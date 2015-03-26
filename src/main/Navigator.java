@@ -11,9 +11,9 @@ public class Navigator extends Thread {
 	// Variables for the speed of the movement
 	final static int FAST_SPEED = 200, SLOW_SPEED = 100, NORMAL_SPEED=200, ACCELERATION = 4000;
 	private final static int ROTATION_SPEED = 100;
-	public static final double LEFT_RADIUS = 2.1428;
-	public static final double RIGHT_RADIUS = 2.1428;
-	private static final double WIDTH = 15.9;
+	public static final double LEFT_RADIUS = 2.065; // originally 2.1428
+	public static final double RIGHT_RADIUS = 2.065;
+	private static final double WIDTH = 16.164; // originally 15.9
 	private double rotationSpeed;
 	
 	// The error and threshold values

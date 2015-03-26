@@ -2,7 +2,11 @@ package main;
 import lejos.nxt.NXTRegulatedMotor;
 
 public class Launcher {
-	private static final int[] reloadSpeeds = {175,345,365,375,395};
+//	private static final int[] reloadSpeeds = {175,345,365,375,400};
+	private static final int[] reloadSpeeds = {235,375,367,374,380};
+//	private static final int[] reloadSpeeds = {90,220,290,345,390}; // with bar
+//	private static final int[] reloadSpeeds = {80,220,280,320,390}; // without bar
+	
 	private static final int shootingSpeed = 200;
 	private Odometer odometer;
 	private NXTRegulatedMotor launcherMotor;

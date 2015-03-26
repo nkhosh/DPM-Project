@@ -7,7 +7,7 @@ import main.Navigator;
 import main.RobinHood;
 
 public class OdoCalibration {
-	private static double radius = 2.05, width = 16.37;
+	private static double radius = 2.065, width = 16.164; // 16.37
 	private static int buttonChoice;
 	private final static NXTRegulatedMotor[] wheelMotor = {Motor.A, Motor.B};
 	private double[] tachometer;
@@ -80,8 +80,8 @@ public class OdoCalibration {
 			}
 			else if( buttonChoice == Button.ID_ENTER ) {
 				robinhood.getOdometer().setRadius(radius);
-//				goForward();
-				squareDrive();
+				goForward();
+//				squareDrive();
 				return;
 			}
 			LCD.drawString("    "+radius, 0, 5);
@@ -128,8 +128,8 @@ public class OdoCalibration {
 			}
 			else if( buttonChoice == Button.ID_ENTER ) {
 				robinhood.getOdometer().setWidth(width);
-//				turnAngle();
-				squareDrive();
+				turnAngle();
+//				squareDrive();
 				return;
 			}
 			LCD.drawString("    "+width, 0, 5);
@@ -139,7 +139,7 @@ public class OdoCalibration {
 	
 	public static void squareDrive() {
 //		final double FORWARD_DISTANCE = 60.96;
-		final double FORWARD_DISTANCE = 2*30.48;
+		final double FORWARD_DISTANCE = 6*30.48;
 		final double ROTATION_ANGLE = 90.0;
 		wheelMotor[0].setSpeed(200);
 		wheelMotor[1].setSpeed(200);
@@ -180,7 +180,7 @@ public class OdoCalibration {
 		wheelMotor[1].rotate((int)Navigator.convertDistance(radius, FORWARD_DISTANCE), false);
 	}
 	public static void turnAngle() {
-		final double ROTATION_ANGLE = 360.0;
+		final double ROTATION_ANGLE = 360.0*4;
 
 		wheelMotor[0].setSpeed(200);
 		wheelMotor[1].setSpeed(200);

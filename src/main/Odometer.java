@@ -3,7 +3,7 @@ package main;
 import lejos.nxt.Motor;
 import lejos.nxt.NXTRegulatedMotor;
 
-public class Odometer extends Thread {
+public class Odometer extends Thread {	
 	private double x, y, heading;
 	Object lock;
 	private double radius, width;
@@ -28,9 +28,9 @@ public class Odometer extends Thread {
 //		radius = 2.075; 
 //		width = 16.22;
 		
-		radius = 2.05; //without shade friction
+		radius = 2.065; //without shade friction
 //		width = 16.19;
-		width = 16.3;
+		width = 16.164;
 	}
 	
 	public void setX(double x) {
@@ -110,7 +110,6 @@ public class Odometer extends Thread {
 			angle = Math.PI*2 + (angle % (Math.PI*2));
 		
 		return angle % (Math.PI*2);
-<<<<<<< HEAD
 	}
 	public void getPosition(double [] pos) {
 		synchronized (lock) {
@@ -126,8 +125,6 @@ public class Odometer extends Thread {
 			if (update[1]) y = pos[1];
 			if (update[2]) heading = fixRadAngle(Math.toRadians(pos[2]));
 		}
-=======
->>>>>>> origin/master
 	}
 	
 	public void run() {

@@ -16,12 +16,5 @@ public class USController {
 	public int getDistance(int orientation) {
 		return us[orientation].getDistance();
 	}
-<<<<<<< HEAD
-
-
 	
 }
-=======
-	
-}
->>>>>>> origin/master
