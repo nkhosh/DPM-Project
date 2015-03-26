@@ -5,7 +5,7 @@ import lejos.nxt.LCD;
 import main.Launcher;
 import main.RobinHood;
 
-public class reloaderTest {
+public class ReloaderTest {
 	
 	static Launcher launcher;
 	
