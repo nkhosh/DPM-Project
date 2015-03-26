@@ -58,6 +58,7 @@ public class Navigator{
 		position = new Vector(0, 0);
 		destinationIndex = 0;
 		unitOrientationVector = new Vector();
+		updatePosition();
 	}
 	
 	/**
@@ -127,7 +128,7 @@ public class Navigator{
 
 	public void navigateMap(double[][]map) {
 	
-	for(int i = 0; i > map.length ; i++)
+	for(int i = 0; i < map.length ; i++)
 		{
 			travelTo(map[i][0],map[i][1]);		
 		}

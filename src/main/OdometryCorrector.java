@@ -57,7 +57,7 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 		// TODO: calibrate...
 //		xLSdistance = 3.15;
 		xLSdistance = 3.75;
-		yLSdistance = 13.5;
+		yLSdistance = 13.4;
 //		lightThreshold = 41;
 //		lightThreshold = 45;
 		lightThreshold = 50; // with shades
