@@ -44,7 +44,7 @@ public class Navigator{
 	
 	
 	private final static int LEFT=0, FRONT=1, RIGHT=1;
-	private final static int MAX_FRONT_DISTANCE = 25;
+	private final static int MIN_FRONT_DISTANCE = 25, MIN_LEFT_DISTANCE = 5;
 	private int[] distance = {255,255};
 	private double launchAngle = Math.tan(7.4/(5*30.48 + 4));
 	private double launchDistance = Math.sqrt(Math.pow(-7.4, 2) + Math.pow(5*30.48 + 4, 2));
@@ -58,7 +58,7 @@ public class Navigator{
 		this.launcher = launch;
 		this.odometer = odometer;
 		this.wheels = wheels;
-		this.state = NO_OBSTACLE;
+//		this.state = NO_OBSTACLE;
 		this.usController = usController;
 		this.speed = new int[2];
 		this.speed[LEFT] =  NORMAL_SPEED;
@@ -204,28 +204,22 @@ public class Navigator{
 			this.distance[LEFT] = usController.getDistance(LEFT);
 			
 			 if( obstacleAvoidance ) {
-				 if( state == OBSTACLE_AVOIDING ) {
-				// If the robot is facing close enough to the destination OR it has reached the destination
-					if( (Math.abs(relativeTargetOrientation - (unitOrientationVector.getOrientation())) <= ANGLE_BANDWIDTH) ) {
-						state = NO_OBSTACLE;
-						Sound.twoBeeps();
-						wheels[LEFT].forward();
-						wheels[RIGHT].forward();
-						wheels[LEFT].setSpeed(NORMAL_SPEED);
-						wheels[RIGHT].setSpeed(NORMAL_SPEED);
-					}
-					else if( distance[FRONT]<=MAX_FRONT_DISTANCE ){
-						avoidObstacle(FRONT);
-					}
-					else if( distance[LEFT]<=DISTANCE_THRESHOLD ) {
-						avoidObstacle(LEFT);
-					}
-				 }
-				else if( state == NO_OBSTACLE ) {
+//				 if( state == OBSTACLE_AVOIDING ) {
+//				// If the robot is facing close enough to the destination OR it has reached the destination
+//					if( distance[FRONT]<=MAX_FRONT_DISTANCE ){
+//						avoidObstacle();
+//					}
+//					else if( distance[LEFT]<=DISTANCE_THRESHOLD ) {
+//						avoidObstacle();
+//					}
+//				 }
+//				else 
+//				if( state == NO_OBSTACLE ) {
 					// If there's an obstacle directly in front of the robot
 					
-					if( distance[FRONT]<=MAX_FRONT_DISTANCE || distance[LEFT]<=DISTANCE_THRESHOLD ) {
-						state = OBSTACLE_AVOIDING;
+					if( distance[FRONT]<=MIN_FRONT_DISTANCE || distance[LEFT]<=MIN_LEFT_DISTANCE ) {
+//						state = OBSTACLE_AVOIDING;
+						avoidObstacle();
 						Sound.beep();
 					}
 				// There's no obstacle in the way, turn towards the destination
@@ -233,7 +227,7 @@ public class Navigator{
 						turnTo(relativeTargetOrientation, false);
 						moveStraight();
 					}
-				}
+//				}
 			}
 			else
 			{
@@ -250,7 +244,51 @@ public class Navigator{
 		wheels[LEFT].stop();
 		wheels[RIGHT].stop();
 	}
+	
+	/**
+	 * This class controls the movement of the robot when an obstacle is detected.
+	 * If there is an obstacle in front, it turns right.
+	 * Otherwise it follows an obstacle with the same logic as bang bang controller.
+	 */
+	private void avoidObstacle() {
+		this.distance[FRONT] = usController.getDistance(FRONT);
+		this.distance[LEFT] = usController.getDistance(LEFT);
+		double relativeTargetOrientation = minimizeAngle( (destination.subtract(position)).getOrientation() )*180/Math.PI;
+		int distError;
 
+		while ( true ) {
+			if( distance[FRONT] <= MIN_FRONT_DISTANCE ) {
+				while( distance[LEFT] > DISTANCE_THRESHOLD ) {
+					turnRight();
+					this.distance[LEFT] = usController.getDistance(LEFT);
+				}
+			}
+			else if( distance[LEFT] <= MIN_LEFT_DISTANCE ) {
+				distError = distance[LEFT]-DISTANCE_THRESHOLD;
+				/* Case 1:  Error in bounds  */
+				if (Math.abs(distError) <= OBSTACLE_DISTANCE_THRESHOLD) {
+					moveStraight();
+				}
+				/* Case 2: Negative error, moving too close to wall */
+				else if (distError < 0) {
+					moveRight();
+				}
+				/* Case 3: Positive error, moving too far from wall */
+				else if (distError > 0) {
+					moveLeft();
+				}
+			}
+			relativeTargetOrientation = minimizeAngle( (destination.subtract(position)).getOrientation() )*180/Math.PI;
+			updatePosition();
+			this.distance[FRONT] = usController.getDistance(FRONT);
+			this.distance[LEFT] = usController.getDistance(LEFT);
+			if((Math.abs(relativeTargetOrientation - (unitOrientationVector.getOrientation())) <= ANGLE_BANDWIDTH))
+				break;
+		}
+//		state = NO_OBSTACLE;
+		Sound.twoBeeps();
+		return;
+	}
 
 	/**
 	 * TurnTo function which takes an angle and boolean as arguments The boolean controls whether or not to stop the
@@ -321,40 +359,6 @@ public class Navigator{
 		destination.setX(destinationArray[0][0]);
 		destination.setY(destinationArray[0][1]);
 	}
-	
-	/**
-	 * This class controls the movement of the robot when an obstacle is detected.
-	 * If there is an obstacle in front, it turns right.
-	 * Otherwise it follows an obstacle with the same logic as bang bang controller.
-	 */
-	private void avoidObstacle(int orientation) {
-		this.distance[FRONT] = usController.getDistance(FRONT);
-		this.distance[LEFT] = usController.getDistance(LEFT);
-
-		if( orientation==FRONT ) {
-			while( distance[LEFT] >= DISTANCE_THRESHOLD || distance[FRONT] < MAX_FRONT_DISTANCE ) {
-				turnRight();
-				this.distance[FRONT] = usController.getDistance(FRONT);
-				this.distance[LEFT] = usController.getDistance(LEFT);
-			}
-		}
-		else if( orientation==LEFT ) {
-//			while() {
-				int distError = distance[LEFT]-DISTANCE_THRESHOLD;
-				/* Case 1:  Error in bounds  */
-				if (Math.abs(distError) <= OBSTACLE_DISTANCE_THRESHOLD) {
-					moveStraight();
-				}
-				/* Case 2: Negative error, moving too close to wall */
-				else if (distError < 0) {
-					moveRight();
-				}
-				/* Case 3: Positive error, moving too far from wall */
-				else if (distError > 0) {
-					moveLeft();
-				}
-//			}
-		}
 		
 		
 		// Wall in front
@@ -398,7 +402,6 @@ public class Navigator{
 //				moveLeft();
 //			}
 //		}
-	}
 	
 	public void setRotationSpeed(double speed) {
 		rotationSpeed = speed;
