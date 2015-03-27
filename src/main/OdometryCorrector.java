@@ -57,14 +57,13 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 	Odometer odometer;
 	LSController lsController;
 	
-	public OdometryCorrector(Odometer odometer, LSController lsController, Object lock, Navigator nav) {
+	public OdometryCorrector(Odometer odometer, LSController lsController, Object lock) {
 		this.lock = lock;
 		this.odometer = odometer;
 		this.lsController = lsController;
-		this.nav = nav;
 		// TODO: calibrate...
 		xRSdistance = 3.45;
-		xLSdistance = 3.1;
+		xLSdistance = 2.8;
 		yLSdistance = 13.6;
 //		lightThreshold = 41;
 //		lightThreshold = 45;
@@ -160,7 +159,7 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 					heading = Math.toRadians(90);
 				else
 					heading = Math.toRadians(270);
-				//odometer.setHeading(heading);
+				odometer.setHeading(heading);
 				
 				// take an average correction of the position, using both sensors
 				xCorrection((leftErrorX + rightErrorX)/2);
@@ -174,7 +173,7 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 					heading = Math.toRadians(180);
 				else
 					heading = 0;
-				//odometer.setHeading(heading);
+				odometer.setHeading(heading);
 				
 				// take an average correction of the position, using both sensors
 				yCorrection((leftErrorY + rightErrorY)/2);
@@ -194,7 +193,9 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 				if(rightCrossingX)
 					xCorrection(rightErrorX);
 				else if(rightCrossingY)
-					yCorrection(rightErrorY);		
+					yCorrection(rightErrorY);	
+				
+				
 			}
 			
 			

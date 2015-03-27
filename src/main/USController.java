@@ -14,7 +14,10 @@ public class USController {
 	}
 	
 	public int getDistance(int orientation) {
-		return us[orientation].getDistance();
+		us[orientation].ping();
+		int distance = us[orientation].getDistance();
+		try { Thread.sleep(50); } catch (InterruptedException e) {}
+		return distance;
 	}
 
 

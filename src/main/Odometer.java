@@ -14,8 +14,8 @@ public class Odometer extends Thread {
 	
 	public Odometer(NXTRegulatedMotor[] wheels, Object lock) {
 		this.lock = lock;
-		x = -7.5;
-		y = -1;
+		x = 0;
+		y = 0;
 		heading = 0.0;
 		tachometer = new double[2];
 		tachometer[0] = 0;
