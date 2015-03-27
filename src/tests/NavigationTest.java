@@ -15,10 +15,15 @@ public class NavigationTest {
 //		double[][] destination = {{0,60.96},{60.96,60.96},{0,0},{30,30}};
 //		double[][] destination = {{60.96,60.96},{0,60.96},{30.48,30.48},{60.96,30.48},{0,0}};
 //		double[][] destination = {{-30.48/2,60.96},{30.48/2,30.48/2},{60.96,60.96},{60.96,30.48/2},{0,0}};
-//		double[][] destination = { 
-//				{-TILE_LENGTH/2, TILE_LENGTH*2.5},
-//				{-TILE_LENGTH/2, TILE_LENGTH*5.5},
-//		};
+		double[][] destination = { 
+				{-TILE_LENGTH/2 + 3, TILE_LENGTH*2.5},
+				{-TILE_LENGTH/2 + 3, TILE_LENGTH*5.5},
+				{TILE_LENGTH*1.5, TILE_LENGTH*5.5 + 4},
+				{TILE_LENGTH*1.5, TILE_LENGTH*6.5},
+				{TILE_LENGTH*4.5, TILE_LENGTH*6.5},
+				{TILE_LENGTH*5.5, TILE_LENGTH*5.5},
+				
+		};
 //		double[][] destination = { 
 //				{0, TILE_LENGTH*3},
 //		};
@@ -36,10 +41,10 @@ public class NavigationTest {
 //			navigator.travelTo(destination[i][0], destination[i][1]);
 //		}
 		robin.getOdometer().start();
-		robin.getOdometryCorrector().start();
+//		robin.getOdometryCorrector().start();
 		robin.getLcdPrinter().start();
-//		navigator.navigateMap(destination);
-		navigator.travelTo(60.96, 60.96, true);
+		navigator.navigateMap(destination);
+//		navigator.travelTo(60.96, 60.96, true);
 		
 //		navigator.travelTo(60.96,60.96, true);
 //		navigator.travelTo(0,0, true);

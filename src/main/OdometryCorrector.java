@@ -77,8 +77,6 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 			leftSensorData = lsData[0];
 			rightSensorData = lsData[1];
 			
-
-			
 			leftCrossingX = false;
 			leftCrossingY = false;
 			rightCrossingX = false;
@@ -144,7 +142,7 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 
 
 //			// if both sensors pass over an x gridline at the same time
-			if(leftCrossingX&&rightCrossingX) {
+			if(leftCrossingX && rightCrossingX) {
 //				Sound.beep();
 				// correct heading (2 possibilities)
 				if(heading>=Math.PI/4 && heading<Math.PI*3/4)
