@@ -43,10 +43,10 @@ public class NavigationTest {
 		robin.getOdometer().start();
 //		robin.getOdometryCorrector().start();
 		robin.getLcdPrinter().start();
-		navigator.navigateMap(destination);
+//		navigator.navigateMap(destination);
 //		navigator.travelTo(60.96, 60.96, true);
 		
-//		navigator.travelTo(60.96,60.96, true);
+		navigator.travelTo(60.96,60.96, true);
 //		navigator.travelTo(0,0, true);
 //		navigator.turnTo(0,true);
 		

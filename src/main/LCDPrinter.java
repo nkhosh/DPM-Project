@@ -25,9 +25,11 @@ public class LCDPrinter extends Thread {
 			LCD.drawString("T:              ", 0, 2);
 
 			// display odometry information
-			LCD.drawString(formattedDoubleToString(odometer.getX()/30.48, 2), 3, 0);
-			LCD.drawString(formattedDoubleToString(odometer.getY()/30.48, 2), 3, 1);
+			LCD.drawString(formattedDoubleToString(odometer.getX(), 2), 3, 0);
+			LCD.drawString(formattedDoubleToString(odometer.getY(), 2), 3, 1);
 			LCD.drawString(formattedDoubleToString(odometer.getHeading()*180/Math.PI, 2), 3, 2);
+			LCD.drawString(formattedDoubleToString((double)Localizer.distanceFront,2),3,3);
+			LCD.drawString(formattedDoubleToString((double)Localizer.distanceSide,2),3,4);
 
 
 			// throttle the OdometryDisplay

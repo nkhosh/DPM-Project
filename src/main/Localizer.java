@@ -30,10 +30,16 @@ public class Localizer {
 	
 	public ColorSensor left;
 	public ColorSensor right;
-	private final double sensorD = 13.18;//13
+	private final double sensorDL = 13.15;//13
+	private final double sensorDR = 13.75;//13
 	public static int gridCounter;
 	public static int leftValue;
 	public static int rightValue;
+	public static double averageL;
+	public static double averageR;
+	public static int threshhold =30;
+	public static int filterCountL;
+	public static int filterCountR ;
 	
 	
 	public Localizer(Odometer odo, Navigator nav, UltrasonicSensor[] us, ColorSensor[] ls) {
@@ -46,8 +52,7 @@ public class Localizer {
 		isIncreasing = true; 
 		distancePrevious = -1;
 	
-		left.setFloodlight(true);
-		right.setFloodlight(true);
+		
 		leftValue = -69;
 		rightValue = -69;
 		// switch off the ultrasonic sensor
@@ -58,7 +63,7 @@ public class Localizer {
 	public void doLocalization() {
 		
 		doUSLocalization();
-		doLSLocalization();
+		doLSLocalization(0,0);
 	}
 	
 	public void doUSLocalization(){
@@ -135,15 +140,24 @@ public class Localizer {
 			double[] pos = {0,0,0};
 			odo.getPosition(pos);
 			odo.setPosition(new double [] {xDistance-30.48, yDistance-30.48, 270 - angle  }, new boolean [] {true, true, true});
-			
+			nav.travelTo(-6.5, -1,false);
+			nav.turnTo(0, true);
 			
 	}
-	public void doLSLocalization(){
+	public void doLSLocalization(double xZero, double yZero){
+		//assumes you are at point -6.5,-1 from your zero
+		left.setFloodlight(true);
+		right.setFloodlight(true);
 		
 		//travel to a relatively close point. I chose (-4,-4)
 		//Sound.buzz();
-		nav.travelTo(-7.5, -1,false);
-		nav.turnTo(0, true);
+		averageL = 0;
+		filterCountL = 0;
+		
+		averageR = 0;
+		filterCountR = 0;
+		
+		
 		gridCounter = 0;
 		  dupCounterL = 0;
 		  dupCounterR = 0;
@@ -172,17 +186,17 @@ public class Localizer {
 			leftValue = left.getNormalizedLightValue();
 			rightValue = right.getNormalizedLightValue();
 			
-			if((leftValue < 580)&&(dupCounterL > 50)) 
+			if(checkAgainstAvgL(leftValue)&&(dupCounterL > 50)) 
 			{
 				
 				//Sound.beep();
 				leftDetected = true;
 				dupCounterL = 0;
 				//nav.stop();
-				//Button.waitForAnyPress();
+			//	Button.waitForAnyPress();
 				//nav.setRotationSpeed(ROTATION_SPEED);
 			}
-			if((rightValue < 580)&&(dupCounterR > 50)) 
+			if(checkAgainstAvgR(rightValue)&&(dupCounterR > 50)) 
 
 			{
 				//Sound.buzz();
@@ -239,11 +253,11 @@ public class Localizer {
 		//this is the trig shown in the tutorial used to calculate the real X,Y and Theta
 		double xTL =(gridAngleL[2] - gridAngleL[0]); 
 		
-		double yL = -sensorD*Math.cos(Math.toRadians(xTL/2));
+		double yL = -sensorDL*Math.cos(Math.toRadians(xTL/2));
 		
 		double yTL = (gridAngleL[3] - gridAngleL[1]);
 		
-		double xL = -sensorD*Math.cos(Math.toRadians(yTL/2));
+		double xL = -sensorDL*Math.cos(Math.toRadians(yTL/2));
 		
 		double deltaL = (yTL/2) + 90 - (gridAngleL[3]-180);
 		
@@ -251,11 +265,11 @@ public class Localizer {
 		
 		double xTR =(gridAngleR[2] - gridAngleR[0]); 
 		
-		double yR = -sensorD*Math.cos(Math.toRadians(xTR/2));
+		double yR = -sensorDR*Math.cos(Math.toRadians(xTR/2));
 		
 		double yTR = (gridAngleR[3] - gridAngleR[1]);
 		
-		double xR = -sensorD*Math.cos(Math.toRadians(yTR/2));
+		double xR = -sensorDR*Math.cos(Math.toRadians(yTR/2));
 		
 		double deltaR = (yTR/2) + 90 - (gridAngleR[3]-180);
 		
@@ -265,12 +279,12 @@ public class Localizer {
 		double y = (yL + yR)/2;
 		double delta = (deltaL + deltaR)/2;
 		
-		
+		Button.waitForAnyPress();
 		//update these values, travel to (0,0), and turn to 0 degrees
-		odo.setPosition(new double [] {x, y, pos[2]+delta + 4.5}, new boolean [] {true, true, true});
+		odo.setPosition(new double [] {x+ xZero, y+yZero, pos[2]+delta+4.5}, new boolean [] {true, true, true});
 		//Button.waitForAnyPress();
 		odo.getPosition(pos);
-		nav.travelTo(0, 0,false);
+		nav.travelTo(xZero, yZero,false);
 		odo.getPosition(pos);
 		nav.turnTo(0,true);
 		
@@ -301,6 +315,36 @@ public class Localizer {
 
 				
 		return distance;
+	}
+	public boolean checkAgainstAvgL(int input)
+	{
+		if(averageL- input >threshhold)
+			return true;
+		else
+		{
+			double tmp = averageL * filterCountL;
+			tmp+= input;
+			filterCountL++;
+			averageL = tmp/filterCountL;
+			return false;
+		}
+		
+		
+	}
+	public boolean checkAgainstAvgR(int input)
+	{
+		if(averageR - input >threshhold)
+			return true;
+		else
+		{
+			double tmp = averageR * filterCountR;
+			tmp+= input;
+			filterCountR++;
+			averageR = tmp/filterCountR;
+			return false;
+		}
+		
+		
 	}
 
 }

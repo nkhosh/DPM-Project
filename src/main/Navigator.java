@@ -10,18 +10,18 @@ public class Navigator{
 	public static boolean state;
 	
 	// Variables for the speed of the movement
-	final static int FAST_SPEED = 200, SLOW_SPEED = 100, NORMAL_SPEED=200, ACCELERATION=4000;
-//			, ACCELERATION = 4000;
+	final static int FAST_SPEED = 200, SLOW_SPEED = 100, NORMAL_SPEED=200, ACCELERATION = 4000;
 	private final static int ROTATION_SPEED = 100;
 	public static final double LEFT_RADIUS = 2.065; // originally 2.1428
-	public static final double RIGHT_RADIUS = 2.085;
-	private static final double WIDTH = 16.134; // originally 15.9
+	public static final double RIGHT_RADIUS = 2.065;
+	private static final double WIDTH = 16.164; // originally 15.9
 	private double rotationSpeed;
 	
 	// The error and threshold values
-	final static double DEG_ERR = 2, CM_ERR = 1.0;	
+	final static double DEG_ERR = 2.0, CM_ERR = 1.0;
+	private static final int THREAD_PERIOD = 15;	
 	final static int POSITION_BANDWIDTH = 1;
-	private static final int DISTANCE_THRESHOLD = 20;
+	private static final int DISTANCE_THRESHOLD = 15;
 	private static final double ANGLE_BANDWIDTH = 2*Math.PI/180; // Used when the robot is possibly turning fast
 	
 	// Objects used by the navigator
@@ -40,11 +40,10 @@ public class Navigator{
 	// Obstacle avoidance variables
 	private int obstacleAvoidanceGapCounter=0; 
 	private static final int OBSTACLE_AVOIDANCE_GAP_FILTER=3, OBSTACLE_MAX_DISTANCE=100, OBSTACLE_DISTANCE_THRESHOLD=3;
-	private int obstaclePosition;
 	
 	
 	private final static int LEFT=0, FRONT=1, RIGHT=1;
-	private final static int MIN_FRONT_DISTANCE = 25, MIN_LEFT_DISTANCE = 5;
+	private final static int MAX_FRONT_DISTANCE = 20;
 	private int[] distance = {255,255};
 	private double launchAngle = Math.tan(7.4/(5*30.48 + 4));
 	private double launchDistance = Math.sqrt(Math.pow(-7.4, 2) + Math.pow(5*30.48 + 4, 2));
@@ -58,7 +57,7 @@ public class Navigator{
 		this.launcher = launch;
 		this.odometer = odometer;
 		this.wheels = wheels;
-//		this.state = NO_OBSTACLE;
+		this.state = NO_OBSTACLE;
 		this.usController = usController;
 		this.speed = new int[2];
 		this.speed[LEFT] =  NORMAL_SPEED;
@@ -69,7 +68,6 @@ public class Navigator{
 		destinationIndex = 0;
 		unitOrientationVector = new Vector();
 		updatePosition();
-		
 	}
 	
 	/**
@@ -78,23 +76,6 @@ public class Navigator{
 	protected void moveStraight() {
 		speed[LEFT]=NORMAL_SPEED;
 		speed[RIGHT]=NORMAL_SPEED;
-		updateSpeed();
-		wheels[RIGHT].forward();
-		wheels[LEFT].forward();
-	}
-	protected void moveLeft() {
-		speed[LEFT] = SLOW_SPEED;
-		speed[RIGHT] = FAST_SPEED;
-		updateSpeed();
-		wheels[RIGHT].forward();
-		wheels[LEFT].forward();
-	}
-	protected void moveRight() {
-		speed[LEFT] = FAST_SPEED;
-		speed[RIGHT] = SLOW_SPEED;
-		updateSpeed();
-		wheels[RIGHT].forward();
-		wheels[LEFT].forward();
 	}
 	/**
 	 * Turns right instantaneously when there is a close wall in front.
@@ -102,10 +83,10 @@ public class Navigator{
 	 */
 	protected void turnRight() {
 		speed[LEFT]=NORMAL_SPEED;
+		wheels[RIGHT].backward();
 		speed[RIGHT]=NORMAL_SPEED;
 		updateSpeed();
-		wheels[RIGHT].backward();
-		wheels[LEFT].forward();
+		wheels[RIGHT].forward();
 	}
 	/**
 	 * Turns left instantaneously when there is no wall in the left.
@@ -113,14 +94,20 @@ public class Navigator{
 	 */
 	protected void turnLeft() {
 		speed[RIGHT]=NORMAL_SPEED;
+		wheels[LEFT].backward();
 		speed[LEFT]=NORMAL_SPEED;
 		updateSpeed();
-		wheels[RIGHT].forward();
-		wheels[LEFT].backward();
+		wheels[LEFT].forward();
 	}	
+	protected void moveLeft() {
+		speed[LEFT] = SLOW_SPEED;
+		speed[RIGHT] = FAST_SPEED;
+	}
+	protected void moveRight() {
+		speed[LEFT] = FAST_SPEED;
+		speed[RIGHT] = SLOW_SPEED;
+	}
 	protected void updateSpeed() {
-		wheels[LEFT].setAcceleration(ACCELERATION);		     
-		wheels[RIGHT].setAcceleration(ACCELERATION);;	
 		wheels[LEFT].setSpeed(speed[LEFT]);		     
 		wheels[RIGHT].setSpeed(speed[RIGHT]);	
 	}
@@ -183,6 +170,7 @@ public class Navigator{
 	for(int i = 0; i < map.length ; i++)
 		{
 			travelTo(map[i][0],map[i][1],false);
+			//Button.waitForAnyPress();
 		}
 	}
 	
@@ -190,8 +178,9 @@ public class Navigator{
 	 * This function takes as arguments the x and y position in cm Will travel to designated position, while
 	 * constantly updating it's heading
 	 */
-	public void travelTo(double x, double y,boolean obstacleAvoidance) {
-		int minFront = 20, minLeft=5, bw=2;
+	public void travelTo(double x, double y,boolean ObstacleAvoidance) {
+		//Sound.beep();
+		//Button.waitForAnyPress();
 		isNavigating = true;
 		destination.setX(x);
 		destination.setY(y);
@@ -199,30 +188,55 @@ public class Navigator{
 		
 		// If the robot isn't close enough to its destination
 		while( !position.approxEquals(destination) ) {
-			this.distance[FRONT] = usController.getDistance(FRONT);
-			this.distance[LEFT] = usController.getDistance(LEFT);
 			
-			 if( obstacleAvoidance ) {
-					if( distance[FRONT]<=20 ) {
-						avoidObstacle();
-						Sound.beep();
+			
+			if(ObstacleAvoidance)
+			{
+			 if( state == OBSTACLE_AVOIDING ) {
+				// If the robot is facing close enough to the destination OR it has reached the destination
+				if( Math.abs(relativeTargetOrientation - (unitOrientationVector.getOrientation())) <= ANGLE_BANDWIDTH 
+					|| position.approxEquals(destination)) {
+					state = NO_OBSTACLE;
+				}
+				else {
+					avoidObstacle();
+				}
+			}
+			else if( state == NO_OBSTACLE ) {
+				
+				// If there's an obstacle directly in front of the robot
+				this.distance[FRONT] = usController.getDistance(FRONT);
+				if( distance[FRONT]<=MAX_FRONT_DISTANCE ) {
+					// Keep rotating right until the sensor doesn't detect the wall
+					while(usController.getDistance(FRONT) <= DISTANCE_THRESHOLD){
+						wheels[RIGHT].backward();
+						wheels[LEFT].forward();
+						wheels[LEFT].setSpeed(ROTATION_SPEED);
+						wheels[RIGHT].setSpeed(ROTATION_SPEED);
+						updatePosition();
 					}
-					else {
-						turnTo(relativeTargetOrientation, false);
-						moveStraight();
-					}
+					
+					state = OBSTACLE_AVOIDING;
+					wheels[RIGHT].forward();
+					wheels[LEFT].forward();
+				}
+				// There's no obstacle in the way, turn towards the destination
+				else {
+					turnTo(relativeTargetOrientation, false);
+					wheels[LEFT].forward();
+					wheels[RIGHT].forward();
+					wheels[LEFT].setSpeed(NORMAL_SPEED);
+					wheels[RIGHT].setSpeed(NORMAL_SPEED);
+				}
+			}
 			}
 			else
 			{
 				turnTo(relativeTargetOrientation, false);
-				moveStraight();
-			}
-			
-			if( distance[LEFT] < 5 ) {
-				moveRight();
-			}
-			else if(distance[LEFT] >= 5 ) {
-				moveStraight();
+				wheels[LEFT].forward();
+				wheels[RIGHT].forward();
+				wheels[LEFT].setSpeed(NORMAL_SPEED);
+				wheels[RIGHT].setSpeed(NORMAL_SPEED);
 			}
 			updatePosition();
 			relativeTargetOrientation = minimizeAngle( (destination.subtract(position)).getOrientation() )*180/Math.PI;
@@ -234,46 +248,7 @@ public class Navigator{
 		wheels[LEFT].stop();
 		wheels[RIGHT].stop();
 	}
-	
-	/**
-	 * This class controls the movement of the robot when an obstacle is detected.
-	 * If there is an obstacle in front, it turns right.
-	 * Otherwise it follows an obstacle with the same logic as bang bang controller.
-	 */
-	private void avoidObstacle() {
-		this.distance[FRONT] = usController.getDistance(FRONT);
-		this.distance[LEFT] = usController.getDistance(LEFT);
-		double relativeTargetOrientation = minimizeAngle( (destination.subtract(position)).getOrientation() )*180/Math.PI;
-		int distError;
 
-		while ( true ) {
-			turnRight();
-			if( distance[LEFT] < 16 )
-				break;
-			this.distance[LEFT] = usController.getDistance(LEFT);
-		}
-		
-		while( true ) {
-			distError = distance[LEFT]-15;
-			/* Case 1:  Error in bounds  */
-			if (Math.abs(distError) <= 2) {
-				moveStraight();
-			}
-			/* Case 2: Negative error, moving too close to wall */
-			else if (distError < 0) {
-				moveRight();
-			}
-			/* Case 3: Positive error, moving too far from wall */
-			else if (distError > 0) {
-				moveLeft();
-			}
-			relativeTargetOrientation = minimizeAngle( (destination.subtract(position)).getOrientation() )*180/Math.PI;
-			if((Math.abs(relativeTargetOrientation - (unitOrientationVector.getOrientation())) <= ANGLE_BANDWIDTH))
-				break;
-		}
-		Sound.twoBeeps();
-		return;
-	}
 
 	/**
 	 * TurnTo function which takes an angle and boolean as arguments The boolean controls whether or not to stop the
@@ -283,6 +258,7 @@ public class Navigator{
 	public void turnTo(double targetAngle, boolean stop) {
 		
 		while(Math.abs(Odometer.minAngleFromTo(odometer.getHeading()*180/Math.PI,targetAngle))>DEG_ERR){
+			
 			// If the robot has to turn counterclockwise
 			if(Odometer.minAngleFromTo(odometer.getHeading()*180/Math.PI,targetAngle)<0){
 				wheels[LEFT].backward();
@@ -338,7 +314,59 @@ public class Navigator{
 		destination.setX(destinationArray[0][0]);
 		destination.setY(destinationArray[0][1]);
 	}
+	
+	/**
+	 * This class controls the movement of the robot when an obstacle is detected.
+	 * If there is an obstacle in front, it turns right.
+	 * Otherwise it follows an obstacle with the same logic as lab 1 wall follower Patbot.
+	 */
+	private void avoidObstacle() {
+		this.distance[FRONT] = usController.getDistance(FRONT);
+		this.distance[LEFT] = usController.getDistance(LEFT);
 		
+		// Wall in front
+		if(distance[FRONT]<MAX_FRONT_DISTANCE){
+			// Turn right
+			turnRight();
+		}
+		else{
+			moveStraight();
+		}
+		// Sensor is to the left
+		int distError = distance[LEFT]-DISTANCE_THRESHOLD;
+		// Potential concave turn
+		if( obstacleAvoidanceGapCounter == OBSTACLE_AVOIDANCE_GAP_FILTER ) {
+			obstacleAvoidanceGapCounter = 0;
+			// It's not a gap, the robot has to turn left
+			// Turn left
+			turnLeft();
+		}
+		
+		distError = distance[RIGHT]-DISTANCE_THRESHOLD;
+		// Potential gap to the left
+		if (distance[FRONT] > OBSTACLE_MAX_DISTANCE) {
+			obstacleAvoidanceGapCounter++;
+			moveStraight();
+		}
+		// Wall to the left
+		else {
+			obstacleAvoidanceGapCounter = 0;
+			/* Case 1:  Error in bounds  */
+			if (Math.abs(distError) <= OBSTACLE_DISTANCE_THRESHOLD) {
+				moveStraight();
+			}
+			/* Case 2: Negative error, moving too close to wall */
+			else if (distError < 0) {
+				moveRight();
+			}
+			/* Case 3: Positive error, moving too far from wall */
+			else if (distError > 0) {
+				moveLeft();
+			}
+		}
+		updateSpeed();
+	}
+	
 	public void setRotationSpeed(double speed) {
 		rotationSpeed = speed;
 		setSpeeds(rotationSpeed);

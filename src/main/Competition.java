@@ -8,7 +8,6 @@ public class Competition {
 	
 	@SuppressWarnings("unused")
 	public static void main(String[] args) {
-		final double TILE_LENGTH = 30.48;
 		// setup the odometer, display, and ultrasonic and light sensors
 		//Button.waitForAnyPress();
 	/*	
@@ -37,6 +36,7 @@ public class Competition {
 		lsSensor[0] = new ColorSensor(SensorPort.S1);
 		lsSensor[1] = new ColorSensor(SensorPort.S2);
 		Object lock = new Object();
+		double TILE_LENGTH = 30.48;
 		
 		LSController lsController = new LSController(lsSensor);
 		USController usController = new USController(usSensor);
@@ -47,41 +47,53 @@ public class Competition {
 		Navigator navigator = new Navigator(odometer, wheelMotor, usController,bow);
 		Localizer loc = new Localizer(odometer, navigator, usSensor,lsSensor);
 		//launcher = new Launcher(odometer, launcherMotor);
-		OdometryCorrector odoC = new OdometryCorrector(odometer,lsController,lock);
+		LCDInfo lcdInfo = new LCDInfo(odometer);
+		OdometryCorrector odoC = new OdometryCorrector(odometer,lsController,lock,navigator);
 		
 		
 		Button.waitForAnyPress();
-//		double[][] demo = new double[5][2];
-//		demo[0] = new double[] {-.35*30.48,2*30.48};
-//		demo[1] = new double[] {-.35*30.48,5.6*30.48};
-//		demo[2] = new double[] {1.5*30.48,5.6*30.48};
-//		demo[3] = new double[] {1.5*30.48,6.6*30.48};
-//		demo[4] = new double[] {5*30.48,6.6*30.48};
+		double[][] demo1 = new double[5][2];
+		demo1[0] = new double[] {-.3*TILE_LENGTH,2*TILE_LENGTH};
+		demo1[1] = new double[] {-.3*TILE_LENGTH,5.5*TILE_LENGTH};
+		demo1[2] = new double[] {1.5*TILE_LENGTH,5.7*TILE_LENGTH};
+		demo1[3] = new double[] {1.55*TILE_LENGTH,6.6*TILE_LENGTH};
+		demo1[4] = new double[] {5*TILE_LENGTH,6.6*TILE_LENGTH};
 		
-//		double[][] straight = new double[1][2];
-//		straight[0] = new double[] {0,6*30.48};
-		double[][] destinations = { 
-				{-TILE_LENGTH/2 + 4, TILE_LENGTH},
-				{-TILE_LENGTH/2 + 4, TILE_LENGTH*5.5},
-				{TILE_LENGTH*1.5, TILE_LENGTH*5.5 + 4},
-				{TILE_LENGTH*1.5, TILE_LENGTH*6.5},
-				{TILE_LENGTH*4.5, TILE_LENGTH*6.5},
-				{TILE_LENGTH*5.5, TILE_LENGTH*5.5},
-				
+		
+		double[][] demo2 = {
+				{5*TILE_LENGTH,6.5*TILE_LENGTH},
+				{1.65*TILE_LENGTH,6.5*TILE_LENGTH},
+				{1.5*TILE_LENGTH,5.7*TILE_LENGTH},
+				{-.35*TILE_LENGTH,5.5*TILE_LENGTH},
+				{-.35*TILE_LENGTH,2*TILE_LENGTH},
+				{0-7.5,0-1}
 		};
+		//double[][]test = {{2*TILE_LENGTH,2*
+		
+		double[][] straight = new double[1][2];
+		straight[0] = new double[] {-.35*TILE_LENGTH,5.6*TILE_LENGTH};
 		odometer.start();
 		//lcdInfo.start();
 		//
-		loc.doLocalization();
+		//loc.doUSLocalization();
+		loc.doLSLocalization(0,0);
+		Sound.beep();
 		//Button.waitForAnyPress();
-//		navigator.travelTo(30.48, 30.48, false);
-//		odoC.start();
-		navigator.navigateMap(destinations);
-		loc.doLocalization();
-		odometer.setX(6*TILE_LENGTH);
-		odometer.setY(6*TILE_LENGTH);
-		odometer.setHeading(270);
-		navigator.fireAt(9*TILE_LENGTH, 9*TILE_LENGTH, 4*TILE_LENGTH,8*TILE_LENGTH, 4*TILE_LENGTH, 8*TILE_LENGTH - 20, 3);
+		//navigator.travelTo(TILE_LENGTH, TILE_LENGTH, false);
+		//odoC.start();
+		//navigator.navigateMap(demo1);
+		//navigator.travelTo(5*TILE_LENGTH - 7.5, 5*TILE_LENGTH - 1, false);
+//		Button.waitForAnyPress();
+		//odoC.setActive(false);
+		//loc.doLSLocalization(5*TILE_LENGTH,5*TILE_LENGTH);
+	    //	Button.waitForAnyPress();
+		//odoC.setActive(true);
+		//navigator.fireAt(9*TILE_LENGTH, 9*TILE_LENGTH, 20.0,3*TILE_LENGTH - 20.0, 20.0, 3*TILE_LENGTH - 20, 1);
+		//navigator.navigateMap(demo2);
+		//odoC.setActive(false);
+		//loc.doUSLocalization();
+		//loc.doLSLocalization(0,0);
+		
 		
 		
 		
