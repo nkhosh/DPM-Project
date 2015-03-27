@@ -10,6 +10,7 @@ public class RobinHood {
 									usLeftPort = SensorPort.S3, usFrontPort = SensorPort.S4; //TODO: check the ports when connecting to hardware
 	private final static NXTRegulatedMotor[] wheelMotor = {Motor.A, Motor.B};
 	private final static NXTRegulatedMotor launcherMotor = Motor.C;
+	private final static int LEFT=0, FRONT=1, RIGHT=1;
 	public final static double wheelRadius = 2.08, wheelsDistance = 16.09; // do we need this?
 	private Object lock;
 	private Odometer odometer;
@@ -29,10 +30,12 @@ public class RobinHood {
 	public RobinHood() {
 		usSensor = new UltrasonicSensor[2];
 		lsSensor = new ColorSensor[2];
-		usSensor[0] = new UltrasonicSensor(usFrontPort);
-		usSensor[1] = new UltrasonicSensor(usLeftPort);
-		lsSensor[0] = new ColorSensor(lsLeftPort);
-		lsSensor[1] = new ColorSensor(lsRightPort);
+		usSensor[LEFT] = new UltrasonicSensor(usLeftPort);
+		usSensor[FRONT] = new UltrasonicSensor(usFrontPort);
+		usSensor[LEFT].continuous();
+		usSensor[FRONT].continuous();
+		lsSensor[LEFT] = new ColorSensor(lsLeftPort);
+		lsSensor[RIGHT] = new ColorSensor(lsRightPort);
 		
 		lock = new Object();
 		

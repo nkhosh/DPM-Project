@@ -10,7 +10,8 @@ public class Navigator{
 	public static boolean state;
 	
 	// Variables for the speed of the movement
-	final static int FAST_SPEED = 200, SLOW_SPEED = 100, NORMAL_SPEED=200, ACCELERATION = 4000;
+	final static int FAST_SPEED = 200, SLOW_SPEED = 100, NORMAL_SPEED=200;
+//			, ACCELERATION = 4000;
 	private final static int ROTATION_SPEED = 100;
 	public static final double LEFT_RADIUS = 2.065; // originally 2.1428
 	public static final double RIGHT_RADIUS = 2.085;
@@ -18,8 +19,7 @@ public class Navigator{
 	private double rotationSpeed;
 	
 	// The error and threshold values
-	final static double DEG_ERR = 2.0, CM_ERR = 1.0;
-	private static final int THREAD_PERIOD = 15;	
+	final static double DEG_ERR = 2, CM_ERR = 1.0;	
 	final static int POSITION_BANDWIDTH = 1;
 	private static final int DISTANCE_THRESHOLD = 15;
 	private static final double ANGLE_BANDWIDTH = 2*Math.PI/180; // Used when the robot is possibly turning fast
@@ -77,6 +77,9 @@ public class Navigator{
 	protected void moveStraight() {
 		speed[LEFT]=NORMAL_SPEED;
 		speed[RIGHT]=NORMAL_SPEED;
+		updateSpeed();
+		wheels[RIGHT].forward();
+		wheels[LEFT].forward();
 	}
 	/**
 	 * Turns right instantaneously when there is a close wall in front.
@@ -84,10 +87,10 @@ public class Navigator{
 	 */
 	protected void turnRight() {
 		speed[LEFT]=NORMAL_SPEED;
-		wheels[RIGHT].backward();
 		speed[RIGHT]=NORMAL_SPEED;
 		updateSpeed();
-		wheels[RIGHT].forward();
+		wheels[RIGHT].backward();
+		wheels[LEFT].forward();
 	}
 	/**
 	 * Turns left instantaneously when there is no wall in the left.
@@ -95,18 +98,24 @@ public class Navigator{
 	 */
 	protected void turnLeft() {
 		speed[RIGHT]=NORMAL_SPEED;
-		wheels[LEFT].backward();
 		speed[LEFT]=NORMAL_SPEED;
 		updateSpeed();
-		wheels[LEFT].forward();
+		wheels[RIGHT].forward();
+		wheels[LEFT].backward();
 	}	
 	protected void moveLeft() {
 		speed[LEFT] = SLOW_SPEED;
 		speed[RIGHT] = FAST_SPEED;
+		updateSpeed();
+		wheels[RIGHT].forward();
+		wheels[LEFT].forward();
 	}
 	protected void moveRight() {
 		speed[LEFT] = FAST_SPEED;
 		speed[RIGHT] = SLOW_SPEED;
+		updateSpeed();
+		wheels[RIGHT].forward();
+		wheels[LEFT].forward();
 	}
 	protected void updateSpeed() {
 		wheels[LEFT].setSpeed(speed[LEFT]);		     
@@ -178,7 +187,7 @@ public class Navigator{
 	 * This function takes as arguments the x and y position in cm Will travel to designated position, while
 	 * constantly updating it's heading
 	 */
-	public void travelTo(double x, double y,boolean ObstacleAvoidance) {
+	public void travelTo(double x, double y,boolean obstacleAvoidance) {
 		//Sound.beep();
 		//Button.waitForAnyPress();
 		isNavigating = true;
@@ -189,36 +198,35 @@ public class Navigator{
 		// If the robot isn't close enough to its destination
 		while( !position.approxEquals(destination) ) {
 			
-			
-			if(ObstacleAvoidance)
-			{
-			 if( state == OBSTACLE_AVOIDING ) {
+			 if( obstacleAvoidance && state == OBSTACLE_AVOIDING ) {
 				// If the robot is facing close enough to the destination OR it has reached the destination
 				if( Math.abs(relativeTargetOrientation - (unitOrientationVector.getOrientation())) <= ANGLE_BANDWIDTH 
 					|| position.approxEquals(destination)) {
 					state = NO_OBSTACLE;
+					Sound.twoBeeps();
 				}
 				else {
 					avoidObstacle();
 				}
-			}
-			else if( state == NO_OBSTACLE ) {
-				
+			 }
+			else if( obstacleAvoidance && state == NO_OBSTACLE ) {
 				// If there's an obstacle directly in front of the robot
 				this.distance[FRONT] = usController.getDistance(FRONT);
-				if( distance[FRONT]<=MAX_FRONT_DISTANCE ) {
+				
+				if( distance[FRONT]<=MAX_FRONT_DISTANCE || distance[LEFT]<=DISTANCE_THRESHOLD ) {
 					// Keep rotating right until the sensor doesn't detect the wall
-					while(usController.getDistance(FRONT) <= DISTANCE_THRESHOLD){
-						wheels[RIGHT].backward();
-						wheels[LEFT].forward();
-						wheels[LEFT].setSpeed(ROTATION_SPEED);
-						wheels[RIGHT].setSpeed(ROTATION_SPEED);
-						updatePosition();
-					}
-					
+//					while(usController.getDistance(FRONT) <= DISTANCE_THRESHOLD){
+//						wheels[RIGHT].backward();
+//						wheels[LEFT].forward();
+//						wheels[LEFT].setSpeed(ROTATION_SPEED);
+//						wheels[RIGHT].setSpeed(ROTATION_SPEED);
+//						updatePosition();
+//					}
+//					
 					state = OBSTACLE_AVOIDING;
-					wheels[RIGHT].forward();
-					wheels[LEFT].forward();
+					Sound.beep();
+//					wheels[RIGHT].forward();
+//					wheels[LEFT].forward();
 				}
 				// There's no obstacle in the way, turn towards the destination
 				else {
@@ -228,7 +236,6 @@ public class Navigator{
 					wheels[LEFT].setSpeed(NORMAL_SPEED);
 					wheels[RIGHT].setSpeed(NORMAL_SPEED);
 				}
-			}
 			}
 			else
 			{
