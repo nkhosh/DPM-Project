@@ -10,8 +10,8 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 
 	private static int lightThreshold; // Threshold between the light value of the line and that of the wooden floor	
 	// x and y components of the distance between the midpoint between the wheels and each sensor (when the robot is facing 0 degrees)
-	private static double xLSdistance;
-	private static double xRSdistance;
+	private static double xLeftLSdistance;
+	private static double xRightLSdistance;
 	private static double yLSdistance;
 
 	// odometer position of the robot 
@@ -37,13 +37,7 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 	private double rightErrorX;
 	private double rightErrorY;
 	
-	// data used to correct angle
-	private double firstGridCrossingX;
-	private double firstGridCrossingY;
-	private double secondGridCrossingX;
-	private double secondGridCrossingY;
-	private double deltaX;
-	private double deltaY;
+	
 	private boolean crossingGrid;
 	private boolean leftCrossingX;
 	private boolean leftCrossingY;
@@ -62,9 +56,13 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 		this.odometer = odometer;
 		this.lsController = lsController;
 		
-		xRSdistance = 3.45;
-		xLSdistance = 2.8;
-		yLSdistance = 13.6;
+//		xRightLSdistance = 3.45;
+//		xLeftLSdistance = 2.8;
+//		yLSdistance = 12.7;
+		
+		xRightLSdistance = 3.55;
+		xLeftLSdistance = 3;
+		yLSdistance = 12.65;
 		
 		lightThreshold = 50;
 	}
@@ -101,8 +99,8 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 			// if the sensor passes over a black line
 			if(leftSensorData < lightThreshold) {
 				crossingGrid = true;
-				leftSensorX = odometerX - yLSdistance*Math.sin(heading) - xLSdistance*Math.cos(heading);
-				leftSensorY = odometerY - yLSdistance*Math.cos(heading) + xLSdistance*Math.sin(heading);
+				leftSensorX = odometerX - yLSdistance*Math.sin(heading) - xLeftLSdistance*Math.cos(heading);
+				leftSensorY = odometerY - yLSdistance*Math.cos(heading) + xLeftLSdistance*Math.sin(heading);
 				
 				if(leftSensorX%TILE_LENGTH > TILE_LENGTH/2)
 					leftErrorX = (leftSensorX%TILE_LENGTH) - TILE_LENGTH;
@@ -125,8 +123,8 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 			
 			if(rightSensorData < lightThreshold) {
 				crossingGrid = true;
-				rightSensorX = odometerX - yLSdistance*Math.sin(heading) + xRSdistance*Math.cos(heading);
-				rightSensorY = odometerY - yLSdistance*Math.cos(heading) - xRSdistance*Math.sin(heading);
+				rightSensorX = odometerX - yLSdistance*Math.sin(heading) + xRightLSdistance*Math.cos(heading);
+				rightSensorY = odometerY - yLSdistance*Math.cos(heading) - xRightLSdistance*Math.sin(heading);
 				
 				if(rightSensorX%TILE_LENGTH > TILE_LENGTH/2)
 					rightErrorX = (rightSensorX%TILE_LENGTH) - TILE_LENGTH;
@@ -190,13 +188,13 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 					yCorrection(rightErrorY);	
 				
 				// heading correction if crossing x and y grid lines at the same time
-				if(leftCrossingX && rightCrossingY){
-					headingCorrection(rightErrorX,leftErrorY);
-				}
-				
-				else if(rightCrossingX && leftCrossingY){
-					headingCorrection(-leftErrorX,-rightErrorY);
-				}
+//				if(leftCrossingX && rightCrossingY){
+//					headingCorrection(rightErrorX,leftErrorY);
+//				}
+//				
+//				else if(rightCrossingX && leftCrossingY){
+//					headingCorrection(-leftErrorX,-rightErrorY);
+//				}
 				
 				
 				

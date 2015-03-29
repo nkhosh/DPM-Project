@@ -83,7 +83,6 @@ public class Localizer {
 					
 					
 					
-					nav.setRotationSpeed(ROTATION_SPEED);
 
 
 					distanceFront = this.getFilteredData(front);
@@ -175,7 +174,6 @@ public class Localizer {
 		// dupCounter allows for a line to only be picked up once.
 		// When gridCounter is 4, meaning you've passed 4 lines, AND the robot has made a full circle, then we exit the loop
 		
-		nav.setRotationSpeed(ROTATION_SPEED);
 		double[] pos = new double[3];
 		odo.getPosition(pos);		
 		double startAngle = pos[2];
