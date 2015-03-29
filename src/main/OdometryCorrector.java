@@ -29,7 +29,7 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 	private double leftSensorX;
 	private double leftSensorY;
 	private double leftErrorX;
-	public static double leftErrorY;
+	private double leftErrorY;
 	public static double avgErrorX=69;
 	public static double avgErrorY=69;
 	private double rightSensorX;
@@ -61,18 +61,14 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 		this.lock = lock;
 		this.odometer = odometer;
 		this.lsController = lsController;
-		// TODO: calibrate...
+		
 		xRSdistance = 3.45;
 		xLSdistance = 2.8;
 		yLSdistance = 13.6;
-//		lightThreshold = 41;
-//		lightThreshold = 45;
-		lightThreshold = 50; // with shades
+		
+		lightThreshold = 50;
 	}
 	
-	private void processLSData() { 
-		
-	}
 	
 	public void run(){
 		isActive = true;
@@ -151,9 +147,8 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 				
 			}
 
-		 //if both sensors pass over an x gridline at the same time
+		 // if both sensors pass over an x gridline at the same time
 			if(leftCrossingX&&rightCrossingX) {
-				//Sound.beep();
 				// correct heading (2 possibilities)
 				if(heading>=Math.toRadians(0) && heading<Math.toRadians(180))
 					heading = Math.toRadians(90);
@@ -167,7 +162,6 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 			
 			// if both sensors pass over a y gridline at the same time
 			else if(leftCrossingY&&rightCrossingY){
-				//Sound.twoBeeps();
 				// correct heading (2 possibilities)
 				if(heading>=Math.toRadians(90) && heading<Math.toRadians(270))
 					heading = Math.toRadians(180);
@@ -181,7 +175,7 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 			
 			// correct with both sensors separately
 			else if(crossingGrid){
-				//Sound.beep();
+				
 				if(leftCrossingX){
 					xCorrection(leftErrorX);
 				}
@@ -197,7 +191,6 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 				
 				
 			}
-			
 			
 			// this ensure the odometry correction occurs only once every period
 			correctionEnd = System.currentTimeMillis();
@@ -226,34 +219,8 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 	 * @param sensorX The x-position of the color sensor
 	 */
 	private void xCorrection(double errorX) {
-		avgErrorX = errorX;
-		//nav.stop();
-		//Button.waitForAnyPress();
-		odometer.setX(odometer.getX()- errorX);
-		//nav.travelTo(-.35*TILE_LENGTH,5.6*TILE_LENGTH, false);
+		odometer.setX(odometerX - errorX);
 	}
-	
-	/**
-	 * Corrects the x-position of the odometer (between the wheels) based on the sensor x-position
-	 * It rounds the sensor position to the closest odd multiple of 15, and updates the odometer position based on 
-	 * the distance between the sensor and the point between the wheels
-	 * @param sensorX The x-position of the color sensor
-	 */
-	/*
-	private void xRightCorrection(double sensorX) {
-//		int roundSensorX = (int)Math.round(sensorX);
-		double gridX;
-		if(sensorX%TILE_LENGTH<TILE_LENGTH/2){
-			gridX = ((int)(sensorX/TILE_LENGTH)) * TILE_LENGTH;
-		}
-		else{
-			gridX = ((int)(sensorX/TILE_LENGTH) + 1) * TILE_LENGTH;
-		}
-		
-		double correctX = gridX + yLSdistance*Math.sin(heading) - xLSdistance*Math.cos(heading);
-		odometer.setX(correctX);
-	}
-	*/
 	
 	/**
 	 * Corrects the x-position of the odometer (between the wheels) based on the sensor x-position
@@ -262,58 +229,8 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 	 * @param sensorX The x-position of the color sensor
 	 */
 	private void yCorrection(double errorY) {
-		avgErrorY = errorY;
-		//nav.stop();
-		//Button.waitForAnyPress();
-		odometer.setY(odometer.getY()- errorY);
-		//nav.travelTo(-.35*TILE_LENGTH,5.6*TILE_LENGTH, false);
+		odometer.setY(odometerY - errorY);
 	}
-	
-	/**
-	 * Corrects the y-position of the odometer (between the wheels) based on the sensor y-position
-	 * It rounds the sensor position to the closest odd multiple of 15, and updates the odometer position based on 
-	 * the distance between the sensor and the point between the wheels
-	 * @param sensorY The y-position of the color sensor
-	 */
-	/*
-	private void yRightCorrection(double sensorY) {
-//		int roundSensorY = (int)Math.round(sensorY);
-		double gridY;
-		if(sensorY%TILE_LENGTH<TILE_LENGTH/2){
-			gridY = ((int)(sensorY/TILE_LENGTH)) * TILE_LENGTH;
-		}
-		else{
-			gridY = ((int)(sensorY/TILE_LENGTH) + 1) * TILE_LENGTH;
-		}
-		double correctY = gridY + yLSdistance*Math.cos(heading) + xLSdistance*Math.sin(heading);
-		odometer.setY(correctY);
-	}
-	*/
-	
-	/**
-	 * Corrects the y-position of the odometer (between the wheels) based on the sensor y-position
-	 * It rounds the sensor position to the closest odd multiple of 15, and updates the odometer position based on 
-	 * the distance between the sensor and the point between the wheels
-	 * @param leftSensorY The y-position of the color sensor
-	 */
-	/*
-	private void yAverageCorrection(double leftSensorY, double rightSensorY) {
-		
-
-	}
-	
-	/**
-	 * Corrects the y-position of the odometer (between the wheels) based on the sensor y-position
-	 * It rounds the sensor position to the closest odd multiple of 15, and updates the odometer position based on 
-	 * the distance between the sensor and the point between the wheels
-	 * @param leftSensorX The y-position of the color sensor
-	 */
-	/*
-	private void xAverageCorrection(double leftSensorX, double rightSensorX) {
-		
-		
-	}
-	
 	/**
 	 * Heading correction when crossing a y grid line
 	 * @param deltaY

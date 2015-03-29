@@ -24,12 +24,7 @@ public class Odometer extends Thread {
 		wheels[0].resetTachoCount();
 		wheels[1].resetTachoCount();
 		
-		// radius and width determined after calibration
-//		radius = 2.075; 
-//		width = 16.22;
-		
-		radius = 2.085; //without shade friction
-//		width = 16.19;
+		radius = 2.085;
 		width = 16.2;
 	}
 	
