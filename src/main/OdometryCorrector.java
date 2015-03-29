@@ -189,6 +189,17 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 				else if(rightCrossingY)
 					yCorrection(rightErrorY);	
 				
+				// heading correction if crossing x and y grid lines at the same time
+				if(leftCrossingX && rightCrossingY){
+					headingCorrection(rightErrorX,leftErrorY);
+				}
+				
+				else if(rightCrossingX && leftCrossingY){
+					headingCorrection(-leftErrorX,-rightErrorY);
+				}
+				
+				
+				
 				
 			}
 			
@@ -232,44 +243,12 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 		odometer.setY(odometerY - errorY);
 	}
 	/**
-	 * Heading correction when crossing a y grid line
+	 * Heading correction when each sensor crosses an opposite gridline
 	 * @param deltaY
 	 */
 	private void headingCorrection(double deltaX, double deltaY) {
-		double correctHeading = Math.atan2(deltaX,deltaY);
+		double correctHeading = Math.atan2(deltaY,deltaX);
 		odometer.setHeading(correctHeading);
 	}
 	
-	
-	/**
-	 * Heading correction when crossing a y grid line
-	 * @param deltaY
-	 */
-	private void yHeadingCorrection(double deltaY) {
-		double correctHeading;
-		// heading in second or third quadrant
-		if(heading>Math.PI/2 && heading<Math.PI*3/2)
-			correctHeading = Math.PI - Math.asin((deltaY)/(2*xLSdistance));
-		// heading in first or fourth quadrant
-		else
-			correctHeading = Math.asin((deltaY)/(2*xLSdistance));
-		
-		odometer.setHeading(correctHeading);
-	}
-	
-	/**
-	 * Heading correction when crossing an x grid line
-	 * @param deltaY
-	 */
-	private void xHeadingCorrection(double deltaX) {
-		double correctHeading;
-		// heading in third or fourth quadrant
-		if(heading>Math.PI && heading<Math.PI*2)
-			correctHeading = -Math.acos((deltaX)/(2*xLSdistance));
-		// heading in first or second quadrant
-		else
-			correctHeading = Math.acos((deltaX)/(2*xLSdistance));
-		
-		odometer.setHeading(correctHeading);
-	}
 }
