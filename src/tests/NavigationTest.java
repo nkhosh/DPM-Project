@@ -15,12 +15,12 @@ public class NavigationTest {
 //		double[][] destination = {{-30.48/2,60.96},{30.48/2,30.48/2},{60.96,60.96},{60.96,30.48/2},{0,0}};
 //		double[][] destination = {{0,0}};
 //		while(!touchSensor.isPressed());
-		double[][] demo1 = new double[5][2];
-		demo1[0] = new double[] {-.5*TILE_LENGTH,2*TILE_LENGTH};
-		demo1[1] = new double[] {-.5*TILE_LENGTH,5.5*TILE_LENGTH};
-		demo1[2] = new double[] {1.5*TILE_LENGTH,5.5*TILE_LENGTH};
-		demo1[3] = new double[] {1.5*TILE_LENGTH,6.5*TILE_LENGTH};
-		demo1[4] = new double[] {5*TILE_LENGTH,6.5*TILE_LENGTH};
+//		double[][] demo1 = new double[5][2];
+//		demo1[0] = new double[] {-.5*TILE_LENGTH,2*TILE_LENGTH};
+//		demo1[1] = new double[] {-.5*TILE_LENGTH,5.5*TILE_LENGTH};
+//		demo1[2] = new double[] {1.5*TILE_LENGTH,5.5*TILE_LENGTH};
+//		demo1[3] = new double[] {1.5*TILE_LENGTH,6.5*TILE_LENGTH};
+//		demo1[4] = new double[] {5*TILE_LENGTH,6.5*TILE_LENGTH};
 		
 		navigator = robin.getNavigator();
 
@@ -39,7 +39,7 @@ public class NavigationTest {
 //		for(int i=0;i<4;i++){
 //			navigator.travelTo(destination[i][0], destination[i][1]);
 //		}
-		navigator.navigateMap(demo1);
+		navigator.navigateMap(destination);
 		navigator.turnTo(0, true);
 		
 		

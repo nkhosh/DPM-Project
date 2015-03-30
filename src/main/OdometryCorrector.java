@@ -190,7 +190,6 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 				// heading correction if crossing x and y grid lines at the same time
 				
 				if(leftCrossingX && rightCrossingY){
-					Sound.beep();
 					// recomputing error from nearest intersection
 					leftSensorY = odometer.getY() - yLSdistance*Math.cos(heading) + xLeftLSdistance*Math.sin(heading);
 					if(leftSensorY%TILE_LENGTH > TILE_LENGTH/2)
@@ -209,7 +208,6 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 				}
 				
 				else if(rightCrossingX && leftCrossingY){
-					Sound.beep();
 					// recomputing error from nearest intersection
 					leftSensorX = odometer.getX() - yLSdistance*Math.sin(heading) - xLeftLSdistance*Math.cos(heading);
 					if(leftSensorX%TILE_LENGTH > TILE_LENGTH/2)
