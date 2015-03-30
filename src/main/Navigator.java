@@ -31,6 +31,7 @@ public class Navigator{
 	private static final int OBSTACLE_AVOIDANCE_GAP_FILTER=3, OBSTACLE_MAX_DISTANCE=100, OBSTACLE_DISTANCE_THRESHOLD=3;
 	private int obstaclePosition;
 	private final static int MIN_FRONT_DISTANCE = 25, MIN_LEFT_DISTANCE = 5;
+	private static double rotationSpeed;
 	
 	
 	private final static int LEFT=0, FRONT=1, RIGHT=1;
@@ -324,47 +325,47 @@ public class Navigator{
 		return minimizedAngle;
 	}
 		
-//	public void setRotationSpeed(int speed) {
-//		rotationSpeed = speed;
-//		setSpeeds(rotationSpeed);
-//	}
-//	
-//	public void setSpeeds( int rotationalSpeed) {
-//		double leftSpeed, rightSpeed;
-//
-//		this.rotationSpeed = rotationalSpeed; 
-//
-//		leftSpeed = (  rotationalSpeed * WIDTH * Math.PI / 360.0) *
-//				180.0 / (RADIUS * Math.PI);
-//		rightSpeed = (-rotationalSpeed * WIDTH * Math.PI / 360.0) *
-//				180.0 / (RADIUS * Math.PI);
-//
-//		// set motor directions
-//		if (leftSpeed > 0.0)
-//			wheels[LEFT].forward();
-//		else {
-//			wheels[LEFT].backward();
-//			leftSpeed = -leftSpeed;
-//		}
-//		
-//		if (rightSpeed > 0.0)
-//			wheels[RIGHT].forward();
-//		else {
-//			wheels[RIGHT].backward();
-//			rightSpeed = -rightSpeed;
-//		}
-//		
-//		// set motor speeds
-//		if (leftSpeed > 900.0)
-//			wheels[LEFT].setSpeed(900);
-//		else
-//			wheels[LEFT].setSpeed((int)leftSpeed);
-//		
-//		if (rightSpeed > 900.0)
-//			wheels[RIGHT].setSpeed(900);
-//		else
-//			wheels[RIGHT].setSpeed((int)rightSpeed);
-//	}
+	public void setRotationSpeed(double speed) {
+		rotationSpeed = speed;
+		setSpeeds(rotationSpeed);
+	}
+	
+	public void setSpeeds(double rotationalSpeed) {
+		double leftSpeed, rightSpeed;
+
+		this.rotationSpeed = rotationalSpeed; 
+
+		leftSpeed = (  rotationalSpeed * WIDTH * Math.PI / 360.0) *
+				180.0 / (RADIUS * Math.PI);
+		rightSpeed = (-rotationalSpeed * WIDTH * Math.PI / 360.0) *
+				180.0 / (RADIUS * Math.PI);
+
+		// set motor directions
+		if (leftSpeed > 0.0)
+			wheels[LEFT].forward();
+		else {
+			wheels[LEFT].backward();
+			leftSpeed = -leftSpeed;
+		}
+		
+		if (rightSpeed > 0.0)
+			wheels[RIGHT].forward();
+		else {
+			wheels[RIGHT].backward();
+			rightSpeed = -rightSpeed;
+		}
+		
+		// set motor speeds
+		if (leftSpeed > 900.0)
+			wheels[LEFT].setSpeed(900);
+		else
+			wheels[LEFT].setSpeed((int)leftSpeed);
+		
+		if (rightSpeed > 900.0)
+			wheels[RIGHT].setSpeed(900);
+		else
+			wheels[RIGHT].setSpeed((int)rightSpeed);
+	}
 	void stop(){
 		wheels[RIGHT].stop();
 		wheels[LEFT].stop();

@@ -9,7 +9,7 @@ public class Localizer {
 	public static final double OFFSETY = 6.0;
 	public static final double OFFSETX = 4.8;
 	public static final int ERROR = 3;
-	public static final int COMPENSATION = 62;
+	public static final int COMPENSATION = 65;
 	public static int phase;
 	public static double testAngle;
 	public static double distance;
@@ -30,13 +30,14 @@ public class Localizer {
 	
 	public ColorSensor left;
 	public ColorSensor right;
-	private final double sensorD = 13.18;//13
+	private final double sensorDL = Math.pow((Math.pow(12.65, 2)+Math.pow(3, 2)), 0.5);
+	private final double sensorDR = Math.pow((Math.pow(12.65, 2)+Math.pow(3.55, 2)), 0.5);
 	public static int gridCounter;
 	public static int leftValue;
 	public static int rightValue;
 	public static double averageL;
 	public static double averageR;
-	public static int threshhold =30;
+	public static int threshhold =40;
 	public static int filterCountL;
 	public static int filterCountR ;
 	
@@ -254,11 +255,11 @@ public class Localizer {
 		//this is the trig shown in the tutorial used to calculate the real X,Y and Theta
 		double xTL =(gridAngleL[2] - gridAngleL[0]); 
 		
-		double yL = -sensorD*Math.cos(Math.toRadians(xTL/2));
+		double yL = -sensorDL*Math.cos(Math.toRadians(xTL/2));
 		
 		double yTL = (gridAngleL[3] - gridAngleL[1]);
 		
-		double xL = -sensorD*Math.cos(Math.toRadians(yTL/2));
+		double xL = -sensorDL*Math.cos(Math.toRadians(yTL/2));
 		
 		double deltaL = (yTL/2) + 90 - (gridAngleL[3]-180);
 		
@@ -266,11 +267,11 @@ public class Localizer {
 		
 		double xTR =(gridAngleR[2] - gridAngleR[0]); 
 		
-		double yR = -sensorD*Math.cos(Math.toRadians(xTR/2));
+		double yR = -sensorDR*Math.cos(Math.toRadians(xTR/2));
 		
 		double yTR = (gridAngleR[3] - gridAngleR[1]);
 		
-		double xR = -sensorD*Math.cos(Math.toRadians(yTR/2));
+		double xR = -sensorDR*Math.cos(Math.toRadians(yTR/2));
 		
 		double deltaR = (yTR/2) + 90 - (gridAngleR[3]-180);
 		
@@ -282,13 +283,13 @@ public class Localizer {
 		
 
 		//update these values, travel to (0,0), and turn to 0 degrees
-		odo.setPosition(new double [] {x+ xZero, y+yZero, pos[2]+delta + 5}, new boolean [] {true, true, true});
-		//Button.waitForAnyPress();
+		odo.setPosition(new double [] {x+ xZero -0.9, y+yZero + 1.5, pos[2]+delta }, new boolean [] {true, true, true});
+		
 		odo.getPosition(pos);
 		nav.travelTo(xZero, yZero,false);
 		odo.getPosition(pos);
 		nav.turnTo(0,true);
-		
+		Button.waitForAnyPress();
 
 		
 		nav.stop();

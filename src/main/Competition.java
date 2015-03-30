@@ -42,13 +42,13 @@ public class Competition {
 		USController usController = new USController(usSensor);
 		Odometer odometer = new Odometer(wheelMotor, lock);
 
-		Launcher bow = new Launcher(odometer,Motor.C,4);
+		Launcher bow = new Launcher(odometer,Motor.C,5);
 		//odometryCorrector = new OdometryCorrector(odometer, lsController, lock);
 		Navigator navigator = new Navigator(odometer, wheelMotor, usController,bow);
 		Localizer loc = new Localizer(odometer, navigator, usSensor,lsSensor);
 		//launcher = new Launcher(odometer, launcherMotor);
 		LCDInfo lcdInfo = new LCDInfo(odometer);
-		OdometryCorrector odoC = new OdometryCorrector(odometer,lsController,lock,navigator);
+		OdometryCorrector odoC = new OdometryCorrector(odometer,lsController,lock);
 		//LCDPrinter lcd = new LCDPrinter(odometer,lock);
 		
 		
@@ -64,10 +64,10 @@ public class Competition {
 		
 		double[][] demo2 = {
 				{5*TILE_LENGTH,6.5*TILE_LENGTH},
-				{1.65*TILE_LENGTH,6.5*TILE_LENGTH},
-				{1.5*TILE_LENGTH,5.7*TILE_LENGTH},
-				{-.35*TILE_LENGTH,5.5*TILE_LENGTH},
-				{-.35*TILE_LENGTH,2*TILE_LENGTH},
+				{1.5*TILE_LENGTH,6.5*TILE_LENGTH},
+				{1.5*TILE_LENGTH,5.5*TILE_LENGTH},
+				{-.5*TILE_LENGTH,5.5*TILE_LENGTH},
+				{-.5*TILE_LENGTH,2*TILE_LENGTH},
 				{0-7.5,0-1}
 		};
 		//double[][]test = {{2*TILE_LENGTH,2*
@@ -82,19 +82,22 @@ public class Competition {
 //		Sound.beep();
 		//Button.waitForAnyPress();
 		//navigator.travelTo(TILE_LENGTH, TILE_LENGTH, false);
-//		odoC.start();
-		//navigator.navigateMap(demo1);
-		//navigator.travelTo(5*TILE_LENGTH - 7.5, 5*TILE_LENGTH - 1, false);
+		odoC.start();
+		navigator.navigateMap(demo1);
+		navigator.travelTo(5*TILE_LENGTH, 5*TILE_LENGTH, true);
 //		Button.waitForAnyPress();
-		//odoC.setActive(false);
-		//loc.doLSLocalization(5*TILE_LENGTH,5*TILE_LENGTH);
+		odoC.setActive(false);
+		loc.doLSLocalization(5*TILE_LENGTH,5*TILE_LENGTH);
 	    //	Button.waitForAnyPress();
-		//odoC.setActive(true);
-		//navigator.fireAt(9*TILE_LENGTH, 9*TILE_LENGTH, 20.0,3*TILE_LENGTH - 20.0, 20.0, 3*TILE_LENGTH - 20, 1);
-		//navigator.navigateMap(demo2);
-		//odoC.setActive(false);
+		odoC.setActive(true);
+		navigator.fireAt(9*TILE_LENGTH, 9*TILE_LENGTH, 4.5*TILE_LENGTH,6.5*TILE_LENGTH,4.5*TILE_LENGTH,6.5*TILE_LENGTH, 6);
+		navigator.navigateMap(demo2);
+		odoC.setActive(false);
 		//loc.doUSLocalization();
-		//loc.doLSLocalization(0,0);
+		loc.doLSLocalization(0,0);
+		
+		navigator.travelTo(5*TILE_LENGTH, 5*TILE_LENGTH, true);
+		navigator.turnTo(0, true);
 		
 		
 		
