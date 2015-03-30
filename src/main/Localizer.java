@@ -3,13 +3,13 @@ package main;
 import lejos.nxt.*;
 
 public class Localizer {
-	public enum LocalizationType { FALLING_EDGE, RISING_EDGE };
+	//public enum LocalizationType { FALLING_EDGE, RISING_EDGE };
 	public static double ROTATION_SPEED = 30;
 	public static final int LIMIT = 65;
 	public static final double OFFSETY = 6.0;
 	public static final double OFFSETX = 4.8;
 	public static final int ERROR = 3;
-	public static final int COMPENSATION = 25;
+	public static final int COMPENSATION = 62;
 	public static int phase;
 	public static double testAngle;
 	public static double distance;
@@ -67,13 +67,12 @@ public class Localizer {
 	
 	public void doUSLocalization(){
 		
-
 		
 			boolean isRunning = true;
 			angle = 0;
 			double xDistance = -1;
 			double yDistance = -1;
-			int delayCountLimit = 20;
+			int delayCountLimit = 45;
 			int delayCount = 0;
 			
 			
@@ -83,6 +82,7 @@ public class Localizer {
 					
 					
 					
+					nav.setRotationSpeed(ROTATION_SPEED);
 
 
 					distanceFront = this.getFilteredData(front);
@@ -97,26 +97,28 @@ public class Localizer {
 							if (change > 0)
 							{
 								//Sound.beep();
-								if(!isIncreasing && delayCount > delayCountLimit)
+								if(change >3 && delayCount > delayCountLimit)
 								{
-									
+									delayCount = 0;
+									Sound.beep();
 									delayCount = 0;
 									nav.stop();
 									nav.turnTo(odo.getHeadingDeg()-COMPENSATION,true);
-
+									//Button.waitForAnyPress();
 									 distanceSide = this.getFilteredData(side);
 									
-									
-									if (distanceSide < LIMIT)
-									{
+									 if(distanceSide < LIMIT)
+									 {
 										//Sound.beep();
-										angle = odo.getHeading();
+										angle = odo.getHeadingDeg();
+										//Button.waitForAnyPress();
 										xDistance = this.getFilteredData(front) + OFFSETX;
 										yDistance = distanceSide + OFFSETY;
 										isRunning = false;
-										
-									}
+									 }
+									
 								}
+								
 								isIncreasing = true;
 							}
 							else if (change < 0 )
@@ -137,12 +139,12 @@ public class Localizer {
 			//Sound.beep();
 			double[] pos = {0,0,0};
 			odo.getPosition(pos);
-			odo.setPosition(new double [] {xDistance-30.48, yDistance-30.48, 270 - angle  }, new boolean [] {true, true, true});
-//			nav.travelTo(-7.5, -1,false);
-			nav.travelTo(-7.5, -7.5,false);
+			odo.setPosition(new double [] {xDistance-30.48, yDistance-30.48, 270  }, new boolean [] {true, true, true});
+			//nav.travelTo(-7.5, -1,false);
+			nav.travelTo(-7.5, -1,false);
 			nav.turnTo(0, true);
-			
 	}
+			
 	public void doLSLocalization(double xZero, double yZero){
 		//assumes you are at point -7.5,-1 from your zero
 		left.setFloodlight(true);
@@ -174,6 +176,7 @@ public class Localizer {
 		// dupCounter allows for a line to only be picked up once.
 		// When gridCounter is 4, meaning you've passed 4 lines, AND the robot has made a full circle, then we exit the loop
 		
+		nav.setRotationSpeed(ROTATION_SPEED);
 		double[] pos = new double[3];
 		odo.getPosition(pos);		
 		double startAngle = pos[2];
@@ -279,7 +282,7 @@ public class Localizer {
 		
 
 		//update these values, travel to (0,0), and turn to 0 degrees
-		odo.setPosition(new double [] {x+ xZero, y+yZero, pos[2]+delta + 4.5}, new boolean [] {true, true, true});
+		odo.setPosition(new double [] {x+ xZero, y+yZero, pos[2]+delta + 5}, new boolean [] {true, true, true});
 		//Button.waitForAnyPress();
 		odo.getPosition(pos);
 		nav.travelTo(xZero, yZero,false);
