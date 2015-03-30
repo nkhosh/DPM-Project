@@ -33,11 +33,11 @@ public class NavigationTest {
 //		for(int i=0;i<4;i++){
 //			navigator.travelTo(destination[i][0], destination[i][1]);
 //		}
-		navigator.navigateMap(destination);
-		navigator.turnTo(0, true);
+//		navigator.navigateMap(destination);
+//		navigator.turnTo(0, true);
 		
 		
-//		navigator.travelTo(60.96,60.96, true);
+		navigator.travelTo(3*TILE_LENGTH,3*TILE_LENGTH, true);
 //		navigator.travelTo(0,0, true);
 //		navigator.turnTo(0,true);
 		
