@@ -64,11 +64,11 @@ public class Navigator{
 	 * Moves the robot straight.
 	 */
 	protected void moveStraight() {
-		wheels[LEFT].forward();
-		wheels[RIGHT].forward();
 		speed[LEFT]=NORMAL_SPEED;
 		speed[RIGHT]=NORMAL_SPEED;
 		updateSpeed();
+		wheels[LEFT].forward();
+		wheels[RIGHT].forward();
 	}
 	protected void moveLeft() {
 		wheels[LEFT].forward();
@@ -100,15 +100,15 @@ public class Navigator{
 	 * Rotates about the center axis of the robot.
 	 */
 	protected void turnLeft() {
-		wheels[RIGHT].forward();
 		wheels[LEFT].backward();
-		speed[RIGHT]=NORMAL_SPEED;
+		wheels[RIGHT].forward();
 		speed[LEFT]=NORMAL_SPEED;
+		speed[RIGHT]=NORMAL_SPEED;
 		updateSpeed();
 	}	
 	protected void updateSpeed() {
-//		wheels[LEFT].setAcceleration(ACCELERATION);		     
-//		wheels[RIGHT].setAcceleration(ACCELERATION);
+		wheels[LEFT].setAcceleration(ACCELERATION);		     
+		wheels[RIGHT].setAcceleration(ACCELERATION);
 		wheels[LEFT].setSpeed(speed[LEFT]);		     
 		wheels[RIGHT].setSpeed(speed[RIGHT]);	
 	}
@@ -286,8 +286,8 @@ public class Navigator{
 			}
 			// Else if the robot has to turn clockwise
 			else{
-				wheels[RIGHT].backward();
 				wheels[LEFT].forward();
+				wheels[RIGHT].backward();
 
 				wheels[LEFT].setSpeed(ROTATION_SPEED);
 				wheels[RIGHT].setSpeed(ROTATION_SPEED);
@@ -367,8 +367,8 @@ public class Navigator{
 //			wheels[RIGHT].setSpeed((int)rightSpeed);
 //	}
 	void stop(){
-		wheels[RIGHT].stop();
 		wheels[LEFT].stop();
+		wheels[RIGHT].stop();
 	}
 	/**
 	 * Implementation of a 2D vector.
