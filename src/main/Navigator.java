@@ -10,7 +10,6 @@ public class Navigator{
 	private final static int ROTATION_SPEED = 100;
 	public static final double RADIUS = 2.085; 
 	private static final double WIDTH = 16.2;
-	
 	// The error and threshold values
 	private final static double ANGLE_BANDWIDTH_DEG = 2, POSITION_BANDWIDTH = 1.0;
 	private static final int LEFT_DISTANCE_THRESHOLD = 15;
@@ -64,11 +63,11 @@ public class Navigator{
 	 * Moves the robot straight.
 	 */
 	protected void moveStraight() {
+		wheels[LEFT].forward();
+		wheels[RIGHT].forward();
 		speed[LEFT]=NORMAL_SPEED;
 		speed[RIGHT]=NORMAL_SPEED;
 		updateSpeed();
-		wheels[LEFT].forward();
-		wheels[RIGHT].forward();
 	}
 	protected void moveLeft() {
 		wheels[LEFT].forward();
@@ -100,15 +99,15 @@ public class Navigator{
 	 * Rotates about the center axis of the robot.
 	 */
 	protected void turnLeft() {
-		wheels[LEFT].backward();
 		wheels[RIGHT].forward();
-		speed[LEFT]=NORMAL_SPEED;
+		wheels[LEFT].backward();
 		speed[RIGHT]=NORMAL_SPEED;
+		speed[LEFT]=NORMAL_SPEED;
 		updateSpeed();
 	}	
 	protected void updateSpeed() {
-		wheels[LEFT].setAcceleration(ACCELERATION);		     
-		wheels[RIGHT].setAcceleration(ACCELERATION);
+//		wheels[LEFT].setAcceleration(ACCELERATION);		     
+//		wheels[RIGHT].setAcceleration(ACCELERATION);
 		wheels[LEFT].setSpeed(speed[LEFT]);		     
 		wheels[RIGHT].setSpeed(speed[RIGHT]);	
 	}
@@ -256,10 +255,10 @@ public class Navigator{
 			else if (distError > 0) {
 				moveLeft();
 			}
-			if( Math.abs(relativeTargetOrientation - (unitOrientationVector.getOrientation())) <= 2*Math.PI/180 && distance[FRONT]>40 )
+			if( Math.abs(relativeTargetOrientation - (unitOrientationVector.getOrientation())) <= 3*Math.PI/180 && distance[FRONT]>40 ) // why?
 				break;
 			
-			if( distance[FRONT] <= 20 ) {
+			if( distance[FRONT] <= 20 ) { // why?
 				break;
 			}
 		}
@@ -286,8 +285,8 @@ public class Navigator{
 			}
 			// Else if the robot has to turn clockwise
 			else{
-				wheels[LEFT].forward();
 				wheels[RIGHT].backward();
+				wheels[LEFT].forward();
 
 				wheels[LEFT].setSpeed(ROTATION_SPEED);
 				wheels[RIGHT].setSpeed(ROTATION_SPEED);
@@ -367,8 +366,8 @@ public class Navigator{
 //			wheels[RIGHT].setSpeed((int)rightSpeed);
 //	}
 	void stop(){
-		wheels[LEFT].stop();
 		wheels[RIGHT].stop();
+		wheels[LEFT].stop();
 	}
 	/**
 	 * Implementation of a 2D vector.

@@ -24,11 +24,9 @@ public class Odometer extends Thread {
 		wheels[0].resetTachoCount();
 		wheels[1].resetTachoCount();
 		
-		radius = 2.095;
-//		radius = 2.09;
-//		width = 15.825;
-//		width = 16.15;
-		width = 15.95;
+//		radius = 2.085;
+		radius = 2.09;
+		width = 15.825;
 	}
 	
 	public void setX(double x) {

@@ -76,12 +76,12 @@ public class Competition {
 		
 		// Localize
 		odometer.start();
-//		loc.doLocalization();
+		loc.doLocalization();
 //		Sound.beep();
 		
 		// Navigate to the destination
 //		odoC.start();
-		navigator.navigateMap(demo1);
+		//navigator.navigateMap(demo1);
 		
 //		// Localize again
 //		navigator.travelTo(5*TILE_LENGTH - 7.5, 5*TILE_LENGTH - 1, false);

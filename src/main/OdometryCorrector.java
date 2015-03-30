@@ -60,8 +60,8 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 //		xLeftLSdistance = 2.8;
 //		yLSdistance = 12.7;
 		
-		xRightLSdistance = 3.4;
-		xLeftLSdistance = 3.1;
+		xRightLSdistance = 3.55;
+		xLeftLSdistance = 3;
 		yLSdistance = 12.65;
 		
 		lightThreshold = 50;
@@ -188,43 +188,13 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 					yCorrection(rightErrorY);	
 				
 				// heading correction if crossing x and y grid lines at the same time
-				
-				if(leftCrossingX && rightCrossingY){
-					// recomputing error from nearest intersection
-					leftSensorY = odometer.getY() - yLSdistance*Math.cos(heading) + xLeftLSdistance*Math.sin(heading);
-					if(leftSensorY%TILE_LENGTH > TILE_LENGTH/2)
-						leftErrorY = (leftSensorY%TILE_LENGTH) - TILE_LENGTH;
-					else
-						leftErrorY = (leftSensorY%TILE_LENGTH);
-					
-					rightSensorX = odometer.getX() - yLSdistance*Math.sin(heading) + xRightLSdistance*Math.cos(heading);
-					if(rightSensorX%TILE_LENGTH > TILE_LENGTH/2)
-						rightErrorX = (rightSensorX%TILE_LENGTH) - TILE_LENGTH;
-					else
-						rightErrorX = (rightSensorX%TILE_LENGTH);
-					
-					// correct heading
-					headingCorrection(rightErrorX,leftErrorY);
-				}
-				
-				else if(rightCrossingX && leftCrossingY){
-					// recomputing error from nearest intersection
-					leftSensorX = odometer.getX() - yLSdistance*Math.sin(heading) - xLeftLSdistance*Math.cos(heading);
-					if(leftSensorX%TILE_LENGTH > TILE_LENGTH/2)
-						leftErrorX = (leftSensorX%TILE_LENGTH) - TILE_LENGTH;
-					else
-						leftErrorX = (leftSensorX%TILE_LENGTH);
-					
-					rightSensorY = odometer.getY() - yLSdistance*Math.cos(heading) - xRightLSdistance*Math.sin(heading);
-					if(rightSensorY%TILE_LENGTH > TILE_LENGTH/2)
-						rightErrorY = (rightSensorY%TILE_LENGTH) - TILE_LENGTH;
-					else
-						rightErrorY = (rightSensorY%TILE_LENGTH);
-					
-					
-					// correct heading
-					headingCorrection(-leftErrorX,-rightErrorY);
-				}
+//				if(leftCrossingX && rightCrossingY){
+//					headingCorrection(rightErrorX,leftErrorY);
+//				}
+//				
+//				else if(rightCrossingX && leftCrossingY){
+//					headingCorrection(-leftErrorX,-rightErrorY);
+//				}
 				
 				
 				
