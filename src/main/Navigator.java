@@ -11,7 +11,7 @@ public class Navigator{
 	public static boolean state;
 	
 	// Variables for the speed of the movement
-	final static int FAST_SPEED = 200, SLOW_SPEED = 100, NORMAL_SPEED=200, ACCELERATION=4000;
+	final static int FAST_SPEED = 200, SLOW_SPEED = 100, NORMAL_SPEED=200, ACCELERATION=2000;
 //			, ACCELERATION = 4000;
 	private final static int ROTATION_SPEED = 100;
 	public static final double RADIUS = 2.085; // originally 2.1428
@@ -19,8 +19,8 @@ public class Navigator{
 	private int rotationSpeed;
 	
 	// The error and threshold values
-	final static double DEG_ERR = 2, CM_ERR = 1.0;	
-	final static int POSITION_BANDWIDTH = 1;
+	final static double DEG_ERR = 2, CM_ERR = 1;	
+	final static double POSITION_BANDWIDTH = 1;
 	private static final int LEFT_DISTANCE_THRESHOLD = 15;
 	private static final double ANGLE_BANDWIDTH = 2*Math.PI/180; // Used when the robot is possibly turning fast
 	
@@ -76,11 +76,11 @@ public class Navigator{
 	 * Moves the robot straight.
 	 */
 	protected void moveStraight() {
-		wheels[LEFT].forward();
-		wheels[RIGHT].forward();
 		speed[LEFT]=NORMAL_SPEED;
 		speed[RIGHT]=NORMAL_SPEED;
 		updateSpeed();
+		wheels[LEFT].forward();
+		wheels[RIGHT].forward();
 	}
 	protected void moveLeft() {
 		wheels[LEFT].forward();
@@ -101,8 +101,8 @@ public class Navigator{
 	 * Rotates about the center axis of the robot.
 	 */
 	protected void turnRight() {
-		wheels[RIGHT].backward();
 		wheels[LEFT].forward();
+		wheels[RIGHT].backward();
 		speed[LEFT]=NORMAL_SPEED;
 		speed[RIGHT]=NORMAL_SPEED;
 		updateSpeed();
@@ -112,15 +112,15 @@ public class Navigator{
 	 * Rotates about the center axis of the robot.
 	 */
 	protected void turnLeft() {
-		wheels[RIGHT].forward();
 		wheels[LEFT].backward();
-		speed[RIGHT]=NORMAL_SPEED;
+		wheels[RIGHT].forward();
 		speed[LEFT]=NORMAL_SPEED;
+		speed[RIGHT]=NORMAL_SPEED;
 		updateSpeed();
 	}	
 	protected void updateSpeed() {
-//		wheels[LEFT].setAcceleration(ACCELERATION);		     
-//		wheels[RIGHT].setAcceleration(ACCELERATION);
+		wheels[LEFT].setAcceleration(ACCELERATION);		     
+		wheels[RIGHT].setAcceleration(ACCELERATION);
 		wheels[LEFT].setSpeed(speed[LEFT]);		     
 		wheels[RIGHT].setSpeed(speed[RIGHT]);	
 	}
@@ -231,8 +231,8 @@ public class Navigator{
 		// If the robot reached its destination
 
 		isNavigating = false;
-		wheels[RIGHT].stop();
 		wheels[LEFT].stop();
+		wheels[RIGHT].stop();
 	}
 	
 	/**
@@ -299,8 +299,8 @@ public class Navigator{
 			}
 			// Else if the robot has to turn clockwise
 			else{
-				wheels[RIGHT].backward();
 				wheels[LEFT].forward();
+				wheels[RIGHT].backward();
 
 				wheels[LEFT].setSpeed(ROTATION_SPEED);
 				wheels[RIGHT].setSpeed(ROTATION_SPEED);
@@ -377,8 +377,8 @@ public class Navigator{
 //			wheels[RIGHT].setSpeed((int)rightSpeed);
 //	}
 	void stop(){
-		wheels[RIGHT].stop();
 		wheels[LEFT].stop();
+		wheels[RIGHT].stop();
 	}
 	/**
 	 * Implementation of a 2D vector.
