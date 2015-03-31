@@ -45,8 +45,8 @@ public class Localizer {
 	public Localizer(Odometer odo, Navigator nav, UltrasonicSensor[] us, ColorSensor[] ls) {
 		this.odo = odo;
 		this.nav = nav;
-		this.front = us[0];
-		this.side = us[1];
+		this.side = us[0];
+		this.front = us[1];
 		this.left = ls[0];
 		this.right = ls[1];
 		isIncreasing = true; 
@@ -142,7 +142,7 @@ public class Localizer {
 			odo.getPosition(pos);
 			odo.setPosition(new double [] {xDistance-30.48, yDistance-30.48, 270  }, new boolean [] {true, true, true});
 			//nav.travelTo(-7.5, -1,false);
-			nav.travelTo(-7.5, -1,false);
+			nav.travelTo(-7.5, -2,false);
 			nav.turnTo(0, true);
 	}
 			
@@ -283,13 +283,13 @@ public class Localizer {
 		
 
 		//update these values, travel to (0,0), and turn to 0 degrees
-		odo.setPosition(new double [] {x+ xZero -0.9, y+yZero + 1.5, pos[2]+delta }, new boolean [] {true, true, true});
+		odo.setPosition(new double [] {x+ xZero -1.1, y+yZero + 1, pos[2]+delta +.5 }, new boolean [] {true, true, true});
 		
 		odo.getPosition(pos);
 		nav.travelTo(xZero, yZero,false);
 		odo.getPosition(pos);
 		nav.turnTo(0,true);
-		Button.waitForAnyPress();
+//		Button.waitForAnyPress();
 
 		
 		nav.stop();

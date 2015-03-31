@@ -43,8 +43,8 @@ public class RobinHood {
 		usController = new USController(usSensor);
 		odometer = new Odometer(wheelMotor, lock);
 		odometryCorrector = new OdometryCorrector(odometer, lsController, lock);
+		navigator = new Navigator(odometer, wheelMotor, usController, launcher, odometryCorrector);
 		launcher = new Launcher(odometer, launcherMotor, 6);
-		navigator = new Navigator(odometer, wheelMotor, usController, launcher);
 		lcdPrinter = new LCDPrinter(odometer, lock);
 		localizer = new Localizer(odometer,navigator,usSensor,lsSensor);
 	}

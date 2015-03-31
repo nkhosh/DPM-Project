@@ -44,12 +44,28 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 	private boolean rightCrossingX;
 	private boolean rightCrossingY;
 	private boolean isActive;
+	private boolean rightAnglePath;
+	
+	private boolean mustTurnLeft;
+	private boolean mustTurnRight;
 	
 	
 	
 	Object lock;
 	Odometer odometer;
 	LSController lsController;
+	
+	public boolean getMustTurnLeft(){
+		return mustTurnLeft;
+	}
+	
+	public boolean getMustTurnRight(){
+		return mustTurnRight;
+	}
+	
+	public void setRightAnglePath(boolean bool){
+		rightAnglePath = bool;
+	}
 	
 	public OdometryCorrector(Odometer odometer, LSController lsController, Object lock) {
 		this.lock = lock;
@@ -65,6 +81,11 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 		yLSdistance = 12.65;
 		
 		lightThreshold = 50;
+		
+		mustTurnLeft = false;
+		mustTurnRight = false;
+		
+		rightAnglePath = false;
 	}
 	
 	
@@ -95,6 +116,22 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 			rightCrossingX = false;
 			rightCrossingY = false;
 			crossingGrid = false;
+			
+			if(rightAnglePath){
+				if(leftSensorData < lightThreshold && rightSensorData > lightThreshold){
+					mustTurnLeft = true;
+				}
+				else{
+					mustTurnLeft = false;
+				}
+				
+				if(rightSensorData < lightThreshold && leftSensorData > lightThreshold){
+					mustTurnRight = true;
+				}
+				else{
+					mustTurnRight = false;
+				}
+			}
 			
 			// if the sensor passes over a black line
 			if(leftSensorData < lightThreshold) {

@@ -31,8 +31,8 @@ public class Competition {
 		NXTRegulatedMotor[] wheelMotor = {Motor.A, Motor.B};
 		UltrasonicSensor[] usSensor = new UltrasonicSensor[2];
 		ColorSensor[] lsSensor = new ColorSensor[2];
-		usSensor[0] = new UltrasonicSensor( SensorPort.S4 );
-		usSensor[1] = new UltrasonicSensor(SensorPort.S3);
+		usSensor[0] = new UltrasonicSensor( SensorPort.S3 );
+		usSensor[1] = new UltrasonicSensor(SensorPort.S4);
 		lsSensor[0] = new ColorSensor(SensorPort.S1);
 		lsSensor[1] = new ColorSensor(SensorPort.S2);
 		Object lock = new Object();
@@ -44,11 +44,11 @@ public class Competition {
 
 		Launcher bow = new Launcher(odometer,Motor.C,5);
 		//odometryCorrector = new OdometryCorrector(odometer, lsController, lock);
-		Navigator navigator = new Navigator(odometer, wheelMotor, usController,bow);
-		Localizer loc = new Localizer(odometer, navigator, usSensor,lsSensor);
 		//launcher = new Launcher(odometer, launcherMotor);
 		LCDInfo lcdInfo = new LCDInfo(odometer);
 		OdometryCorrector odoC = new OdometryCorrector(odometer,lsController,lock);
+		Navigator navigator = new Navigator(odometer, wheelMotor, usController, bow, odoC);
+		Localizer loc = new Localizer(odometer, navigator, usSensor,lsSensor);
 		//LCDPrinter lcd = new LCDPrinter(odometer,lock);
 		
 		
@@ -56,10 +56,12 @@ public class Competition {
 		Button.waitForAnyPress();
 		double[][] demo1 = new double[5][2];
 		demo1[0] = new double[] {-.5*TILE_LENGTH,0};
+		demo1[1] = new double[] {-.5*TILE_LENGTH,2*TILE_LENGTH};
+		demo1[1] = new double[] {-.5*TILE_LENGTH,4*TILE_LENGTH};
 		demo1[1] = new double[] {-.5*TILE_LENGTH,5.5*TILE_LENGTH};
 		demo1[2] = new double[] {1.5*TILE_LENGTH,5.5*TILE_LENGTH};
 		demo1[3] = new double[] {1.5*TILE_LENGTH,6.5*TILE_LENGTH};
-		demo1[4] = new double[] {5*TILE_LENGTH,6.5*TILE_LENGTH};
+		demo1[4] = new double[] {5*TILE_LENGTH,6.6*TILE_LENGTH};
 		
 		
 		double[][] demo2 = {
@@ -79,12 +81,13 @@ public class Competition {
 		
 		
 		loc.doLocalization();
-//		Sound.beep();
+		Sound.beep();
 		//Button.waitForAnyPress();
 		//navigator.travelTo(TILE_LENGTH, TILE_LENGTH, false);
 		odoC.start();
 		navigator.navigateMap(demo1);
-		navigator.travelTo(5*TILE_LENGTH, 5*TILE_LENGTH, true);
+		navigator.travelTo(5*TILE_LENGTH -7.5, 5*TILE_LENGTH -1, false);
+		navigator.turnTo(0, true);
 //		Button.waitForAnyPress();
 		odoC.setActive(false);
 		loc.doLSLocalization(5*TILE_LENGTH,5*TILE_LENGTH);
@@ -96,8 +99,11 @@ public class Competition {
 		//loc.doUSLocalization();
 		loc.doLSLocalization(0,0);
 		
-		navigator.travelTo(5*TILE_LENGTH, 5*TILE_LENGTH, true);
-		navigator.turnTo(0, true);
+//		navigator.travelTo(5.5*TILE_LENGTH, 5*TILE_LENGTH, true);
+////		navigator.turnTo(0, true);
+//		navigator.fireAt(9*TILE_LENGTH, 9*TILE_LENGTH, 4.5*TILE_LENGTH,6.5*TILE_LENGTH,4.5*TILE_LENGTH,6.5*TILE_LENGTH, 6);
+//		navigator.travelTo(0, 0, true);
+//		navigator.turnTo(0, true);
 		
 		
 		

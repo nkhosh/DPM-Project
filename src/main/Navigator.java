@@ -39,15 +39,17 @@ public class Navigator{
 	private double launchAngle = Math.tan(7.4/(5*30.48 + 4));
 	private double launchDistance = Math.sqrt(Math.pow(-7.4, 2) + Math.pow(5*30.48 + 4, 2));
 	private Launcher launcher;
+	private OdometryCorrector odoC;
 	public static int targetAngle;
 	public static double targetX;
 	public static double targetY;
 	
 	
-	public Navigator(Odometer odometer, NXTRegulatedMotor[] wheels, USController usController, Launcher launch)	{
+	public Navigator(Odometer odometer, NXTRegulatedMotor[] wheels, USController usController, Launcher launch, OdometryCorrector odoC)	{
 		this.launcher = launch;
 		this.odometer = odometer;
 		this.wheels = wheels;
+		this.odoC = odoC;
 //		this.state = NO_OBSTACLE;
 		this.usController = usController;
 		this.speed = new int[2];
@@ -66,8 +68,10 @@ public class Navigator{
 	protected void moveStraight() {
 		wheels[LEFT].forward();
 		wheels[RIGHT].forward();
+//		speed[LEFT]=(int)(NORMAL_SPEED*odometer.getLeftRadius()/odometer.getRightRadius());
 		speed[LEFT]=NORMAL_SPEED;
 		speed[RIGHT]=NORMAL_SPEED;
+		
 		updateSpeed();
 	}
 	protected void moveLeft() {
@@ -100,8 +104,8 @@ public class Navigator{
 	 * Rotates about the center axis of the robot.
 	 */
 	protected void turnLeft() {
-		wheels[RIGHT].forward();
 		wheels[LEFT].backward();
+		wheels[RIGHT].forward();
 		speed[RIGHT]=NORMAL_SPEED;
 		speed[LEFT]=NORMAL_SPEED;
 		updateSpeed();
@@ -192,7 +196,7 @@ public class Navigator{
 			this.distance[FRONT] = usController.getDistance(FRONT);
 			this.distance[LEFT] = usController.getDistance(LEFT);
 			
-			 if( obstacleAvoidance ) {
+			if( obstacleAvoidance ) {
 				if( distance[FRONT] <= 20 ) {
 					avoidObstacle();
 				}
@@ -201,6 +205,24 @@ public class Navigator{
 					moveStraight();
 				}
 			}
+			// 
+			else if(odoC.getMustTurnLeft()){
+				speed[LEFT] = 0;
+				speed[RIGHT] = FAST_SPEED;
+				updateSpeed();
+			}
+			
+			else if(odoC.getMustTurnRight()){
+				speed[LEFT] = FAST_SPEED;
+				speed[RIGHT] = 0;
+				updateSpeed();
+			}
+			//
+			else if(distance[LEFT]<=7){
+				Sound.beep();
+				moveRight();
+			}
+			
 			else
 			{
 				turnTo(relativeTargetOrientation, false);
@@ -240,8 +262,8 @@ public class Navigator{
 			distance[FRONT] = usController.getDistance(FRONT);
 			distance[LEFT] = usController.getDistance(LEFT);
 			updatePosition();
-			LCD.drawString("Left dist:  "+distance[LEFT], 0, 4);
-			LCD.drawString("Front dist: "+distance[FRONT], 0, 5);
+			LCD.drawString("Left dist:  " + distance[LEFT], 0, 4);
+			LCD.drawString("Front dist: " + distance[FRONT], 0, 5);
 			relativeTargetOrientation = minimizeAngle( (destination.subtract(position)).getOrientation() );
 			distError = distance[LEFT]-10;
 			/* Case 1:  Error in bounds  */
@@ -278,8 +300,8 @@ public class Navigator{
 		while(Math.abs(Odometer.minAngleFromTo(odometer.getHeading()*180/Math.PI,targetAngle))>ANGLE_BANDWIDTH_DEG){
 			// If the robot has to turn counterclockwise
 			if(Odometer.minAngleFromTo(odometer.getHeading()*180/Math.PI,targetAngle)<0){
-				wheels[LEFT].backward();
 				wheels[RIGHT].forward();
+				wheels[LEFT].backward();
 
 				wheels[LEFT].setSpeed(ROTATION_SPEED);
 				wheels[RIGHT].setSpeed(ROTATION_SPEED);

@@ -6,7 +6,7 @@ import lejos.nxt.NXTRegulatedMotor;
 public class Odometer extends Thread {	
 	private double x, y, heading;
 	Object lock;
-	private double radius, width;
+	private double leftRadius, rightRadius, width;
 	private final NXTRegulatedMotor[] wheels;
 	private double[] tachometer;
 	private double dc, dt;
@@ -25,8 +25,10 @@ public class Odometer extends Thread {
 		wheels[1].resetTachoCount();
 		
 //		radius = 2.085;
-		radius = 2.09;
-		width = 15.825;
+		leftRadius = 2.09;
+		rightRadius = 2.09;
+//		width = 15.825;
+		width = 16.35;
 	}
 	
 	public void setX(double x) {
@@ -48,10 +50,14 @@ public class Odometer extends Thread {
 	}
 	
 	public void setRadius(double r) {
-		radius = r;
+		leftRadius = r;
+		rightRadius = r;
 	}
-	public double getRadius() {
-		return radius;
+	public double getLeftRadius() {
+		return leftRadius;
+	}
+	public double getRightRadius() {
+		return rightRadius;
 	}
 	public void setWidth(double w) {
 		width = w;
@@ -133,8 +139,8 @@ public class Odometer extends Thread {
 			double tachoCounterR = (wheels[1].getTachoCount())*Math.PI/180;
 			tachometer[0] = tachoCounterL - tachometer[0];
 			tachometer[1] = tachoCounterR - tachometer[1];
-			dc = (tachometer[1]*radius + tachometer[0]*radius)/2;
-			dt = (tachometer[1]*radius-tachometer[0]*radius)/width;
+			dc = (tachometer[1]*rightRadius + tachometer[0]*leftRadius)/2;
+			dt = (tachometer[1]*rightRadius - tachometer[0]*leftRadius)/width;
 			
 			synchronized (lock) {
 				// don't use the variables x, y, or theta anywhere but here!
