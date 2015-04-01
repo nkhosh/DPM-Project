@@ -40,10 +40,10 @@ public class Competition {
 		USController usController = new USController(usSensor);
 		Odometer odometer = new Odometer(wheelMotor, lock);
 
-		Launcher bow = new Launcher(odometer,Motor.C,5);
+		Launcher bow = new Launcher(Motor.C,5);
 		//odometryCorrector = new OdometryCorrector(odometer, lsController, lock);
 		//launcher = new Launcher(odometer, launcherMotor);
-		LCDInfo lcdInfo = new LCDInfo(odometer);
+//		LCDInfo lcdInfo = new LCDInfo(odometer);
 		OdometryCorrector odoC = new OdometryCorrector(odometer,lsController,lock);
 		Navigator navigator = new Navigator(odometer, wheelMotor, usController, bow, odoC);
 		Localizer loc = new Localizer(odometer, navigator, usSensor,lsSensor);

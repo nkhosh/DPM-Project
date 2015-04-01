@@ -1,8 +1,5 @@
 package main;
-
 import lejos.nxt.*;
-
-
 
 public class MedianFilter extends Thread
 {
@@ -10,7 +7,10 @@ public class MedianFilter extends Thread
 	private int[] inputDistances, sortedDistances; //arrays to store the input distances from the sensor, and the sorted distances
 	private int count, medianDistance;
 	
-	//The constructor
+	/**
+	 * The constructor
+	 * @param us
+	 */
 	public MedianFilter(UltrasonicSensor us)
 	{
 		//setting up the initial variables
@@ -24,7 +24,9 @@ public class MedianFilter extends Thread
 		count = 0;							//setting initial count to 0
 	}
 	
-	//The concurrent thread
+	/**
+	 * Runs the median filter on the ultrasonic sensor data
+	 */
 	public void run()
 	{
 		while(true)
@@ -37,9 +39,11 @@ public class MedianFilter extends Thread
 		}
 	}
 	
-	//using an insertion sort
-	//this method takes the input array, sorts the current values in the array
-	//and stores them in a sorted array, this way the original input array is never altered
+	/**
+	 * Using an insertion sort, this method takes the input array, sorts the current values in the array 
+	 * and stores them in a sorted array, this way the original input array is never altered
+	 * @param input
+	 */
 	private void sort(int[] input)
 	{		
 		sortedDistances = input; 						//copying the inputs into the sorted array
@@ -55,7 +59,10 @@ public class MedianFilter extends Thread
 		}
 	}
 	
-	//getter method
+	/**
+	 * Returns the filtered distance data
+	 * @return
+	 */
 	public int getFilteredDistance()
 	{
 		return this.medianDistance;

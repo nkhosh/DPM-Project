@@ -1,16 +1,17 @@
 package main;
-
-import lejos.nxt.Motor;
 import lejos.nxt.NXTRegulatedMotor;
 
 public class Odometer extends Thread {	
+	private static final long ODOMETER_PERIOD = 25;
+	private static double wheelRadius=2.09, wheelsDistance=16.35;
+//	Previous values in Navigator: (Check for errors)
+//	private final static double RADIUS = 2.085; 
+//	private final static double WHEELS_DISTANCE = 16.2;
 	private double x, y, heading;
-	Object lock;
-	private double leftRadius, rightRadius, width;
+	private Object lock;
 	private final NXTRegulatedMotor[] wheels;
 	private double[] tachometer;
 	private double dc, dt;
-	private static final long ODOMETER_PERIOD = 25;
 	
 	public Odometer(NXTRegulatedMotor[] wheels, Object lock) {
 		this.lock = lock;
@@ -23,12 +24,6 @@ public class Odometer extends Thread {
 		this.wheels = wheels;
 		wheels[0].resetTachoCount();
 		wheels[1].resetTachoCount();
-		
-//		radius = 2.085;
-		leftRadius = 2.09;
-		rightRadius = 2.09;
-//		width = 15.825;
-		width = 16.35;
 	}
 	
 	public void setX(double x) {
@@ -50,20 +45,19 @@ public class Odometer extends Thread {
 	}
 	
 	public void setRadius(double r) {
-		leftRadius = r;
-		rightRadius = r;
+		wheelRadius = r;
 	}
-	public double getLeftRadius() {
-		return leftRadius;
+	
+	public double getRadius() {
+		return wheelRadius;
 	}
-	public double getRightRadius() {
-		return rightRadius;
-	}
+	
 	public void setWidth(double w) {
-		width = w;
+		wheelsDistance = w;
 	}
-	public double getWidth() {
-		return width;
+	
+	public double getWheelsDistance() {
+		return wheelsDistance;
 	}
 	
 	public double getX() {
@@ -78,12 +72,12 @@ public class Odometer extends Thread {
 		}
 	}
 	
-	
 	public double getHeading() {
 		synchronized(lock){
 			return fixRadAngle(heading);
 		}
 	}
+	
 	public double getHeadingDeg() {
 		synchronized(lock){
 			return fixDegAngle(Math.toDegrees(heading));
@@ -113,6 +107,7 @@ public class Odometer extends Thread {
 		
 		return angle % (Math.PI*2);
 	}
+	
 	public void getPosition(double [] pos) {
 		synchronized (lock) {
 			pos[0] = x;
@@ -128,19 +123,22 @@ public class Odometer extends Thread {
 			if (update[2]) heading = fixRadAngle(Math.toRadians(pos[2]));
 		}
 	}
+
+	public boolean isTurning(){
+		return !(wheels[0].getSpeed() == wheels[1].getSpeed());
+	}
 	
 	public void run() {
 		long updateStart, updateEnd;
 
 		while (true) {
 			updateStart = System.currentTimeMillis();
-			// put (some of) your odometer code here
 			double tachoCounterL = (wheels[0].getTachoCount())*Math.PI/180;
 			double tachoCounterR = (wheels[1].getTachoCount())*Math.PI/180;
 			tachometer[0] = tachoCounterL - tachometer[0];
 			tachometer[1] = tachoCounterR - tachometer[1];
-			dc = (tachometer[1]*rightRadius + tachometer[0]*leftRadius)/2;
-			dt = (tachometer[1]*rightRadius - tachometer[0]*leftRadius)/width;
+			dc = (tachometer[1]*wheelRadius + tachometer[0]*wheelRadius)/2;
+			dt = (tachometer[1]*wheelRadius - tachometer[0]*wheelRadius)/wheelsDistance;
 			
 			synchronized (lock) {
 				// don't use the variables x, y, or theta anywhere but here!
@@ -164,10 +162,5 @@ public class Odometer extends Thread {
 				}
 			}
 		}
-	}
-	
-
-	public boolean isTurning(){
-		return !(wheels[0].getSpeed() == wheels[1].getSpeed());
 	}
 }

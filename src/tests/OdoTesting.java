@@ -30,7 +30,7 @@ public class OdoTesting {
 		lcdPrinter = robinHood.getLcdPrinter();
 		
 		radius = odometer.getRadius();
-		width = odometer.getWidth();
+		width = odometer.getWheelsDistance();
 		
 		forwardSpeed = 250;
 		rotationSpeed = 150;

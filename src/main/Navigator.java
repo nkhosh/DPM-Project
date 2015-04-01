@@ -1,19 +1,22 @@
 package main;
 import lejos.nxt.LCD;
 import lejos.nxt.NXTRegulatedMotor;
-import lejos.nxt.Sound;
 
 
 public class Navigator{	
 	// Variables for the speed of the movement
-	private final static int FAST_SPEED = 250, SLOW_SPEED = 90, NORMAL_SPEED=200, ACCELERATION=4000;
+	private final static int FAST_SPEED = 250, SLOW_SPEED = 90, NORMAL_SPEED=200;
 	private final static int ROTATION_SPEED = 100;
-	private final static double RADIUS = 2.085; 
-	private final static double WHEELS_DISTANCE = 16.2;
+	private static double wheelRadius; 
+	private static double wheelsDistance;
 	
 	// The error and threshold values
-	private final static double ANGLE_BANDWIDTH_DEG = 2, ANGLE_BANDWIDTH_RAD = 2*Math.PI/180;
-	private final static double POSITION_BANDWIDTH = 1.0; // Used when the robot is possibly turning fast
+	private final static double ANGLE_BANDWIDTH_DEG = 2; 
+	// Used when the robot is possibly turning fast
+	private final static double POSITION_BANDWIDTH = 1.0; 
+
+	// Some flags
+	private final static int LEFT=0, FRONT=1, RIGHT=1;
 	
 	// Objects used by the navigator
 	private Odometer odometer;
@@ -24,38 +27,33 @@ public class Navigator{
 	// Variables to indicate the position of RobinHood and the destination
 	private Vector position, destination;
 	private Vector unitOrientationVector;
-	boolean isNavigating;
 	
 	// Obstacle avoidance variables
-	private int obstacleAvoidanceGapCounter=0; 
-	private final static int OBSTACLE_AVOIDANCE_GAP_FILTER=3, OBSTACLE_MAX_DISTANCE=100, OBSTACLE_DISTANCE_THRESHOLD=3;
-	private int obstaclePosition;
-	private final static int MIN_FRONT_DISTANCE = 25, MIN_LEFT_DISTANCE = 5;
+	private static final int FRONT_DISTANCETHRESHOLD = 20, LEFT_DESIRED_DISTANCE = 16;
+	private static final int LEFT_MIN_DISTANCE = 9, LEFT_DISTANCE_BANDWIDTH = 2;
 	private static double rotationSpeed;
 	
-	
-	private final static int LEFT=0, FRONT=1, RIGHT=1;
 	private int[] distance = {255,255};
 	private double launchAngle = Math.tan(7.4/(5*30.48 + 4));
 	private double launchDistance = Math.sqrt(Math.pow(-7.4, 2) + Math.pow(5*30.48 + 4, 2));
 	private Launcher launcher;
-	private OdometryCorrector odoC;
-	public static int targetAngle;
-	public static double targetX;
-	public static double targetY;
+	private OdometryCorrector odometryCorrector;
+	private int targetAngle;
+	private double targetX;
+	private double targetY;
 	
 	
-	public Navigator(Odometer odometer, NXTRegulatedMotor[] wheels, USController usController, Launcher launch, OdometryCorrector odoC)	{
+	public Navigator(Odometer odometer, NXTRegulatedMotor[] wheels, USController usController, Launcher launch, OdometryCorrector odoCorrector)	{
 		this.launcher = launch;
 		this.odometer = odometer;
 		this.wheels = wheels;
-		this.odoC = odoC;
-//		this.state = NO_OBSTACLE;
+		this.odometryCorrector = odoCorrector;
 		this.usController = usController;
 		this.speed = new int[2];
 		this.speed[LEFT] =  NORMAL_SPEED;
 		this.speed[RIGHT] = NORMAL_SPEED;
-		this.isNavigating = false;
+		wheelRadius = odometer.getRadius();
+		wheelsDistance = odometer.getWheelsDistance();
 		destination = new Vector(0, 0);
 		position = new Vector(0, 0);
 		unitOrientationVector = new Vector();
@@ -68,12 +66,15 @@ public class Navigator{
 	protected void moveStraight() {
 		wheels[LEFT].forward();
 		wheels[RIGHT].forward();
-//		speed[LEFT]=(int)(NORMAL_SPEED*odometer.getLeftRadius()/odometer.getRightRadius());
 		speed[LEFT]=NORMAL_SPEED;
 		speed[RIGHT]=NORMAL_SPEED;
 		
 		updateSpeed();
 	}
+	
+	/**
+	 * Moves the robotto left.
+	 */
 	protected void moveLeft() {
 		wheels[LEFT].forward();
 		wheels[RIGHT].forward();
@@ -81,6 +82,10 @@ public class Navigator{
 		speed[RIGHT] = FAST_SPEED;
 		updateSpeed();
 	}
+	
+	/**
+	 * Moves the robot to right.
+	 */
 	protected void moveRight() {
 		wheels[LEFT].forward();
 		wheels[RIGHT].forward();
@@ -88,6 +93,7 @@ public class Navigator{
 		speed[RIGHT] = SLOW_SPEED;
 		updateSpeed();
 	}
+	
 	/**
 	 * Turns right instantaneously when there is a close wall in front.
 	 * Rotates about the center axis of the robot.
@@ -99,6 +105,7 @@ public class Navigator{
 		speed[RIGHT]=NORMAL_SPEED;
 		updateSpeed();
 	}
+	
 	/**
 	 * Turns left instantaneously when there is no wall in the left.
 	 * Rotates about the center axis of the robot.
@@ -111,15 +118,20 @@ public class Navigator{
 		updateSpeed();
 	}	
 	protected void updateSpeed() {
-//		wheels[LEFT].setAcceleration(ACCELERATION);		     
-//		wheels[RIGHT].setAcceleration(ACCELERATION);
 		wheels[LEFT].setSpeed(speed[LEFT]);		     
 		wheels[RIGHT].setSpeed(speed[RIGHT]);	
 	}
 	
 	/**
-	 * Updates the position vector and the unit orientation vector of the robot based
-	 * on the odometer x, y and theta
+	 * Moves the robot to the point that it has to launch the ball.
+	 * It stops and turns to the target. Then calls the launcher to launch a ball.
+	 * @param x
+	 * @param y
+	 * @param xMin
+	 * @param xMax
+	 * @param yMin
+	 * @param yMax
+	 * @param numBalls Number of ping pong balls to shoot
 	 */
 	public void fireAt(double x, double y, double xMin, double xMax, double yMin, double yMax,int numBalls)
 	{
@@ -131,8 +143,6 @@ public class Navigator{
 			double testX = -(Math.cos(Math.toRadians(i))*launchDistance);
 			double testY = -(Math.sin(Math.toRadians(i))*launchDistance);
 			
-			
-			
 			testX = testX + x;
 			testY = testY + y;
 			if((testX > xMin && testX < xMax)&&(testY > yMin && testY < yMax))
@@ -143,61 +153,50 @@ public class Navigator{
 				break;
 			}
 		}
-	//	Button.waitForAnyPress();
 		travelTo(targetX,targetY,false);
-		
 		turnTo(targetAngle + launchAngle,true);
-		
 		launcher.launch( numBalls);
 	}
 	
-	public void updatePosition() {
+	/**
+	 * Updates the current position by odometer values
+	 */
+	private void updatePosition() {
 		position.setX(odometer.getX());
 		position.setY(odometer.getY());
 		unitOrientationVector.setOrientation(minimizeAngle(odometer.getHeading()));
 	}
-//	public void setSpeeds(int lSpd, int rSpd) {
-//		this.wheels[0].setSpeed(lSpd);
-//		this.wheels[1].setSpeed(rSpd);
-//		if (lSpd < 0)
-//			this.wheels[0].backward();
-//		else
-//			this.wheels[0].forward();
-//		if (rSpd < 0)
-//			this.wheels[1].backward();
-//		else
-//			this.wheels[1].forward();
-//	}
-
-
-	public void navigateMap(double[][]map) {
 	
-	for(int i = 0; i < map.length ; i++)
-		{
-			travelTo(map[i][0],map[i][1],false);
-		}
+	/**
+	 * Navigates the robot through the given map
+	 * @param map The list of x and y coordinates of the destinations in the given map
+	 */
+	public void navigateMap(double[][]map) {
+		for(int i = 0; i < map.length ; i++)
+			{
+				travelTo(map[i][0],map[i][1],false);
+			}
 	}
 	
 	/** 
 	 * This function takes as arguments the x and y position in cm Will travel to designated position, while
 	 * constantly updating it's heading
+	 * @param x destination x coordinate
+	 * @param y destination y coordinate
+	 * @param obstacleAvoidance determines if the obstacle avoidance feature is activated or not
 	 */
 	public void travelTo(double x, double y,boolean obstacleAvoidance) {
-		int minFront = 20, minLeft=5, bw=2;
-		isNavigating = true;
 		destination.setX(x);
 		destination.setY(y);
 		double relativeTargetOrientation = minimizeAngle( (destination.subtract(position)).getOrientation() )*180/Math.PI;
-//		wheels[LEFT].setAcceleration(1000);
-//		wheels[RIGHT].setAcceleration(1000);
-		
+
 		// If the robot isn't close enough to its destination
 		while( !position.approxEquals(destination) ) {
 			this.distance[FRONT] = usController.getDistance(FRONT);
 			this.distance[LEFT] = usController.getDistance(LEFT);
 			
-			if( obstacleAvoidance ) {
-				if( distance[FRONT] <= 20 ) {
+			 if( obstacleAvoidance ) {
+				if( distance[FRONT] <= FRONT_DISTANCETHRESHOLD ) {
 					avoidObstacle();
 				}
 				else {
@@ -206,23 +205,21 @@ public class Navigator{
 				}
 			}
 			// Used when going perpendicular to grid lines
-			else if(odoC.getMustTurnLeft()){
+			else if(odometryCorrector.getMustTurnLeft()){
 				speed[LEFT] = 0;
 				speed[RIGHT] = FAST_SPEED;
 				updateSpeed();
 			}
-			else if(odoC.getMustTurnRight()){
+			else if(odometryCorrector.getMustTurnRight()){
 				speed[LEFT] = FAST_SPEED;
 				speed[RIGHT] = 0;
 				updateSpeed();
 			}
 			
 			// Obstacle avoidance while on the set path
-			else if(distance[LEFT]<=9){
-				Sound.beep();
+			else if(distance[LEFT]<=LEFT_MIN_DISTANCE){
 				moveRight();
 			}
-			
 			else
 			{
 				turnTo(relativeTargetOrientation, false);
@@ -233,7 +230,6 @@ public class Navigator{
 		}
 		
 		// If the robot reached its destination
-		isNavigating = false;
 		wheels[LEFT].stop();
 		wheels[RIGHT].stop();
 	}
@@ -251,7 +247,7 @@ public class Navigator{
 
 		while ( true ) {
 			turnRight();
-			if( distance[LEFT] < 16 )
+			if( distance[LEFT] < LEFT_DESIRED_DISTANCE )
 				break;
 			this.distance[LEFT] = usController.getDistance(LEFT);
 			LCD.drawString("Left dist:  "+distance[LEFT], 0, 4);
@@ -265,9 +261,9 @@ public class Navigator{
 			LCD.drawString("Left dist:  " + distance[LEFT], 0, 4);
 			LCD.drawString("Front dist: " + distance[FRONT], 0, 5);
 			relativeTargetOrientation = minimizeAngle( (destination.subtract(position)).getOrientation() );
-			distError = distance[LEFT]-10;
+			distError = distance[LEFT]-LEFT_MIN_DISTANCE;
 			/* Case 1:  Error in bounds  */
-			if (Math.abs(distError) <= 1.5 ) {
+			if (Math.abs(distError) <= LEFT_DISTANCE_BANDWIDTH ) {
 				moveStraight();
 			}
 			/* Case 2: Negative error, moving too close to wall */
@@ -280,8 +276,9 @@ public class Navigator{
 			}
 			if( Math.abs(relativeTargetOrientation - (unitOrientationVector.getOrientation())) <= 3*Math.PI/180 && distance[FRONT]>40 ) // why?
 				break;
-			
-			if( distance[FRONT] <= 20 ) { // why?
+	
+			// If another obstacle was detected in front, finishes the loop and starts from the beginning
+			if( distance[FRONT] <= 20 ) {
 				break;
 			}
 		}
@@ -294,9 +291,6 @@ public class Navigator{
 	 * @param targetAngle The angle in degrees
 	 */
 	public void turnTo(double targetAngle, boolean stop) {
-//		wheels[LEFT].setAcceleration(6000);
-//		wheels[RIGHT].setAcceleration(6000);
-
 		while(Math.abs(Odometer.minAngleFromTo(odometer.getHeading()*180/Math.PI,targetAngle))>ANGLE_BANDWIDTH_DEG){
 			// If the robot has to turn counterclockwise
 			if(Odometer.minAngleFromTo(odometer.getHeading()*180/Math.PI,targetAngle)<0){
@@ -317,24 +311,33 @@ public class Navigator{
 		}
 		if( stop )
 			this.stop();
-
-//		wheels[LEFT].setAcceleration(1000);
-//		wheels[RIGHT].setAcceleration(1000);
 	}
 	
-	
+	/**
+	 * Converts the traveling distance to the angle that the wheel has to rotate in degrees
+	 * @param radius of the wheel
+	 * @param distance that must be traveled
+	 * @return
+	 */
 	public static double convertDistance(double radius, double distance) {
 		return ((180.0 * distance) / (Math.PI * radius));
 	}
-	public static double convertAngle(double radius, double width, double angle) {
-		return convertDistance(radius, Math.PI * width * angle / 360.0);
+	/**
+	 * Converts angle that the robot should turn into the angle that the wheels have to turn in degrees
+	 * @param radius of the wheel
+	 * @param wheelDistance distance of the two wheels of the robot
+	 * @param angle that we want the robot to change its heading to
+	 * @return
+	 */
+	public static double convertAngle(double radius, double wheelDistance, double angle) {
+		return convertDistance(radius, Math.PI * wheelDistance * angle / 360.0);
 	}
 	/**
 	 * Minimizes an angle so that it is within the range from -180 degrees to 180 if not already in that range
 	 * @param angle in radians
 	 * @return
 	 */
-	public double minimizeAngle(double angle){
+	private double minimizeAngle(double angle){
 		double pi = Math.PI;
 		angle = angle%(2*pi);
 		double minimizedAngle = angle;
@@ -346,21 +349,27 @@ public class Navigator{
 		}
 		return minimizedAngle;
 	}
-		
+	
+	/**
+	 * Sets the speed of rotation of the robot
+	 * @param speed
+	 */
 	public void setRotationSpeed(double speed) {
 		rotationSpeed = speed;
 		setSpeeds(rotationSpeed);
 	}
 	
+	/**
+	 * Sets the speed of each wheel according to the desired speed for the rotation of the robot
+	 * @param rotationalSpeed
+	 */
 	public void setSpeeds(double rotationalSpeed) {
 		double leftSpeed, rightSpeed;
 
-		this.rotationSpeed = rotationalSpeed; 
-
-		leftSpeed = (  rotationalSpeed * WHEELS_DISTANCE * Math.PI / 360.0) *
-				180.0 / (RADIUS * Math.PI);
-		rightSpeed = (-rotationalSpeed * WHEELS_DISTANCE * Math.PI / 360.0) *
-				180.0 / (RADIUS * Math.PI);
+		leftSpeed = (  rotationalSpeed * wheelsDistance * Math.PI / 360.0) *
+				180.0 / (wheelRadius * Math.PI);
+		rightSpeed = (-rotationalSpeed * wheelsDistance * Math.PI / 360.0) *
+				180.0 / (wheelRadius * Math.PI);
 
 		// set motor directions
 		if (leftSpeed > 0.0)
@@ -388,10 +397,15 @@ public class Navigator{
 		else
 			wheels[RIGHT].setSpeed((int)rightSpeed);
 	}
-	void stop(){
+	
+	/**
+	 * Stops the robot
+	 */
+	public void stop(){
 		wheels[RIGHT].stop();
 		wheels[LEFT].stop();
 	}
+
 	/**
 	 * Implementation of a 2D vector.
 	 *
@@ -408,12 +422,6 @@ public class Navigator{
 			setMagnitude(1);
 			setOrientation(0);
 		}
-		public double dotProduct(Vector v) {
-			return x*v.getX()+y*v.getY();
-		}
-		public Vector add(Vector v) {
-			return new Vector(this.x+v.getX(), this.y+v.getY());
-		}
 		public Vector subtract(Vector v) {
 			return new Vector(this.x-v.getX(), this.y-v.getY());
 		}
@@ -422,9 +430,6 @@ public class Navigator{
 		}
 		public double getY() {
 			return y;
-		}
-		public double getMagnitude() {
-			return magnitude;
 		}
 		public double getOrientation() {
 			return orientation;

@@ -11,6 +11,9 @@ public class LCDPrinter extends Thread {
 		this.odometer = odometer;
 	}
 	
+	/**
+	 * Starts displaying the odometry values on the LCD of the NXT brick.
+	 */
 	public void run() {
 		long displayStart, displayEnd;
 		// clear the display once

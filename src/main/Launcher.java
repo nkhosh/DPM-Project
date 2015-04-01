@@ -2,22 +2,21 @@ package main;
 import lejos.nxt.NXTRegulatedMotor;
 
 public class Launcher {
-//	private static final int[] reloadSpeeds = {175,345,365,375,400};
 	private static final int[] reloadSpeeds = {235,375,367,374,380};
-//	private static final int[] reloadSpeeds = {90,220,290,345,390}; // with bar
-//	private static final int[] reloadSpeeds = {80,220,280,320,390}; // without bar
 	
 	private static final int shootingSpeed = 200;
-	private Odometer odometer;
 	private NXTRegulatedMotor launcherMotor;
 	private int ballsInQuiver;
 	
-	public Launcher(Odometer odometer, NXTRegulatedMotor launcherMotor,int startingBalls) {
-		this.odometer = odometer;
+	public Launcher(NXTRegulatedMotor launcherMotor,int startingBalls) {
 		this.launcherMotor = launcherMotor;
 		ballsInQuiver = startingBalls;
 	}
 	
+	/**
+	 * Launches the ping pong balls
+	 * @param balls The number of balls to be shot
+	 */
 	public void launch(int balls){
 		
 		// fire specified number of balls, reloading in between each shot

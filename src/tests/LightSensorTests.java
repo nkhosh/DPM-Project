@@ -15,10 +15,10 @@ public class LightSensorTests {
 		// TODO Auto-generated method stub
 		RobinHood robinHood = new RobinHood();
 		lsController = robinHood.getLScontroller();
-		lsController.activateLS();
+		lsController.activateCS();
 		
 		while(true){
-			data = lsController.readFilteredLSdata();
+			data = lsController.readFilteredCSdata();
 			
 			LCD.drawString("LEFT:  "+ data[0], 0, 0);
 			LCD.drawString("RIGHT: "+ data[1], 0, 1);

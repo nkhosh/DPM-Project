@@ -7,7 +7,7 @@ import lejos.nxt.UltrasonicSensor;
 
 public class RobinHood {
 	private final static SensorPort lsLeftPort = SensorPort.S1, lsRightPort = SensorPort.S2,
-									usLeftPort = SensorPort.S3, usFrontPort = SensorPort.S4; //TODO: check the ports when connecting to hardware
+									usLeftPort = SensorPort.S3, usFrontPort = SensorPort.S4; 
 	private final static NXTRegulatedMotor[] wheelMotor = {Motor.A, Motor.B};
 	private final static NXTRegulatedMotor launcherMotor = Motor.C;
 	private final static int LEFT=0, FRONT=1, RIGHT=1;
@@ -44,7 +44,7 @@ public class RobinHood {
 		odometer = new Odometer(wheelMotor, lock);
 		odometryCorrector = new OdometryCorrector(odometer, lsController, lock);
 		navigator = new Navigator(odometer, wheelMotor, usController, launcher, odometryCorrector);
-		launcher = new Launcher(odometer, launcherMotor, 6);
+		launcher = new Launcher(launcherMotor, 6);
 		lcdPrinter = new LCDPrinter(odometer, lock);
 		localizer = new Localizer(odometer,navigator,usSensor,lsSensor);
 	}

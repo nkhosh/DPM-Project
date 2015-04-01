@@ -3,7 +3,6 @@ package main;
 import lejos.nxt.*;
 
 public class Localizer {
-	//public enum LocalizationType { FALLING_EDGE, RISING_EDGE };
 	public static double ROTATION_SPEED = 30;
 	public static final int LIMIT = 65;
 	public static final double OFFSETY = 6.0;
@@ -18,7 +17,7 @@ public class Localizer {
 
 	private Odometer odo;
 	private Navigator nav;
-	private static UltrasonicSensor front,side;
+	private UltrasonicSensor frontUSSensor,leftUSSensor;
 	public static boolean isIncreasing;
 	public static int distancePrevious;
 	public static int distanceSide;
@@ -41,12 +40,18 @@ public class Localizer {
 	public static int filterCountL;
 	public static int filterCountR ;
 	
-	
+	/**
+	 * Constructor initializes the variables in the class
+	 * @param odo Odometer object
+	 * @param nav Navigator object
+	 * @param us Array of two ultrasonic sensors
+	 * @param ls Array of two color sensors
+	 */
 	public Localizer(Odometer odo, Navigator nav, UltrasonicSensor[] us, ColorSensor[] ls) {
 		this.odo = odo;
 		this.nav = nav;
-		this.side = us[0];
-		this.front = us[1];
+		this.leftUSSensor = us[0];
+		this.frontUSSensor = us[1];
 		this.left = ls[0];
 		this.right = ls[1];
 		isIncreasing = true; 
@@ -56,97 +61,96 @@ public class Localizer {
 		leftValue = -69;
 		rightValue = -69;
 		// switch off the ultrasonic sensor
-		front.off();
-		side.off();
+		frontUSSensor.off();
+		leftUSSensor.off();
 	}
 	
+	/**
+	 * 
+	 */
 	public void doLocalization() {
 		
 		doUSLocalization();
 		doLSLocalization(0,0);
 	}
 	
-	public void doUSLocalization(){
-		
-		
-			boolean isRunning = true;
-			angle = 0;
-			double xDistance = -1;
-			double yDistance = -1;
-			int delayCountLimit = 45;
-			int delayCount = 0;
-			
-			
-			while(isRunning)
-			{
-					int change = 0;
+	/**
+	 * Localizes the robot using the ultrasonic sensors
+	 */
+	public void doUSLocalization(){		
+		boolean isRunning = true;
+		angle = 0;
+		double xDistance = -1;
+		double yDistance = -1;
+		int delayCountLimit = 45;
+		int delayCount = 0;
 					
-					
-					
-					nav.setRotationSpeed(ROTATION_SPEED);
-
-
-					distanceFront = this.getFilteredData(front);
-					if(distancePrevious == -1)
-					{
-						//Sound.beep();
-					}
-					else
-					{
-						change = distanceFront - distancePrevious;
-
-							if (change > 0)
-							{
-								//Sound.beep();
-								if(change >3 && delayCount > delayCountLimit)
-								{
-									delayCount = 0;
-									Sound.beep();
-									delayCount = 0;
-									nav.stop();
-									nav.turnTo(odo.getHeadingDeg()-COMPENSATION,true);
-									//Button.waitForAnyPress();
-									 distanceSide = this.getFilteredData(side);
-									
-									 if(distanceSide < LIMIT)
-									 {
-										//Sound.beep();
-										angle = odo.getHeadingDeg();
-										//Button.waitForAnyPress();
-										xDistance = this.getFilteredData(front) + OFFSETX;
-										yDistance = distanceSide + OFFSETY;
-										isRunning = false;
-									 }
-									
-								}
-								
-								isIncreasing = true;
-							}
-							else if (change < 0 )
-							{
-								isIncreasing = false;
-							}
-							delayCount ++;
+		while(isRunning)
+		{
+			int change = 0;
 							
+			nav.setRotationSpeed(ROTATION_SPEED);
+
+			distanceFront = this.getFilteredData(frontUSSensor);
+			if(distancePrevious == -1)
+			{
+				//Sound.beep();
+			}
+			else
+			{
+				change = distanceFront - distancePrevious;
+				if (change > 0)
+				{
+					//Sound.beep();
+					if(change >3 && delayCount > delayCountLimit)
+					{
+						delayCount = 0;
+						Sound.beep();
+						delayCount = 0;
+						nav.stop();
+						nav.turnTo(odo.getHeadingDeg()-COMPENSATION,true);
+						//Button.waitForAnyPress();
+						 distanceSide = this.getFilteredData(leftUSSensor);
+						
+						 if(distanceSide < LIMIT)
+						 {
+							//Sound.beep();
+							angle = odo.getHeadingDeg();
+							//Button.waitForAnyPress();
+							xDistance = this.getFilteredData(frontUSSensor) + OFFSETX;
+							yDistance = distanceSide + OFFSETY;
+							isRunning = false;
+						 }
 					}
-					distancePrevious = distanceFront;
+					isIncreasing = true;
+				}
+				else if (change < 0 )
+				{
+					isIncreasing = false;
+				}
+				delayCount ++;
 					
-			}		
-					
-		
-			
-			//double correctAngle = angle + COMPENSATION;
-			nav.stop();
-			//Sound.beep();
-			double[] pos = {0,0,0};
-			odo.getPosition(pos);
-			odo.setPosition(new double [] {xDistance-30.48, yDistance-30.48, 270  }, new boolean [] {true, true, true});
-			//nav.travelTo(-7.5, -1,false);
-			nav.travelTo(-7.5, -2,false);
-			nav.turnTo(0, true);
+			}
+			distancePrevious = distanceFront;
+		}		
+							
+		//double correctAngle = angle + COMPENSATION;
+		nav.stop();
+		//Sound.beep();
+		double[] pos = {0,0,0};
+		odo.getPosition(pos);
+		odo.setPosition(new double [] {xDistance-30.48, yDistance-30.48, 270  }, new boolean [] {true, true, true});
+		//nav.travelTo(-7.5, -1,false);
+		nav.travelTo(-7.5, -1,false);
+		nav.turnTo(0, true);
 	}
 			
-	public void doLSLocalization(double xZero, double yZero){
+	/**
+	 * Localizes the robot using the color sensors given the approximate coordinates where it starts localization
+	 * @param initialX
+	 * @param initialY
+	 */
+	public void doLSLocalization(double initialX, double initialY){
 		//assumes you are at point -7.5,-1 from your zero
 		left.setFloodlight(true);
 		right.setFloodlight(true);
@@ -283,21 +287,17 @@ public class Localizer {
 		
 
 		//update these values, travel to (0,0), and turn to 0 degrees
-		odo.setPosition(new double [] {x+ xZero -1.1, y+yZero + 1, pos[2]+delta +.5 }, new boolean [] {true, true, true});
+
+		odo.setPosition(new double [] {x+ initialX -0.9, y+initialY + 1.5, pos[2]+delta }, new boolean [] {true, true, true});
 		
 		odo.getPosition(pos);
-		nav.travelTo(xZero, yZero,false);
+		nav.travelTo(initialX, initialY,false);
 		odo.getPosition(pos);
 		nav.turnTo(0,true);
-//		Button.waitForAnyPress();
-
-		
 		nav.stop();
-		
-		
 	}
 	
-	public int getFilteredData(UltrasonicSensor s) {
+	private int getFilteredData(UltrasonicSensor s) {
 		 int distance = 0;
 		
 		// do a ping
@@ -318,7 +318,8 @@ public class Localizer {
 				
 		return distance;
 	}
-	public boolean checkAgainstAvgL(int input)
+	
+	private boolean checkAgainstAvgL(int input)
 	{
 		if(averageL- input >threshhold)
 			return true;
@@ -333,7 +334,7 @@ public class Localizer {
 		
 		
 	}
-	public boolean checkAgainstAvgR(int input)
+	private boolean checkAgainstAvgR(int input)
 	{
 		if(averageR - input >threshhold)
 			return true;
