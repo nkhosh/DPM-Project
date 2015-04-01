@@ -205,20 +205,20 @@ public class Navigator{
 					moveStraight();
 				}
 			}
-			// 
+			// Used when going perpendicular to grid lines
 			else if(odoC.getMustTurnLeft()){
 				speed[LEFT] = 0;
 				speed[RIGHT] = FAST_SPEED;
 				updateSpeed();
 			}
-			
 			else if(odoC.getMustTurnRight()){
 				speed[LEFT] = FAST_SPEED;
 				speed[RIGHT] = 0;
 				updateSpeed();
 			}
-			//
-			else if(distance[LEFT]<=7){
+			
+			// Obstacle avoidance while on the set path
+			else if(distance[LEFT]<=9){
 				Sound.beep();
 				moveRight();
 			}
