@@ -3,10 +3,8 @@ import lejos.nxt.*;
 
 
 public class Competition {
-	
-
-	
-	@SuppressWarnings("unused")
+		
+//	@SuppressWarnings("unused")
 	public static void main(String[] args) {
 		// setup the odometer, display, and ultrasonic and light sensors
 		//Button.waitForAnyPress();

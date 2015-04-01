@@ -6,14 +6,14 @@ import lejos.nxt.Sound;
 
 public class Navigator{	
 	// Variables for the speed of the movement
-	final static int FAST_SPEED = 250, SLOW_SPEED = 90, NORMAL_SPEED=200, ACCELERATION=4000;
+	private final static int FAST_SPEED = 250, SLOW_SPEED = 90, NORMAL_SPEED=200, ACCELERATION=4000;
 	private final static int ROTATION_SPEED = 100;
-	public static final double RADIUS = 2.085; 
-	private static final double WIDTH = 16.2;
+	private final static double RADIUS = 2.085; 
+	private final static double WHEELS_DISTANCE = 16.2;
+	
 	// The error and threshold values
-	private final static double ANGLE_BANDWIDTH_DEG = 2, POSITION_BANDWIDTH = 1.0;
-	private static final int LEFT_DISTANCE_THRESHOLD = 15;
-	private static final double ANGLE_BANDWIDTH_RAD = 2*Math.PI/180; // Used when the robot is possibly turning fast
+	private final static double ANGLE_BANDWIDTH_DEG = 2, ANGLE_BANDWIDTH_RAD = 2*Math.PI/180;
+	private final static double POSITION_BANDWIDTH = 1.0; // Used when the robot is possibly turning fast
 	
 	// Objects used by the navigator
 	private Odometer odometer;
@@ -28,7 +28,7 @@ public class Navigator{
 	
 	// Obstacle avoidance variables
 	private int obstacleAvoidanceGapCounter=0; 
-	private static final int OBSTACLE_AVOIDANCE_GAP_FILTER=3, OBSTACLE_MAX_DISTANCE=100, OBSTACLE_DISTANCE_THRESHOLD=3;
+	private final static int OBSTACLE_AVOIDANCE_GAP_FILTER=3, OBSTACLE_MAX_DISTANCE=100, OBSTACLE_DISTANCE_THRESHOLD=3;
 	private int obstaclePosition;
 	private final static int MIN_FRONT_DISTANCE = 25, MIN_LEFT_DISTANCE = 5;
 	private static double rotationSpeed;
@@ -357,9 +357,9 @@ public class Navigator{
 
 		this.rotationSpeed = rotationalSpeed; 
 
-		leftSpeed = (  rotationalSpeed * WIDTH * Math.PI / 360.0) *
+		leftSpeed = (  rotationalSpeed * WHEELS_DISTANCE * Math.PI / 360.0) *
 				180.0 / (RADIUS * Math.PI);
-		rightSpeed = (-rotationalSpeed * WIDTH * Math.PI / 360.0) *
+		rightSpeed = (-rotationalSpeed * WHEELS_DISTANCE * Math.PI / 360.0) *
 				180.0 / (RADIUS * Math.PI);
 
 		// set motor directions
