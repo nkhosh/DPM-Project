@@ -5,10 +5,12 @@ import lejos.nxt.LCD;
 public class LCDPrinter extends Thread {
 	private static final long DISPLAY_PERIOD = 250;
 	private Odometer odometer;
+	private Navigator nav;
 	private Object lock;
 	
-	public LCDPrinter(Odometer odometer, Object lock) {
+	public LCDPrinter(Odometer odometer, Navigator nav, Object lock) {
 		this.odometer = odometer;
+		this.nav = nav;
 	}
 	
 	/**
@@ -26,13 +28,19 @@ public class LCDPrinter extends Thread {
 			LCD.drawString("X:              ", 0, 0);
 			LCD.drawString("Y:              ", 0, 1);
 			LCD.drawString("T:              ", 0, 2);
+			LCD.drawString("L:              ", 0, 4);
+			LCD.drawString("R:              ", 0, 5);
+			LCD.drawString("F:              ", 0, 6);
 
 			// display odometry information
 			LCD.drawString(formattedDoubleToString(odometer.getX(), 2), 3, 0);
 			LCD.drawString(formattedDoubleToString(odometer.getY(), 2), 3, 1);
 			LCD.drawString(formattedDoubleToString(odometer.getHeading()*180/Math.PI, 2), 3, 2);
-			LCD.drawString(formattedDoubleToString((double)Localizer.distanceFront,2),3,3);
-			LCD.drawString(formattedDoubleToString((double)Localizer.distanceSide,2),3,4);
+			LCD.drawString(formattedDoubleToString(nav.getDistance()[0], 2), 3, 4);
+			LCD.drawString(formattedDoubleToString(nav.getDistance()[1], 2), 3, 5);
+			LCD.drawString(formattedDoubleToString(nav.getDistance()[2], 2), 3, 6);
+//			LCD.drawString(formattedDoubleToString((double)Localizer.distanceFront,2),3,3);
+//			LCD.drawString(formattedDoubleToString((double)Localizer.distanceSide,2),3,4);
 
 
 			// throttle the OdometryDisplay

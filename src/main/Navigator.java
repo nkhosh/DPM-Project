@@ -1,22 +1,24 @@
 package main;
 import lejos.nxt.LCD;
 import lejos.nxt.NXTRegulatedMotor;
+import lejos.nxt.Sound;
 
 
 public class Navigator{	
 	// Variables for the speed of the movement
-	private final static int FAST_SPEED = 250, SLOW_SPEED = 90, NORMAL_SPEED=200;
+	private final static int FAST_SPEED = 250, SLOW_SPEED = 100, NORMAL_SPEED=200;
 	private final static int ROTATION_SPEED = 100;
 	private static double wheelRadius; 
 	private static double wheelsDistance;
 	
 	// The error and threshold values
-	private final static double ANGLE_BANDWIDTH_DEG = 2; 
+	private final static double ANGLE_BANDWIDTH_DEG = 2;
+	private final static double ANGLE_BANDWIDTH_RAD = Math.toRadians(ANGLE_BANDWIDTH_DEG);
 	// Used when the robot is possibly turning fast
 	private final static double POSITION_BANDWIDTH = 1.0; 
 
 	// Some flags
-	private final static int LEFT=0, FRONT=1, RIGHT=1;
+	private final static int LEFT=0, FRONT=2, RIGHT=1;
 	
 	// Objects used by the navigator
 	private Odometer odometer;
@@ -28,26 +30,27 @@ public class Navigator{
 	private Vector position, destination;
 	private Vector unitOrientationVector;
 	
-	// Obstacle avoidance variables
-	private static final int FRONT_DISTANCETHRESHOLD = 20, LEFT_DESIRED_DISTANCE = 16;
-	private static final int LEFT_MIN_DISTANCE = 9, LEFT_DISTANCE_BANDWIDTH = 2;
+	// Obstacle avoidance variables (in centimeters)
+	private static final int FRONT_DISTANCE_THRESHOLD = 20, ANGLED_SENSOR_DISTANCE_THRESHOLD = 20, ANGLED_SENSOR_BANDCENTER = 30;
+	private static final int ANGLED_SENSOR_DISTANCE_BANDWIDTH = 3;
+	private static final int MAX_DISTANCE = 40;
 	private static double rotationSpeed;
 	
-	private int[] distance = {255,255};
+	private int[] distance = {255,255,255};
 	private double launchAngle = Math.tan(7.4/(5*30.48 + 4));
 	private double launchDistance = Math.sqrt(Math.pow(-7.4, 2) + Math.pow(5*30.48 + 4, 2));
 	private Launcher launcher;
-	private OdometryCorrector odometryCorrector;
 	private int targetAngle;
 	private double targetX;
 	private double targetY;
 	
+	private int followingSide;
 	
-	public Navigator(Odometer odometer, NXTRegulatedMotor[] wheels, USController usController, Launcher launch, OdometryCorrector odoCorrector)	{
+	
+	public Navigator(Odometer odometer, NXTRegulatedMotor[] wheels, USController usController, Launcher launch)	{
 		this.launcher = launch;
 		this.odometer = odometer;
 		this.wheels = wheels;
-		this.odometryCorrector = odoCorrector;
 		this.usController = usController;
 		this.speed = new int[2];
 		this.speed[LEFT] =  NORMAL_SPEED;
@@ -58,6 +61,16 @@ public class Navigator{
 		position = new Vector(0, 0);
 		unitOrientationVector = new Vector();
 		updatePosition();
+		
+		followingSide = LEFT;
+	}
+	
+	public int[] getDistance(){
+		return distance;
+	}
+	
+	public void setUSFollowingSide(int side){
+		this.followingSide = side;
 	}
 	
 	/**
@@ -73,7 +86,7 @@ public class Navigator{
 	}
 	
 	/**
-	 * Moves the robotto left.
+	 * Moves the robot to left.
 	 */
 	protected void moveLeft() {
 		wheels[LEFT].forward();
@@ -116,7 +129,45 @@ public class Navigator{
 		speed[RIGHT]=NORMAL_SPEED;
 		speed[LEFT]=NORMAL_SPEED;
 		updateSpeed();
-	}	
+	}
+	
+	protected void turn(int orientation){
+		if(orientation == LEFT){
+			wheels[LEFT].backward();
+			wheels[RIGHT].forward();
+		}
+		else{
+			wheels[LEFT].forward();
+			wheels[RIGHT].backward();
+		}
+		
+		speed[RIGHT]=NORMAL_SPEED;
+		speed[LEFT]=NORMAL_SPEED;
+		updateSpeed();
+	}
+	/**
+	 * Move in the 
+	 * @param orientation
+	 */
+	protected void move(int orientation){
+		wheels[LEFT].forward();
+		wheels[RIGHT].forward();
+		if(orientation == LEFT){
+			speed[LEFT]=SLOW_SPEED;
+			speed[RIGHT]=FAST_SPEED;
+		}
+		else if(orientation == RIGHT){
+			speed[LEFT]=FAST_SPEED;
+			speed[RIGHT]=SLOW_SPEED;
+		}
+		else if(orientation == FRONT){
+			speed[LEFT]=NORMAL_SPEED;
+			speed[RIGHT]=NORMAL_SPEED;
+		}
+		updateSpeed();
+	}
+	
+	
 	protected void updateSpeed() {
 		wheels[LEFT].setSpeed(speed[LEFT]);		     
 		wheels[RIGHT].setSpeed(speed[RIGHT]);	
@@ -194,32 +245,39 @@ public class Navigator{
 		while( !position.approxEquals(destination) ) {
 			this.distance[FRONT] = usController.getDistance(FRONT);
 			this.distance[LEFT] = usController.getDistance(LEFT);
+			this.distance[RIGHT] = usController.getDistance(RIGHT);
 			
 			 if( obstacleAvoidance ) {
-				if( distance[FRONT] <= FRONT_DISTANCETHRESHOLD ) {
-					avoidObstacle();
+				if( distance[FRONT] <= FRONT_DISTANCE_THRESHOLD ) {
+					// Keep rotating until no obstacle in front
+					while(distance[FRONT] <= MAX_DISTANCE){
+						if(followingSide == LEFT){
+							turn(RIGHT);
+						}
+						else{
+							turn(LEFT);
+						}
+						distance[FRONT] = usController.getDistance(FRONT);
+					}
+					avoidObstacle(followingSide);
+				}
+				else if( distance[LEFT] <= ANGLED_SENSOR_DISTANCE_THRESHOLD ) {
+					avoidObstacle(LEFT);
+				}
+				else if( distance[RIGHT] <= ANGLED_SENSOR_DISTANCE_THRESHOLD ) {
+					avoidObstacle(RIGHT);
 				}
 				else {
 					turnTo(relativeTargetOrientation, false);
 					moveStraight();
 				}
 			}
-			// Used when going perpendicular to grid lines
-			else if(odometryCorrector.getMustTurnLeft()){
-				speed[LEFT] = 0;
-				speed[RIGHT] = FAST_SPEED;
-				updateSpeed();
-			}
-			else if(odometryCorrector.getMustTurnRight()){
-				speed[LEFT] = FAST_SPEED;
-				speed[RIGHT] = 0;
-				updateSpeed();
-			}
 			
-			// Obstacle avoidance while on the set path
-			else if(distance[LEFT]<=LEFT_MIN_DISTANCE){
-				moveRight();
-			}
+			
+//			// Obstacle avoidance while on the set path
+//			else if(distance[LEFT]<=LEFT_MIN_DISTANCE){
+//				moveRight();
+//			}
 			else
 			{
 				turnTo(relativeTargetOrientation, false);
@@ -234,55 +292,133 @@ public class Navigator{
 		wheels[RIGHT].stop();
 	}
 
-	/**
-	 * This class controls the movement of the robot when an obstacle is detected.
-	 * If there is an obstacle in front, it turns right.
-	 * Otherwise it follows an obstacle with the same logic as bang bang controller.
-	 */
-	private void avoidObstacle() {
-		this.distance[FRONT] = usController.getDistance(FRONT);
-		this.distance[LEFT] = usController.getDistance(LEFT);
+//	/**
+//	 * This class controls the movement of the robot when an obstacle is detected.
+//	 * If there is an obstacle in front, it turns right.
+//	 * Otherwise it follows an obstacle with the same logic as bang bang controller.
+//	 */
+//	private void avoidObstacle() {
+//		this.distance[FRONT] = usController.getDistance(FRONT);
+//		this.distance[LEFT] = usController.getDistance(LEFT);
+//		double relativeTargetOrientation = minimizeAngle( (destination.subtract(position)).getOrientation() );
+//		int distError;
+//
+//		while ( true ) {
+//			turnRight();
+//			if( distance[LEFT] < ANGLED_SENSOR_DISTANCE_THRESHOLD )
+//				break;
+//			this.distance[LEFT] = usController.getDistance(LEFT);
+//			LCD.drawString("Left dist:  "+distance[LEFT], 0, 4);
+//			LCD.drawString("Front dist: "+distance[FRONT], 0, 5);
+//		}
+//		
+//		while( true ) {
+//			distance[FRONT] = usController.getDistance(FRONT);
+//			distance[LEFT] = usController.getDistance(LEFT);
+//			updatePosition();
+//			LCD.drawString("Left dist:  " + distance[LEFT], 0, 4);
+//			LCD.drawString("Front dist: " + distance[FRONT], 0, 5);
+//			relativeTargetOrientation = minimizeAngle( (destination.subtract(position)).getOrientation() );
+//			distError = distance[LEFT]-LEFT_MIN_DISTANCE;
+//			/* Case 1:  Error in bounds  */
+//			if (Math.abs(distError) <= ANGLED_SENSOR_DISTANCE_BANDWIDTH ) {
+//				moveStraight();
+//			}
+//			/* Case 2: Negative error, moving too close to wall */
+//			else if (distError < 0) {
+//				moveRight();
+//			}
+//			/* Case 3: Positive error, moving too far from wall */
+//			else if (distError > 0) {
+//				moveLeft();
+//			}
+//			if( Math.abs(relativeTargetOrientation - (unitOrientationVector.getOrientation())) <= 3*Math.PI/180 && distance[FRONT]>40 ) // why?
+//				break;
+//	
+//			// If another obstacle was detected in front, finishes the loop and starts from the beginning
+//			if( distance[FRONT] <= 20 ) {
+//				break;
+//			}
+//		}
+//		return;
+//	}
+	
+	private void avoidObstacle(int followingSide){
 		double relativeTargetOrientation = minimizeAngle( (destination.subtract(position)).getOrientation() );
-		int distError;
-
-		while ( true ) {
-			turnRight();
-			if( distance[LEFT] < LEFT_DESIRED_DISTANCE )
-				break;
-			this.distance[LEFT] = usController.getDistance(LEFT);
-			LCD.drawString("Left dist:  "+distance[LEFT], 0, 4);
-			LCD.drawString("Front dist: "+distance[FRONT], 0, 5);
-		}
+		double distError;
+		int dist;
+		int filterCounter = 0;
+		int filterCounter2 = 0;
 		
-		while( true ) {
+		while(true){
+			
+			dist = usController.getDistance(followingSide);
+			
+			if(filterCounter>10 ){
+				distance[followingSide] = dist;
+				filterCounter = 0;
+			}
+			else{
+				if(dist<70){
+					distance[followingSide] = dist;
+					filterCounter = 0;
+				}
+				else{
+					filterCounter++;
+				}
+			}
+			
 			distance[FRONT] = usController.getDistance(FRONT);
-			distance[LEFT] = usController.getDistance(LEFT);
+			
+//			if(filterCounter2>10 ){
+//				distance[FRONT] = dist;
+//				filterCounter2 = 0;
+//			}
+//			else{
+//				if(dist<70){
+//					distance[FRONT] = dist;
+//				}
+//				else{
+//					filterCounter2++;
+//				}
+//			}
+			
+			
 			updatePosition();
-			LCD.drawString("Left dist:  " + distance[LEFT], 0, 4);
-			LCD.drawString("Front dist: " + distance[FRONT], 0, 5);
+			distError = distance[followingSide]-ANGLED_SENSOR_BANDCENTER;
+			
 			relativeTargetOrientation = minimizeAngle( (destination.subtract(position)).getOrientation() );
-			distError = distance[LEFT]-LEFT_MIN_DISTANCE;
+			
+			if(Math.abs(relativeTargetOrientation - (unitOrientationVector.getOrientation())) <= ANGLE_BANDWIDTH_RAD
+					 && distance[followingSide] > ANGLED_SENSOR_BANDCENTER){
+				break;
+			}
+			
+			if(distance[FRONT] < FRONT_DISTANCE_THRESHOLD){
+				break;
+			}
+			
 			/* Case 1:  Error in bounds  */
-			if (Math.abs(distError) <= LEFT_DISTANCE_BANDWIDTH ) {
-				moveStraight();
+			if (Math.abs(distError) <= ANGLED_SENSOR_DISTANCE_BANDWIDTH ) {
+				move(FRONT);
 			}
 			/* Case 2: Negative error, moving too close to wall */
 			else if (distError < 0) {
-				moveRight();
+				if(followingSide == LEFT){
+					move(RIGHT);
+				}
+				else if(followingSide == RIGHT){
+					move(LEFT);
+				}
 			}
 			/* Case 3: Positive error, moving too far from wall */
 			else if (distError > 0) {
-				moveLeft();
+				move(followingSide);
 			}
-			if( Math.abs(relativeTargetOrientation - (unitOrientationVector.getOrientation())) <= 3*Math.PI/180 && distance[FRONT]>40 ) // why?
-				break;
-	
-			// If another obstacle was detected in front, finishes the loop and starts from the beginning
-			if( distance[FRONT] <= 20 ) {
-				break;
-			}
+			
 		}
-		return;
+
+		
 	}
 
 	/**

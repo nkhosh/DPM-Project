@@ -47,13 +47,12 @@ public class Localizer {
 	 * @param us Array of two ultrasonic sensors
 	 * @param ls Array of two color sensors
 	 */
-	public Localizer(Odometer odo, Navigator nav, UltrasonicSensor[] us, ColorSensor[] ls) {
+	public Localizer(Odometer odo, Navigator nav, UltrasonicSensor[] us, ColorSensor ls) {
 		this.odo = odo;
 		this.nav = nav;
 		this.leftUSSensor = us[0];
 		this.frontUSSensor = us[1];
-		this.left = ls[0];
-		this.right = ls[1];
+		this.left = ls; // TODO: no need for array of color sensors, now 3 ultrasonic sensors
 		isIncreasing = true; 
 		distancePrevious = -1;
 	
