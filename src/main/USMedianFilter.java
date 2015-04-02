@@ -23,7 +23,11 @@ public class USMedianFilter extends Thread
 	{
 		for(int i=0; i < 5; i++)
 		{
-			inputDistances[count] = us.getDistance();	//putting the distance value into the input array
+			us.ping();
+			int distance = us.getDistance();
+			try { Thread.sleep(15); } catch (InterruptedException e) {}
+			
+			inputDistances[count] = distance;	//putting the distance value into the input array
 			count++;									//increment count
 			count = count % 5; 							//this makes sure we don not exceed the array size
 			sort(inputDistances);						//sort the input array 
@@ -54,4 +58,10 @@ public class USMedianFilter extends Thread
 	{
 		return this.medianDistance;
 	}
+	
+	public int runAndGetData(){
+		runFilter();
+		return this.medianDistance;
+	}
+	
 }

@@ -18,7 +18,7 @@ public class Navigator{
 	private final static double POSITION_BANDWIDTH = 1.0; 
 
 	// Some flags
-	private final static int LEFT=0, FRONT=2, RIGHT=1;
+	private final static int LEFT=0, RIGHT=1, FRONT=2;
 	
 	// Objects used by the navigator
 	private Odometer odometer;
@@ -45,6 +45,8 @@ public class Navigator{
 	private double targetY;
 	
 	private int followingSide;
+	
+	
 	
 	
 	public Navigator(Odometer odometer, NXTRegulatedMotor[] wheels, USController usController, Launcher launch)	{
@@ -243,9 +245,13 @@ public class Navigator{
 
 		// If the robot isn't close enough to its destination
 		while( !position.approxEquals(destination) ) {
-			this.distance[FRONT] = usController.getDistance(FRONT);
-			this.distance[LEFT] = usController.getDistance(LEFT);
-			this.distance[RIGHT] = usController.getDistance(RIGHT);
+//			this.distance[FRONT] = usController.getDistance(FRONT);
+//			this.distance[LEFT] = usController.getDistance(LEFT);
+//			this.distance[RIGHT] = usController.getDistance(RIGHT);
+			
+			this.distance[FRONT] = usController.getFilteredDistance(FRONT);
+			this.distance[LEFT] = usController.getFilteredDistance(LEFT);
+			this.distance[RIGHT] = usController.getFilteredDistance(RIGHT);
 			
 			 if( obstacleAvoidance ) {
 				if( distance[FRONT] <= FRONT_DISTANCE_THRESHOLD ) {
@@ -257,7 +263,8 @@ public class Navigator{
 						else{
 							turn(LEFT);
 						}
-						distance[FRONT] = usController.getDistance(FRONT);
+//						distance[FRONT] = usController.getDistance(FRONT);
+						distance[FRONT] = usController.getFilteredDistance(FRONT);
 					}
 					avoidObstacle(followingSide);
 				}
@@ -346,29 +353,29 @@ public class Navigator{
 	private void avoidObstacle(int followingSide){
 		double relativeTargetOrientation = minimizeAngle( (destination.subtract(position)).getOrientation() );
 		double distError;
-		int dist;
-		int filterCounter = 0;
-		int filterCounter2 = 0;
+//		int dist;
+//		int filterCounter = 0;
+//		int filterCounter2 = 0;
 		
 		while(true){
 			
-			dist = usController.getDistance(followingSide);
-			
-			if(filterCounter>10 ){
-				distance[followingSide] = dist;
-				filterCounter = 0;
-			}
-			else{
-				if(dist<70){
-					distance[followingSide] = dist;
-					filterCounter = 0;
-				}
-				else{
-					filterCounter++;
-				}
-			}
-			
-			distance[FRONT] = usController.getDistance(FRONT);
+//			dist = usController.getDistance(followingSide);
+//			
+//			if(filterCounter>10 ){
+//				distance[followingSide] = dist;
+//				filterCounter = 0;
+//			}
+//			else{
+//				if(dist<70){
+//					distance[followingSide] = dist;
+//					filterCounter = 0;
+//				}
+//				else{
+//					filterCounter++;
+//				}
+//			}
+			distance[followingSide] = usController.getFilteredDistance(followingSide);
+			distance[FRONT] = usController.getFilteredDistance(FRONT);
 			
 //			if(filterCounter2>10 ){
 //				distance[FRONT] = dist;
@@ -389,8 +396,8 @@ public class Navigator{
 			
 			relativeTargetOrientation = minimizeAngle( (destination.subtract(position)).getOrientation() );
 			
-			if(Math.abs(relativeTargetOrientation - (unitOrientationVector.getOrientation())) <= ANGLE_BANDWIDTH_RAD
-					 && distance[followingSide] > ANGLED_SENSOR_BANDCENTER){
+			if( (Math.abs(relativeTargetOrientation - (unitOrientationVector.getOrientation())) <= ANGLE_BANDWIDTH_RAD
+					 && distance[followingSide] > ANGLED_SENSOR_BANDCENTER)  || ( position.approxEquals(destination)) ){
 				break;
 			}
 			
