@@ -24,6 +24,11 @@ public class NavigationTest {
 //		double[][] destination = {{0,5*TILE_LENGTH}};
 //		double[][] destination = {{0,10*TILE_LENGTH}, {2*TILE_LENGTH,5*TILE_LENGTH}, {0,0} };
 //		while(!touchSensor.isPressed());
+		double[][] destination = {
+				{2*TILE_LENGTH,2*TILE_LENGTH},
+				{-1*TILE_LENGTH,5*TILE_LENGTH},
+				{-2*TILE_LENGTH,2*TILE_LENGTH}
+		};
 		
 		navigator = robin.getNavigator();
 
@@ -38,12 +43,12 @@ public class NavigationTest {
 			robin.getOdometryCorrector().start();
 		}
 		robin.getOdometer().start();
-		robin.getLcdPrinter().start();
+//		robin.getLcdPrinter().start();
 //		navigator.turnTo(0,true);
 //		for(int i=0;i<4;i++){
 //			navigator.travelTo(destination[i][0], destination[i][1]);
 //		}
-//		navigator.navigateMap(destination);
+		navigator.navigateMap(destination, true);
 //		navigator.turnTo(0, true);
 		
 		

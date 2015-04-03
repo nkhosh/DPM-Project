@@ -14,7 +14,10 @@ public class USController {
 		us = usSensor;
 		for(int i=0; i<3; i++){
 			usFilters[i] = new USMedianFilter( us[i] );
+			usFilters[i].start();
 		}
+		
+		
 	}
 	
 	public int getDistance(int orientation) {
@@ -25,7 +28,6 @@ public class USController {
 	}
 	
 	public int getFilteredDistance(int orientation){
-		usFilters[orientation].runFilter();
 		return usFilters[orientation].getFilteredDistance();
 	}
 	
