@@ -85,7 +85,7 @@ public class USMedianFilter extends Thread
 	//getter method
 	public int getFilteredDistance()
 	{
-		medianDistance = inputDistances[windowSize/2];
+		medianDistance = sortedDistances[windowSize/2];
 		return medianDistance;
 	}
 	
