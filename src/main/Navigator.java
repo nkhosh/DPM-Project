@@ -41,6 +41,8 @@ public class Navigator{
 	private static final int FRONT_DISTANCE_THRESHOLD = 20, ANGLED_SENSOR_DISTANCE_THRESHOLD = 18, ANGLED_SENSOR_BANDCENTER = 30;
 	private static final int ANGLED_SENSOR_DISTANCE_BANDWIDTH = 5;
 	private static final int MAX_DISTANCE = 40;
+	private static final int UPPER_ANGLED_BANDWIDTH = 15;
+	private static final int LOWER_ANGLED_BANDWIDTH = 5;
 	private static double rotationSpeed;
 	
 	private int[] distance = {255,255,255};
@@ -391,12 +393,16 @@ public class Navigator{
 				break;
 			}
 			
-			/* Case 1:  Error in bounds  */
-			if (Math.abs(distError) <= ANGLED_SENSOR_DISTANCE_BANDWIDTH /*|| speed[LEFT]!=speed[RIGHT]*/ ) {
-				move(FRONT);
+			
+			/* Case 3: Positive error, moving too far from wall */
+			if (distError > UPPER_ANGLED_BANDWIDTH) { // so the robot doesn't turn into the wall as much
+				move(followingSide);
+//				pMove(followingSide, distError);
 			}
+			
+			
 			/* Case 2: Negative error, moving too close to wall */
-			else if (distError < 0) {
+			else if (distError < - LOWER_ANGLED_BANDWIDTH) {
 				if(followingSide == LEFT){
 					move(RIGHT);
 //					pMove(RIGHT, distError);
@@ -406,11 +412,12 @@ public class Navigator{
 //					pMove(LEFT, distError);
 				}
 			}
-			/* Case 3: Positive error, moving too far from wall */
-			else if (distError > 0) {
-				move(followingSide);
-//				pMove(followingSide, distError);
+			
+			/* Case 1:  Error in bounds  */
+			else /*if (Math.abs(distError) <= ANGLED_SENSOR_DISTANCE_BANDWIDTH)*/ { 
+				move(FRONT);
 			}
+
 			
 		}
 

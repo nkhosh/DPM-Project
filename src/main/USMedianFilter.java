@@ -7,11 +7,11 @@ import lejos.nxt.UltrasonicSensor;
 public class USMedianFilter extends Thread
 {
 	private UltrasonicSensor us;
-	private int[] inputDistances, sortedDistances; //arrays to store the input distances from the sensor, and the sorted distances
 	private int count, medianDistance;
 	private int windowSize;
 	private int movingIndex;
-	private int[] distances;
+	private int[] inputDistances;
+	private int[] sortedDistances;
 	
 	//The constructor
 	public USMedianFilter(UltrasonicSensor us)
@@ -19,11 +19,13 @@ public class USMedianFilter extends Thread
 		//setting up the initial variables
 		this.us = us;
 		windowSize = 5;
-		distances = new int[windowSize];
+		inputDistances = new int[windowSize];
+		sortedDistances = new int[windowSize];
 		movingIndex = 0;
 		
 		for(int i=0; i<windowSize; i++){
-			distances[i] = 255;
+			inputDistances[i] = 255;
+			sortedDistances[i] = 255;
 		}
 	}	
 	
@@ -49,8 +51,10 @@ public class USMedianFilter extends Thread
 			us.ping();
 			int distance = us.getDistance();
 			
-			distances[movingIndex] = distance;
-			Arrays.sort(distances);
+			inputDistances[movingIndex] = distance;
+			
+			sortedDistances = Arrays.copyOf(inputDistances, windowSize);
+			Arrays.sort(sortedDistances);
 
 			movingIndex = (movingIndex+1) % windowSize;
 			
@@ -81,7 +85,7 @@ public class USMedianFilter extends Thread
 	//getter method
 	public int getFilteredDistance()
 	{
-		medianDistance = distances[windowSize/2];
+		medianDistance = inputDistances[windowSize/2];
 		return medianDistance;
 	}
 	
