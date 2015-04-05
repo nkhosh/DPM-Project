@@ -6,14 +6,14 @@ import lejos.nxt.Sound;
 
 public class Navigator{	
 	// Variables for the speed of the movement
+//	private final static int FAST_SPEED = 250, SLOW_SPEED = 120, NORMAL_SPEED=250;
 	private final static int FAST_SPEED = 250, SLOW_SPEED = 120, NORMAL_SPEED=250;
-//	private final static int FAST_SPEED = 300, SLOW_SPEED = 50, NORMAL_SPEED=250;
 	private final static int ROTATION_SPEED = 100;
 	private static double wheelRadius; 
 	private static double wheelsDistance;
 	
 	// The error and threshold values
-	private final static double LOW_ANGLE_BANDWIDTH_DEG = 2;
+	private final static double LOW_ANGLE_BANDWIDTH_DEG = 3;
 	private final static double LOW_ANGLE_BANDWIDTH_RAD = Math.toRadians(LOW_ANGLE_BANDWIDTH_DEG);
 	
 	private final static double HIGH_ANGLE_BANDWIDTH_DEG = 4;
@@ -21,7 +21,7 @@ public class Navigator{
 	// Used when the robot is possibly turning fast
 	
 	private final static double LOW_POSITION_BANDWIDTH = 1;
-	private final static double HIGH_POSITION_BANDWIDTH = 10;
+	private final static double HIGH_POSITION_BANDWIDTH = 30;
 	
 
 	// Some flags
@@ -41,7 +41,7 @@ public class Navigator{
 	private static final int FRONT_DISTANCE_THRESHOLD = 20, ANGLED_SENSOR_DISTANCE_THRESHOLD = 18, ANGLED_SENSOR_BANDCENTER = 30;
 	private static final int ANGLED_SENSOR_DISTANCE_BANDWIDTH = 5;
 	private static final int MAX_DISTANCE = 40;
-	private static final int UPPER_ANGLED_BANDWIDTH = 15;
+	private static final int UPPER_ANGLED_BANDWIDTH = 10;
 	private static final int LOWER_ANGLED_BANDWIDTH = 5;
 	private static double rotationSpeed;
 	
@@ -89,34 +89,41 @@ public class Navigator{
 	 * Moves the robot straight.
 	 */
 	protected void moveStraight() {
+
 		wheels[LEFT].forward();
 		wheels[RIGHT].forward();
 		speed[LEFT]=NORMAL_SPEED;
 		speed[RIGHT]=NORMAL_SPEED;
 		
 		updateSpeed();
+	
 	}
 	
 	/**
 	 * Moves the robot to left.
 	 */
 	protected void moveLeft() {
+
 		wheels[LEFT].forward();
 		wheels[RIGHT].forward();
+		
 		speed[LEFT] = SLOW_SPEED;
 		speed[RIGHT] = FAST_SPEED;
 		updateSpeed();
+		
 	}
 	
 	/**
 	 * Moves the robot to right.
 	 */
 	protected void moveRight() {
+
 		wheels[LEFT].forward();
 		wheels[RIGHT].forward();
 		speed[LEFT] = FAST_SPEED;
 		speed[RIGHT] = SLOW_SPEED;
 		updateSpeed();
+		
 	}
 	
 	/**
@@ -129,6 +136,8 @@ public class Navigator{
 		speed[LEFT]=NORMAL_SPEED;
 		speed[RIGHT]=NORMAL_SPEED;
 		updateSpeed();
+		
+
 	}
 	
 	/**
@@ -141,9 +150,12 @@ public class Navigator{
 		speed[RIGHT]=NORMAL_SPEED;
 		speed[LEFT]=NORMAL_SPEED;
 		updateSpeed();
+		
+
 	}
 	
 	protected void turn(int orientation){
+
 		if(orientation == LEFT){
 			wheels[LEFT].backward();
 			wheels[RIGHT].forward();
@@ -151,19 +163,21 @@ public class Navigator{
 		else{
 			wheels[LEFT].forward();
 			wheels[RIGHT].backward();
-		}
-		
 		speed[RIGHT]=NORMAL_SPEED;
 		speed[LEFT]=NORMAL_SPEED;
 		updateSpeed();
+		
+		}
 	}
 	/**
 	 * Move in the 
 	 * @param orientation
 	 */
 	protected void move(int orientation){
+
 		wheels[LEFT].forward();
 		wheels[RIGHT].forward();
+		
 		if(orientation == LEFT){
 			speed[LEFT]=SLOW_SPEED;
 			speed[RIGHT]=FAST_SPEED;
@@ -176,12 +190,17 @@ public class Navigator{
 			speed[LEFT]=NORMAL_SPEED;
 			speed[RIGHT]=NORMAL_SPEED;
 		}
+		
+		
 		updateSpeed();
+
 	}
 	
 	protected void pMove(int orientation, int difference){
+
 		wheels[LEFT].forward();
 		wheels[RIGHT].forward();
+		
 		if(orientation == LEFT){
 			speed[LEFT]=NORMAL_SPEED - pCalculateSpeed(difference);
 			speed[RIGHT]=NORMAL_SPEED + pCalculateSpeed(difference);
@@ -195,6 +214,8 @@ public class Navigator{
 			speed[RIGHT]=NORMAL_SPEED;
 		}
 		updateSpeed();
+		
+
 	}
 	
 	protected int pCalculateSpeed(int difference){
@@ -277,6 +298,17 @@ public class Navigator{
 			}
 	}
 	
+	/**
+	 * Navigates the robot through the given map
+	 * @param map The list of x and y coordinates (as tile numbers)s of the destinations in the given map
+	 */
+	public void navigateMapTiles(double[][]map, boolean obstacleAvoidance) {
+		for(int i = 0; i < map.length ; i++)
+			{
+				travelTo(map[i][0]*30.48,map[i][1]*30.48, obstacleAvoidance);
+			}
+	}
+	
 	/** 
 	 * This function takes as arguments the x and y position in cm Will travel to designated position, while
 	 * constantly updating it's heading
@@ -287,10 +319,27 @@ public class Navigator{
 	public void travelTo(double x, double y,boolean obstacleAvoidance) {
 		destination.setX(x);
 		destination.setY(y);
-		double relativeTargetOrientation = minimizeAngle( (destination.subtract(position)).getOrientation() )*180/Math.PI;
-
+		double relativeTargetOrientation = minimizeAngle( Math.atan2(x - odometer.getX(), y - odometer.getY()) );
+		long updateStart, updateEnd;
+		
+		/////////
+		
+//		double minAng;
+//		while (Math.abs(x - odometer.getX()) > LOW_POSITION_BANDWIDTH || Math.abs(y - odometer.getY()) > LOW_POSITION_BANDWIDTH) {
+//			minAng = (Math.atan2(x - odometer.getX(), y - odometer.getY())) * (180.0 / Math.PI);
+//			if (minAng < 0)
+//				minAng += 360.0;
+//			this.turnTo(minAng, false);
+//			this.moveStraight();
+//		}
+		
+		/////////
+		
+		
+		
+		
 		// If the robot isn't close enough to its destination
-		while( !position.approxEquals(destination, LOW_POSITION_BANDWIDTH) ) {
+		while( (Math.abs(x - odometer.getX()) > LOW_POSITION_BANDWIDTH || Math.abs(y - odometer.getY()) > LOW_POSITION_BANDWIDTH) ) {
 //			this.distance[FRONT] = usController.getDistance(FRONT);
 //			this.distance[LEFT] = usController.getDistance(LEFT);
 //			this.distance[RIGHT] = usController.getDistance(RIGHT);
@@ -299,7 +348,10 @@ public class Navigator{
 			this.distance[LEFT] = usController.getFilteredDistance(LEFT);
 			this.distance[RIGHT] = usController.getFilteredDistance(RIGHT);
 			
-			 if( obstacleAvoidance && !position.approxEquals(destination, HIGH_POSITION_BANDWIDTH) ) {
+
+			updateStart = System.currentTimeMillis();
+			
+			 if(obstacleAvoidance && (Math.abs(x - odometer.getX()) > HIGH_POSITION_BANDWIDTH || Math.abs(y - odometer.getY()) > HIGH_POSITION_BANDWIDTH) ) {
 				if( distance[FRONT] <= FRONT_DISTANCE_THRESHOLD ) {
 					// Keep rotating until no obstacle in front
 					while(distance[FRONT] <= MAX_DISTANCE){
@@ -328,28 +380,141 @@ public class Navigator{
 					avoidObstacle(RIGHT);
 				}
 				else {
-					turnTo(relativeTargetOrientation, false);
+					turnToRad(relativeTargetOrientation, false);
 					moveStraight();
 				}
 			}
 			
-			
-//			// Obstacle avoidance while on the set path
-//			else if(distance[LEFT]<=LEFT_MIN_DISTANCE){
-//				moveRight();
-//			}
 			else
 			{
-				turnTo(relativeTargetOrientation, false);
+				turnToRad(relativeTargetOrientation, false);
 				moveStraight();
 			}
-			updatePosition();
-			relativeTargetOrientation = minimizeAngle( (destination.subtract(position)).getOrientation() )*180/Math.PI;
+			 
+			relativeTargetOrientation = minimizeAngle( Math.atan2(x - odometer.getX(), y - odometer.getY()) );
+			updateEnd = System.currentTimeMillis();
+			
+//			if (updateEnd - updateStart < 15) {
+//				try {
+//					Thread.sleep(15 - (updateEnd - updateStart));
+//				} catch (InterruptedException e) {
+//					// there is nothing to be done here because it is not
+//					// expected that the odometer will be interrupted by
+//					// another thread
+//				}
+//			}
 		}
 		
 		// If the robot reached its destination
 		wheels[LEFT].stop();
 		wheels[RIGHT].stop();
+	}
+	
+	
+	/**
+	 * TurnTo function which takes an angle and boolean as arguments The boolean controls whether or not to stop the
+	 * motors when the turn is completed
+	 * @param targetAngle The angle in degrees
+	 */
+	public void turnTo(double targetAngle, boolean stop) {
+		double heading = odometer.getHeading();
+		
+		while(Math.abs(Odometer.minAngleFromTo(heading*180/Math.PI,targetAngle))>LOW_ANGLE_BANDWIDTH_DEG){
+
+			speed[LEFT] = ROTATION_SPEED;
+			speed[RIGHT] = ROTATION_SPEED;
+			
+			// If the robot has to turn counterclockwise
+			if(Odometer.minAngleFromTo(heading*180/Math.PI,targetAngle)<0){
+				wheels[RIGHT].forward();
+				wheels[LEFT].backward();
+			}
+			// Else if the robot has to turn clockwise
+			else{
+				wheels[RIGHT].backward();
+				wheels[LEFT].forward();
+			}
+			
+
+			updateSpeed();
+
+			
+			heading = odometer.getHeading();
+			
+		}
+		if( stop )
+			this.stop();
+		
+		
+	}
+	
+	/**
+	 * TurnTo function which takes an angle and boolean as arguments The boolean controls whether or not to stop the
+	 * motors when the turn is completed
+	 * @param targetAngle The angle in degrees
+	 */
+	public void turnToRad(double targetAngle, boolean stop) {
+		double heading = odometer.getHeading();
+		
+		while(Math.abs(minAngleFromToRad(heading,targetAngle)) > LOW_ANGLE_BANDWIDTH_RAD){
+
+			speed[LEFT] = ROTATION_SPEED;
+			speed[RIGHT] = ROTATION_SPEED;
+			
+			// If the robot has to turn counterclockwise
+			if(minAngleFromToRad(heading,targetAngle) < 0){
+				wheels[RIGHT].forward();
+				wheels[LEFT].backward();
+			}
+			// Else if the robot has to turn clockwise
+			else{
+				wheels[RIGHT].backward();
+				wheels[LEFT].forward();
+			}
+			
+
+			updateSpeed();
+
+			
+			heading = odometer.getHeading();
+			
+		}
+		if( stop )
+			this.stop();
+		
+		
+	}
+	
+	public static double minAngleFromTo(double fromAngle, double toAngle) {
+		double d = fixDegAngle(toAngle - fromAngle);
+		
+		if (d < 180.0)
+			return d;
+		else
+			return d - 360.0;
+	}
+	
+	public static double minAngleFromToRad(double fromAngle, double toAngle) {
+		double d = fixRadAngle(toAngle - fromAngle);
+		
+		if (d < Math.PI)
+			return d;
+		else
+			return d - Math.PI*2;
+	}
+	
+	public static double fixDegAngle(double angle) {		
+		if (angle < 0.0)
+			angle = 360.0 + (angle % 360.0);
+		
+		return angle % 360.0;
+	}
+	
+	public static double fixRadAngle(double angle) {		
+		if (angle < 0.0)
+			angle = Math.PI*2 + (angle % (Math.PI*2));
+		
+		return angle % (Math.PI*2);
 	}
 
 
@@ -424,32 +589,7 @@ public class Navigator{
 		
 	}
 
-	/**
-	 * TurnTo function which takes an angle and boolean as arguments The boolean controls whether or not to stop the
-	 * motors when the turn is completed
-	 * @param targetAngle The angle in degrees
-	 */
-	public void turnTo(double targetAngle, boolean stop) {
-		while(Math.abs(Odometer.minAngleFromTo(odometer.getHeading()*180/Math.PI,targetAngle))>LOW_ANGLE_BANDWIDTH_DEG){
-			// If the robot has to turn counterclockwise
-			if(Odometer.minAngleFromTo(odometer.getHeading()*180/Math.PI,targetAngle)<0){
-				wheels[RIGHT].forward();
-				wheels[LEFT].backward();
-			}
-			// Else if the robot has to turn clockwise
-			else{
-				wheels[RIGHT].backward();
-				wheels[LEFT].forward();
-			}
 
-			speed[LEFT] = ROTATION_SPEED;
-			speed[RIGHT] = ROTATION_SPEED;
-			updateSpeed();
-			
-		}
-		if( stop )
-			this.stop();
-	}
 	
 	/**
 	 * Converts the traveling distance to the angle that the wheel has to rotate in degrees
@@ -525,16 +665,22 @@ public class Navigator{
 		}
 		
 		// set motor speeds
-		if (leftSpeed > 900.0)
-			wheels[LEFT].setSpeed(900);
-		else
-			wheels[LEFT].setSpeed((int)leftSpeed);
+//		if (leftSpeed > 900.0)
+//			wheels[LEFT].setSpeed(900);
+//		else
+//			wheels[LEFT].setSpeed((int)leftSpeed);
+//		
+//		if (rightSpeed > 900.0)
+//			wheels[RIGHT].setSpeed(900);
+//		else
+//			wheels[RIGHT].setSpeed((int)rightSpeed);
 		
-		if (rightSpeed > 900.0)
-			wheels[RIGHT].setSpeed(900);
-		else
-			wheels[RIGHT].setSpeed((int)rightSpeed);
+		speed[LEFT] = (int)leftSpeed;
+		speed[RIGHT] = (int)rightSpeed;
+		
+		updateSpeed();
 	}
+	
 	
 	/**
 	 * Stops the robot

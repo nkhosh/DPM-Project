@@ -3,7 +3,7 @@ import lejos.nxt.NXTRegulatedMotor;
 
 public class Odometer extends Thread {	
 	private static final long ODOMETER_PERIOD = 25;
-	private static double wheelRadius=2.09, wheelsDistance=16.35;
+	private static double wheelRadius=2.055, wheelsDistance=16.8;
 //	Previous values in Navigator: (Check for errors)
 //	private final static double RADIUS = 2.085; 
 //	private final static double WHEELS_DISTANCE = 16.2;
@@ -74,13 +74,13 @@ public class Odometer extends Thread {
 	
 	public double getHeading() {
 		synchronized(lock){
-			return fixRadAngle(heading);
+			return heading;
 		}
 	}
 	
 	public double getHeadingDeg() {
 		synchronized(lock){
-			return fixDegAngle(Math.toDegrees(heading));
+			return Math.toDegrees(heading);
 			
 		}
 	}
@@ -145,6 +145,7 @@ public class Odometer extends Thread {
 				y += dc * Math.cos(heading + dt/2);
 				x += dc * Math.sin(heading + dt/2);
 				heading -= dt;
+				heading = fixRadAngle(heading);
 			}
 			
 			tachometer[0] = tachoCounterL;

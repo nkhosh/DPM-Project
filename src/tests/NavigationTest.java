@@ -16,7 +16,22 @@ public class NavigationTest {
 //		demo1[2] = new double[] {1.5*TILE_LENGTH,5.5*TILE_LENGTH};
 //		demo1[3] = new double[] {1.5*TILE_LENGTH,6.5*TILE_LENGTH};
 //		demo1[4] = new double[] {5*TILE_LENGTH,6.5*TILE_LENGTH};
-//		double[][] destination = {{0,60.96},{60.96,60.96},{0,0},{TILE_LENGTH,TILE_LENGTH}};
+//		double[][] destination = {
+//				{0,60.96},
+//				{60.96,60.96},
+//				{0,0},
+//				{TILE_LENGTH,TILE_LENGTH}
+//				};
+		double[][] destination = {
+				{-TILE_LENGTH,-TILE_LENGTH},
+				{0,0},
+				{TILE_LENGTH,-TILE_LENGTH},
+				{0,0},
+				{TILE_LENGTH,TILE_LENGTH},
+				{0,0},
+				{-TILE_LENGTH,TILE_LENGTH},
+				{0,0}
+				};
 //		double[][] destination = {{0,60.96},{-60.96,60.96},{0,0},{-TILE_LENGTH,TILE_LENGTH}};
 //		double[][] destination = {{2*TILE_LENGTH,2*TILE_LENGTH},{5*TILE_LENGTH,2*TILE_LENGTH}};
 //		double[][] destination = {{60.96,60.96},{0,60.96},{30.48,30.48},{60.96,30.48},{0,0}};
@@ -24,11 +39,11 @@ public class NavigationTest {
 //		double[][] destination = {{0,5*TILE_LENGTH}};
 //		double[][] destination = {{0,10*TILE_LENGTH}, {2*TILE_LENGTH,5*TILE_LENGTH}, {0,0} };
 //		while(!touchSensor.isPressed());
-		double[][] destination = {
-				{2*TILE_LENGTH,2*TILE_LENGTH},
-				{-1*TILE_LENGTH,5*TILE_LENGTH},
-				{-2*TILE_LENGTH,2*TILE_LENGTH}
-		};
+//		double[][] destination = {
+//				{2*TILE_LENGTH,2*TILE_LENGTH},
+//				{-1*TILE_LENGTH,5*TILE_LENGTH},
+//				{-2*TILE_LENGTH,2*TILE_LENGTH}
+//		};
 		
 		navigator = robin.getNavigator();
 
@@ -39,23 +54,24 @@ public class NavigationTest {
 			buttonChoice = Button.waitForAnyPress();
 		}
 		if(buttonChoice==Button.ID_LEFT){
-			robin.getOdometryCorrector().setRightAnglePath(false);
+//			robin.getOdometryCorrector().setRightAnglePath(false);
 			robin.getOdometryCorrector().start();
 		}
 		robin.getOdometer().start();
-//		robin.getLcdPrinter().start();
+		robin.getLcdPrinter().start();
 //		navigator.turnTo(0,true);
 //		for(int i=0;i<4;i++){
 //			navigator.travelTo(destination[i][0], destination[i][1]);
 //		}
-		navigator.navigateMap(destination, true);
+//		navigator.navigateMap(destination, true);
+//		navigator.turnTo(0, true);
 //		navigator.turnTo(0, true);
 		
 		
 //		navigator.travelTo(0,10*TILE_LENGTH, false);
 		navigator.travelTo(2*TILE_LENGTH,2*TILE_LENGTH, true);
 //		navigator.travelTo(0,0, true);
-//		navigator.turnTo(0,true);
+		navigator.turnTo(0,true);
 		
 		buttonChoice = Button.waitForAnyPress();
 		while(buttonChoice!=Button.ID_ESCAPE) {

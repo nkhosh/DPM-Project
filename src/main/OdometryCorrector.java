@@ -1,5 +1,7 @@
 package main;
 
+import lejos.nxt.Sound;
+
 public class OdometryCorrector extends Thread { //TODO heading correction
 	private final static long CORRECTION_PERIOD = 10;
 	private final static double TILE_LENGTH = 30.48; // in centimeters\
@@ -8,9 +10,10 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 	private final static int LIGHT_THRESHOLD = 50; 	
 	
 	// x and y components of the distance between the midpoint between the wheels and each sensor (when the robot is facing 0 degrees)
-	private final static double X_LEFT_LS_DISTANCE = 3;
-	private final static double X_RIGHT_LS_DISTANCE = 3.55;
+//	private final static double X_LEFT_LS_DISTANCE = 3;
+//	private final static double X_RIGHT_LS_DISTANCE = 3.55;
 	private final static double LS_DISTANCE = 12.65;
+//	private final static double LS_DISTANCE = 12;
 	
 	// odometer position of the robot 
 	private double odometerX;
@@ -20,28 +23,14 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 	// light sensor data
 	private int lsData;
 	private int sensorData;
-	private int rightSensorData;
 	
 	// Position and position error of light sensors
 	private double sensorX;
 	private double sensorY;
 	private double errorX;
 	private double errorY;
-	public static double avgErrorX=69;
-	public static double avgErrorY=69;
-	private double rightSensorX;
-	private double rightSensorY;
-	private double rightErrorX;
-	private double rightErrorY;
 	
-	// Variables for heading corection with color sensor
-	private boolean crossingGrid;
-	private boolean leftCrossingX;
-	private boolean leftCrossingY;
-	private boolean rightCrossingX;
-	private boolean rightCrossingY;
 	private boolean isActive;
-	private boolean rightAnglePath;
 	
 	// Variables determining movement while odometry correcting
 	private boolean mustTurnLeft;
@@ -59,9 +48,6 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 		return mustTurnRight;
 	}
 	
-	public void setRightAnglePath(boolean bool){
-		rightAnglePath = bool;
-	}
 	
 	/**
 	 * Constructor to build and initials the variables of odometry corrector
@@ -77,16 +63,11 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 //		xRightLSdistance = 3.45;
 //		xLeftLSdistance = 2.8;
 //		yLSdistance = 12.7;
-		
-		mustTurnLeft = false;
-		mustTurnRight = false;
-		
-		rightAnglePath = false;
 	}
 	
 	/**
 	 * This methods runs the correction. It checks for the inputs from the color sensors
-	 * and corrects the odometer values due to the calculations.
+	 * and corrects the odometer values based on calculations.
 	 */
 	public void run(){
 		isActive = true;
@@ -100,12 +81,9 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 				
 				errorX = 0;
 				errorY = 0;
-				rightErrorX = 0;
-				rightErrorY = 0;
 				
 				// if the sensor passes over a black line
 				if(lsData < LIGHT_THRESHOLD) {
-					
 					odometerX = odometer.getX();
 					odometerY = odometer.getY();
 					heading = odometer.getHeading();

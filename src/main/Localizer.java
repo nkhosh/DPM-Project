@@ -4,6 +4,8 @@ import lejos.nxt.*;
 
 public class Localizer {
 	//public enum LocalizationType { FALLING_EDGE, RISING_EDGE };
+	private final static int LEFT=0, RIGHT=1, FRONT=2;
+	
 	public static double ROTATION_SPEED = 30;
 	public static final int LIMIT = 70;
 	public static final double OFFSETY = 6.0;
@@ -37,8 +39,8 @@ public class Localizer {
 	public Localizer(Odometer odo, Navigator nav, UltrasonicSensor[] us, ColorSensor ls) {
 		this.odo = odo;
 		this.nav = nav;
-		this.front = us[0];
-		this.left = us[1];
+		this.front = us[FRONT];
+		this.left = us[LEFT];
 		this.ls = ls;
 		isIncreasing = true; 
 		distancePrevious = -1;
@@ -201,7 +203,7 @@ public class Localizer {
 		double delta = (yT/2) + 90 - (gridAngle[3]-180);
 		
 		//update these values, travel to (0,0), and turn to 0 degrees
-		odo.setPosition(new double [] {x + xZero + 0.2, y + yZero + 0.3, pos[2]+delta +1 }, new boolean [] {true, true, true});
+		odo.setPosition(new double [] {x + xZero + 0.2, y + yZero + 0.3, pos[2]+delta /*+1*/ }, new boolean [] {true, true, true});
 		
 		//Button.waitForAnyPress();
 		odo.getPosition(pos);
