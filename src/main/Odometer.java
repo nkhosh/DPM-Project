@@ -3,7 +3,7 @@ import lejos.nxt.NXTRegulatedMotor;
 
 public class Odometer extends Thread {	
 	private static final long ODOMETER_PERIOD = 25;
-	private static double wheelRadius=2.055, wheelsDistance=16.8;
+	private static double wheelRadius=2.055, wheelsDistance=16.05;
 //	Previous values in Navigator: (Check for errors)
 //	private final static double RADIUS = 2.085; 
 //	private final static double WHEELS_DISTANCE = 16.2;
@@ -128,6 +128,24 @@ public class Odometer extends Thread {
 		return !(wheels[0].getSpeed() == wheels[1].getSpeed());
 	}
 	
+	/**
+	 * Minimizes an angle so that it is within the range from -PI to PI if not already in that range
+	 * @param angle in radians
+	 * @return
+	 */
+	protected static double minimizeAngle(double angle){
+		double pi = Math.PI;
+		angle = angle%(2*pi);
+		double minimizedAngle = angle;
+		if(angle<-pi){
+			minimizedAngle = angle+2*pi;
+		}
+		else if(angle>pi){
+			minimizedAngle = angle-2*pi;
+		}
+		return minimizedAngle;
+	}
+	
 	public void run() {
 		long updateStart, updateEnd;
 
@@ -145,7 +163,7 @@ public class Odometer extends Thread {
 				y += dc * Math.cos(heading + dt/2);
 				x += dc * Math.sin(heading + dt/2);
 				heading -= dt;
-				heading = fixRadAngle(heading);
+				heading = minimizeAngle(heading);
 			}
 			
 			tachometer[0] = tachoCounterL;

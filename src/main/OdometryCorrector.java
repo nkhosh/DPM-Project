@@ -12,7 +12,8 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 	// x and y components of the distance between the midpoint between the wheels and each sensor (when the robot is facing 0 degrees)
 //	private final static double X_LEFT_LS_DISTANCE = 3;
 //	private final static double X_RIGHT_LS_DISTANCE = 3.55;
-	private final static double LS_DISTANCE = 12.65;
+//	private final static double LS_DISTANCE = 12.65;
+	private final static double LS_DISTANCE = 11.8;
 //	private final static double LS_DISTANCE = 12;
 	
 	// odometer position of the robot 

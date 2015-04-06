@@ -1,6 +1,7 @@
 package main;
 
 import lejos.nxt.*;
+import lejos.util.Delay;
 
 public class Localizer {
 	//public enum LocalizationType { FALLING_EDGE, RISING_EDGE };
@@ -96,7 +97,7 @@ public class Localizer {
 									Sound.beep();
 									delayCount = 0;
 									nav.stop();
-									nav.turnTo(odo.getHeadingDeg()-COMPENSATION,true);
+									nav.turnToDeg(odo.getHeadingDeg()-COMPENSATION,true);
 									//Button.waitForAnyPress();
 									 distanceSide = this.getFilteredData(left);
 									
@@ -108,7 +109,7 @@ public class Localizer {
 										
 										yDistance = distanceSide + OFFSETY;
 										
-										nav.turnTo(odo.getHeadingDeg()+ 52 ,true);
+										nav.turnToDeg(odo.getHeadingDeg()+ 52 ,true);
 										//Button.waitForAnyPress();
 										xDistance = this.getFilteredData(front) + OFFSETX;
 										isRunning = false;
@@ -132,14 +133,14 @@ public class Localizer {
 		
 			
 			//double correctAngle = angle + COMPENSATION;
-			nav.stop();
+//			nav.stop();
 			//Sound.beep();
 			double[] pos = {0,0,0};
 			odo.getPosition(pos);
 			odo.setPosition(new double [] {xDistance-30.48, yDistance-30.48, 270  }, new boolean [] {true, true, true});
 			//nav.travelTo(-7.5, -1,false);
 			nav.travelTo(-7.5, -1,false);
-			nav.turnTo(0, true);
+			nav.turnToDeg(0, true);
 	}
 			
 	public void doLSLocalization(double xZero, double yZero){
@@ -189,7 +190,7 @@ public class Localizer {
 			
 			
 		}
-		nav.stop();
+//		nav.stop();
 		odo.getPosition(pos);
 		//this is the trig shown in the tutorial used to calculate the real X,Y and Theta
 		double xT =(gridAngle[2] - gridAngle[0]); 
@@ -210,10 +211,10 @@ public class Localizer {
 		nav.travelTo(0, 0,false);
 		//Button.waitForAnyPress();
 		odo.getPosition(pos);
-		nav.turnTo(0,true);
+		nav.turnToDeg(0,true);
 
 		
-		nav.stop();
+//		nav.stop();
 		
 		
 	}

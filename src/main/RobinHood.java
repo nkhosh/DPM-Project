@@ -42,7 +42,7 @@ public class RobinHood {
 		odometryCorrector = new OdometryCorrector(odometer, lsController, lock);
 		navigator = new Navigator(odometer, wheelMotor, usController, launcher);
 		launcher = new Launcher(launcherMotor, 5);
-		lcdPrinter = new LCDPrinter(odometer, navigator, lock);
+		lcdPrinter = new LCDPrinter(odometer, navigator, usController, lock);
 		localizer = new Localizer(odometer,navigator,usSensors,lightSensor);
 	}
 	
@@ -66,7 +66,7 @@ public class RobinHood {
 		return launcher;
 	}
 	
-	public LCDPrinter getLcdPrinter() {
+	public LCDPrinter getLCDPrinter() {
 		return lcdPrinter;
 	}
 	

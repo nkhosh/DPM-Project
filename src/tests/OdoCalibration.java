@@ -8,7 +8,7 @@ import main.Navigator;
 import main.RobinHood;
 
 public class OdoCalibration {
-	private static double radius = 2.055, width = 16; // 16.37    2.09, wheelsDistance=16.35
+	private static double radius = 2.055, width = 16.05; // 16.37    2.09, wheelsDistance=16.35
 	private static int buttonChoice;
 	private final static NXTRegulatedMotor[] wheelMotor = {Motor.A, Motor.B};
 	private double[] tachometer;
@@ -193,8 +193,8 @@ public class OdoCalibration {
 //		nav.turnTo(0, true);
 		final double ROTATION_ANGLE = 360.0*2;
 //
-		wheelMotor[0].setSpeed(150);
-		wheelMotor[1].setSpeed(150);
+		wheelMotor[0].setSpeed(123);
+		wheelMotor[1].setSpeed(123);
 
 		// wait 5 seconds
 //		try {

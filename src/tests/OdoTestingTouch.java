@@ -28,7 +28,7 @@ public class OdoTestingTouch {
 		RobinHood robinHood = new RobinHood();
 		touchSensor = new TouchSensor(SensorPort.S4);
 		odometer = robinHood.getOdometer();
-		lcdPrinter = robinHood.getLcdPrinter();
+		lcdPrinter = robinHood.getLCDPrinter();
 
 		radius = odometer.getRadius();
 		width = odometer.getWheelsDistance();
@@ -55,7 +55,7 @@ public class OdoTestingTouch {
 
 		LCD.clear();
 		robinHood.getOdometer().start();
-		robinHood.getLcdPrinter().start();
+		robinHood.getLCDPrinter().start();
 
 		// if (buttonChoice == Button.ID_LEFT) {
 		robinHood.getOdometryCorrector().start();

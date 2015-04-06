@@ -27,7 +27,7 @@ public class OdoTesting {
 	public static void main(String[] args){
 		RobinHood robinHood = new RobinHood();
 		odometer = robinHood.getOdometer();
-		lcdPrinter = robinHood.getLcdPrinter();
+		lcdPrinter = robinHood.getLCDPrinter();
 		
 		radius = odometer.getRadius();
 		width = odometer.getWheelsDistance();
@@ -53,7 +53,7 @@ public class OdoTesting {
 				&& buttonChoice != Button.ID_RIGHT);
 		
 		robinHood.getOdometer().start();
-		robinHood.getLcdPrinter().start();
+		robinHood.getLCDPrinter().start();
 		
 		if (buttonChoice == Button.ID_LEFT) {
 			robinHood.getOdometryCorrector().start();

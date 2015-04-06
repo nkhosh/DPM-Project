@@ -17,7 +17,7 @@ public class DemoTest {
 		
 		navigator = robin.getNavigator();
 		robin.getOdometer().start();
-		robin.getLcdPrinter().start();
+		robin.getLCDPrinter().start();
 //		navigator.setDestinationArray(destination);
 
 		int buttonChoice = Button.waitForAnyPress();
@@ -39,7 +39,7 @@ public class DemoTest {
 		
 //		navigator.travelTo(60.96,60.96, true);
 //		navigator.travelTo(0,0, true);
-		navigator.turnTo(0,true);
+		navigator.turnToDeg(0,true);
 		
 		buttonChoice = Button.waitForAnyPress();
 		while(buttonChoice!=Button.ID_ESCAPE) {

@@ -85,7 +85,7 @@ public class Competition {
 		odoC.start();
 		navigator.navigateMap(demo1);
 		navigator.travelTo(5*TILE_LENGTH -7.5, 5*TILE_LENGTH -1, false);
-		navigator.turnTo(0, true);
+		navigator.turnToDeg(0, true);
 //		Button.waitForAnyPress();
 		odoC.setActive(false);
 		loc.doLSLocalization(5*TILE_LENGTH,5*TILE_LENGTH);

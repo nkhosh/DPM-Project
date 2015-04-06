@@ -2,13 +2,14 @@ package main;
 import lejos.nxt.LCD;
 import lejos.nxt.NXTRegulatedMotor;
 import lejos.nxt.Sound;
+import lejos.util.Delay;
 
 
 public class Navigator{	
 	// Variables for the speed of the movement
 //	private final static int FAST_SPEED = 250, SLOW_SPEED = 120, NORMAL_SPEED=250;
-	private final static int FAST_SPEED = 250, SLOW_SPEED = 120, NORMAL_SPEED=250;
-	private final static int ROTATION_SPEED = 100;
+	private final static int FAST_SPEED = 250, SLOW_SPEED = 120, NORMAL_SPEED=250, MIN_SPEED = 150, MAX_SPEED = 350;
+	private final static int ROTATION_SPEED = 123;
 	private static double wheelRadius; 
 	private static double wheelsDistance;
 	
@@ -16,7 +17,7 @@ public class Navigator{
 	private final static double LOW_ANGLE_BANDWIDTH_DEG = 3;
 	private final static double LOW_ANGLE_BANDWIDTH_RAD = Math.toRadians(LOW_ANGLE_BANDWIDTH_DEG);
 	
-	private final static double HIGH_ANGLE_BANDWIDTH_DEG = 4;
+	private final static double HIGH_ANGLE_BANDWIDTH_DEG = 5;
 	private final static double HIGH_ANGLE_BANDWIDTH_RAD = Math.toRadians(HIGH_ANGLE_BANDWIDTH_DEG);
 	// Used when the robot is possibly turning fast
 	
@@ -38,10 +39,11 @@ public class Navigator{
 	private Vector unitOrientationVector;
 	
 	// Obstacle avoidance variables (in centimeters)
-	private static final int FRONT_DISTANCE_THRESHOLD = 20, ANGLED_SENSOR_DISTANCE_THRESHOLD = 18, ANGLED_SENSOR_BANDCENTER = 30;
+	private static final int FRONT_DISTANCE_THRESHOLD = 20, ANGLED_SENSOR_DISTANCE_THRESHOLD = 20, ANGLED_SENSOR_BANDCENTER = 23;
+	private static final int FRONT_CORNER_DISTANCE_THRESHOLD = 25;
 	private static final int ANGLED_SENSOR_DISTANCE_BANDWIDTH = 5;
-	private static final int MAX_DISTANCE = 40;
-	private static final int UPPER_ANGLED_BANDWIDTH = 10;
+	private static final int MAX_DISTANCE = 30;
+	private static final int UPPER_ANGLED_BANDWIDTH = 5;
 	private static final int LOWER_ANGLED_BANDWIDTH = 5;
 	private static double rotationSpeed;
 	
@@ -49,12 +51,12 @@ public class Navigator{
 	private double launchAngle = Math.tan(7.4/(5*30.48 + 4));
 	private double launchDistance = Math.sqrt(Math.pow(-7.4, 2) + Math.pow(5*30.48 + 4, 2));
 	private Launcher launcher;
-	private int targetAngle;
+//	private int targetAngle;
 	private double targetX;
 	private double targetY;
 	
 	private int followingSide;
-	private static final int P_SPEED_COEFFICIENT = 10;
+	private static final int P_SPEED_COEFFICIENT = 15;
 	
 	public Navigator(Odometer odometer, NXTRegulatedMotor[] wheels, USController usController, Launcher launch)	{
 		this.launcher = launch;
@@ -163,11 +165,12 @@ public class Navigator{
 		else{
 			wheels[LEFT].forward();
 			wheels[RIGHT].backward();
+		
+		}
+		
 		speed[RIGHT]=NORMAL_SPEED;
 		speed[LEFT]=NORMAL_SPEED;
 		updateSpeed();
-		
-		}
 	}
 	/**
 	 * Move in the 
@@ -224,18 +227,18 @@ public class Navigator{
 	
 	
 	protected void updateSpeed() {
-		if(speed[LEFT] > FAST_SPEED){
-			speed[LEFT] = FAST_SPEED;
+		if(speed[LEFT] > MAX_SPEED){
+			speed[LEFT] = MAX_SPEED;
  		}
-		else if(speed[LEFT] < SLOW_SPEED){
-			speed[LEFT] = SLOW_SPEED;
+		else if(speed[LEFT] < MIN_SPEED){
+			speed[LEFT] = MIN_SPEED;
  		}
 		
-		if(speed[RIGHT] > FAST_SPEED){
-			speed[RIGHT] = FAST_SPEED;
+		if(speed[RIGHT] > MAX_SPEED){
+			speed[RIGHT] = MAX_SPEED;
  		}
-		else if(speed[RIGHT] < SLOW_SPEED){
-			speed[RIGHT] = SLOW_SPEED;
+		else if(speed[RIGHT] < MIN_SPEED){
+			speed[RIGHT] = MIN_SPEED;
  		}
 		
 		wheels[LEFT].setSpeed(speed[LEFT]);		     
@@ -255,6 +258,7 @@ public class Navigator{
 	 */
 	public void fireAt(double x, double y, double xMin, double xMax, double yMin, double yMax,int numBalls)
 	{
+		int targetAngle;	//TODO: changed from a static variable to a method variable. Check for errors.
 		targetAngle = -1;
 		targetX = 0;
 	    targetY = 0;
@@ -274,7 +278,7 @@ public class Navigator{
 			}
 		}
 		travelTo(targetX,targetY,false);
-		turnTo(targetAngle + launchAngle,true);
+		turnToDeg(targetAngle + launchAngle,true);
 		launcher.launch( numBalls);
 	}
 	
@@ -319,7 +323,7 @@ public class Navigator{
 	public void travelTo(double x, double y,boolean obstacleAvoidance) {
 		destination.setX(x);
 		destination.setY(y);
-		double relativeTargetOrientation = minimizeAngle( Math.atan2(x - odometer.getX(), y - odometer.getY()) );
+		double relativeTargetOrientation = Math.atan2(x - odometer.getX(), y - odometer.getY()) ;
 		long updateStart, updateEnd;
 		
 		/////////
@@ -337,7 +341,8 @@ public class Navigator{
 		
 		
 		
-		
+		boolean possibleFrontObstacle = false;
+		int frontObstacleDetectionCounter = 0, frontDistanceSum = 0;
 		// If the robot isn't close enough to its destination
 		while( (Math.abs(x - odometer.getX()) > LOW_POSITION_BANDWIDTH || Math.abs(y - odometer.getY()) > LOW_POSITION_BANDWIDTH) ) {
 //			this.distance[FRONT] = usController.getDistance(FRONT);
@@ -351,9 +356,56 @@ public class Navigator{
 
 			updateStart = System.currentTimeMillis();
 			
-			 if(obstacleAvoidance && (Math.abs(x - odometer.getX()) > HIGH_POSITION_BANDWIDTH || Math.abs(y - odometer.getY()) > HIGH_POSITION_BANDWIDTH) ) {
+			
+			if(obstacleAvoidance && (Math.abs(x - odometer.getX()) > HIGH_POSITION_BANDWIDTH || Math.abs(y - odometer.getY()) > HIGH_POSITION_BANDWIDTH) ) {
+
+//				if( possibleFrontObstacle ) {
+//					frontObstacleDetectionCounter++;
+//					frontDistanceSum += distance[FRONT];
+//					
+//					if( frontObstacleDetectionCounter>300 )
+//						if( frontDistanceSum/300 > FRONT_CORNER_DISTANCE_THRESHOLD ) {
+//							while(distance[FRONT] <= MAX_DISTANCE){
+//								if(followingSide == LEFT){
+//									turn(RIGHT);
+//								}
+//								else{
+//									turn(LEFT);
+//								}
+//								distance[FRONT] = usController.getFilteredDistance(FRONT);
+//							}
+//							Delay.msDelay(800);
+//							avoidObstacle(followingSide);
+//							frontObstacleDetectionCounter=0;
+//							possibleFrontObstacle=false;
+//							frontDistanceSum = 0;
+//						}
+//						else {
+//							possibleFrontObstacle = false;
+//						}
+//				}
+				
 				if( distance[FRONT] <= FRONT_DISTANCE_THRESHOLD ) {
+					
 					// Keep rotating until no obstacle in front
+						while(distance[FRONT] <= MAX_DISTANCE){
+							if(followingSide == LEFT){
+								turn(RIGHT);
+							}
+							else{
+								turn(LEFT);
+							}
+							distance[FRONT] = usController.getFilteredDistance(FRONT);
+						}
+						avoidObstacle(followingSide);
+					}
+				
+				if( distance[FRONT] <= FRONT_CORNER_DISTANCE_THRESHOLD ) {
+					Sound.beep();
+					Delay.msDelay(700);
+					distance[FRONT] = usController.getFilteredDistance(FRONT);
+					
+				// Keep rotating until no obstacle in front
 					while(distance[FRONT] <= MAX_DISTANCE){
 						if(followingSide == LEFT){
 							turn(RIGHT);
@@ -363,13 +415,31 @@ public class Navigator{
 						}
 						distance[FRONT] = usController.getFilteredDistance(FRONT);
 					}
+					Delay.msDelay(500);
 					avoidObstacle(followingSide);
 				}
+//				else if( distance[FRONT] <= FRONT_CORNER_DISTANCE_THRESHOLD ) {
+//					Delay.msDelay(600);
+//					Sound.beep();
+//					
+//					// Keep rotating until no obstacle in front
+//					while(distance[FRONT] <= MAX_DISTANCE){
+//						if(followingSide == LEFT){
+//							turn(RIGHT);
+//						}
+//						else{
+//							turn(LEFT);
+//						}
+//						distance[FRONT] = usController.getFilteredDistance(FRONT);
+//					}
+//					avoidObstacle(followingSide);
+//				}
 				else if( distance[LEFT] <= ANGLED_SENSOR_DISTANCE_THRESHOLD ) {
 					while(distance[LEFT] < ANGLED_SENSOR_BANDCENTER){
 						turn(RIGHT);
 						distance[LEFT] = usController.getFilteredDistance(LEFT);
 					}
+					followingSide = LEFT;
 					avoidObstacle(LEFT);
 				}
 				else if( distance[RIGHT] <= ANGLED_SENSOR_DISTANCE_THRESHOLD ) {
@@ -377,6 +447,7 @@ public class Navigator{
 						turn(LEFT);
 						distance[RIGHT] = usController.getFilteredDistance(RIGHT);
 					}
+					followingSide = RIGHT;
 					avoidObstacle(RIGHT);
 				}
 				else {
@@ -384,14 +455,13 @@ public class Navigator{
 					moveStraight();
 				}
 			}
-			
 			else
 			{
 				turnToRad(relativeTargetOrientation, false);
 				moveStraight();
 			}
 			 
-			relativeTargetOrientation = minimizeAngle( Math.atan2(x - odometer.getX(), y - odometer.getY()) );
+			relativeTargetOrientation = Math.atan2(x - odometer.getX(), y - odometer.getY());
 			updateEnd = System.currentTimeMillis();
 			
 //			if (updateEnd - updateStart < 15) {
@@ -416,35 +486,36 @@ public class Navigator{
 	 * motors when the turn is completed
 	 * @param targetAngle The angle in degrees
 	 */
-	public void turnTo(double targetAngle, boolean stop) {
-		double heading = odometer.getHeading();
-		
-		while(Math.abs(Odometer.minAngleFromTo(heading*180/Math.PI,targetAngle))>LOW_ANGLE_BANDWIDTH_DEG){
-
-			speed[LEFT] = ROTATION_SPEED;
-			speed[RIGHT] = ROTATION_SPEED;
-			
-			// If the robot has to turn counterclockwise
-			if(Odometer.minAngleFromTo(heading*180/Math.PI,targetAngle)<0){
-				wheels[RIGHT].forward();
-				wheels[LEFT].backward();
-			}
-			// Else if the robot has to turn clockwise
-			else{
-				wheels[RIGHT].backward();
-				wheels[LEFT].forward();
-			}
-			
-
-			updateSpeed();
-
-			
-			heading = odometer.getHeading();
-			
-		}
-		if( stop )
-			this.stop();
-		
+	public void turnToDeg(double targetAngle, boolean stop) {
+		turnToRad( Math.toRadians(targetAngle), stop);
+//		double heading = odometer.getHeading();
+//		
+//		while(Math.abs(Odometer.minAngleFromTo(heading*180/Math.PI,targetAngle))>LOW_ANGLE_BANDWIDTH_DEG){
+//
+//			speed[LEFT] = ROTATION_SPEED;
+//			speed[RIGHT] = ROTATION_SPEED;
+//			
+//			
+//			// If the robot has to turn counterclockwise
+//			if(Odometer.minAngleFromTo(heading*180/Math.PI,targetAngle)<0){
+//				wheels[RIGHT].forward();
+//				wheels[LEFT].backward();
+//			}
+//			// Else if the robot has to turn clockwise
+//			else{
+//				wheels[RIGHT].backward();
+//				wheels[LEFT].forward();
+//			}
+//			
+//
+//			updateSpeed();
+//
+//			
+//			heading = odometer.getHeading();
+//			
+//		}
+//		if( stop )
+//			this.stop();
 		
 	}
 	
@@ -456,24 +527,27 @@ public class Navigator{
 	public void turnToRad(double targetAngle, boolean stop) {
 		double heading = odometer.getHeading();
 		
-		while(Math.abs(minAngleFromToRad(heading,targetAngle)) > LOW_ANGLE_BANDWIDTH_RAD){
+		while(Math.abs( Odometer.minimizeAngle(targetAngle-heading) ) > LOW_ANGLE_BANDWIDTH_RAD){
 
 			speed[LEFT] = ROTATION_SPEED;
 			speed[RIGHT] = ROTATION_SPEED;
+			wheels[LEFT].setSpeed(speed[LEFT]);		     
+			wheels[RIGHT].setSpeed(speed[RIGHT]);	
+//			setRotationSpeed(30);
 			
 			// If the robot has to turn counterclockwise
-			if(minAngleFromToRad(heading,targetAngle) < 0){
-				wheels[RIGHT].forward();
+			if( Odometer.minimizeAngle(targetAngle-heading) < 0){
 				wheels[LEFT].backward();
+				wheels[RIGHT].forward();
 			}
 			// Else if the robot has to turn clockwise
 			else{
-				wheels[RIGHT].backward();
 				wheels[LEFT].forward();
+				wheels[RIGHT].backward();
 			}
 			
 
-			updateSpeed();
+//			updateSpeed();
 
 			
 			heading = odometer.getHeading();
@@ -481,7 +555,6 @@ public class Navigator{
 		}
 		if( stop )
 			this.stop();
-		
 		
 	}
 	
@@ -496,7 +569,7 @@ public class Navigator{
 	
 	public static double minAngleFromToRad(double fromAngle, double toAngle) {
 		double d = fixRadAngle(toAngle - fromAngle);
-		
+//		double d = minimizeAngle(toAngle - fromAngle;
 		if (d < Math.PI)
 			return d;
 		else
@@ -561,20 +634,20 @@ public class Navigator{
 			
 			/* Case 3: Positive error, moving too far from wall */
 			if (distError > UPPER_ANGLED_BANDWIDTH) { // so the robot doesn't turn into the wall as much
-				move(followingSide);
-//				pMove(followingSide, distError);
+//				move(followingSide);
+				pMove(followingSide, distError);
 			}
 			
 			
 			/* Case 2: Negative error, moving too close to wall */
 			else if (distError < - LOWER_ANGLED_BANDWIDTH) {
 				if(followingSide == LEFT){
-					move(RIGHT);
-//					pMove(RIGHT, distError);
+//					move(RIGHT);
+					pMove(RIGHT, distError);
 				}
 				else if(followingSide == RIGHT){
-					move(LEFT);
-//					pMove(LEFT, distError);
+//					move(LEFT);
+					pMove(LEFT, distError);
 				}
 			}
 			
@@ -611,7 +684,7 @@ public class Navigator{
 		return convertDistance(radius, Math.PI * wheelDistance * angle / 360.0);
 	}
 	/**
-	 * Minimizes an angle so that it is within the range from -180 degrees to 180 if not already in that range
+	 * Minimizes an angle so that it is within the range from -PI to PI if not already in that range
 	 * @param angle in radians
 	 * @return
 	 */
@@ -688,6 +761,9 @@ public class Navigator{
 	public void stop(){
 		wheels[RIGHT].stop();
 		wheels[LEFT].stop();
+		
+//		wheels[RIGHT].setSpeed(0);
+//		wheels[LEFT].setSpeed(0);
 	}
 
 	/**

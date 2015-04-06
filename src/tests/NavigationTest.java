@@ -58,7 +58,7 @@ public class NavigationTest {
 			robin.getOdometryCorrector().start();
 		}
 		robin.getOdometer().start();
-		robin.getLcdPrinter().start();
+		robin.getLCDPrinter().start();
 //		navigator.turnTo(0,true);
 //		for(int i=0;i<4;i++){
 //			navigator.travelTo(destination[i][0], destination[i][1]);
@@ -71,7 +71,7 @@ public class NavigationTest {
 //		navigator.travelTo(0,10*TILE_LENGTH, false);
 		navigator.travelTo(2*TILE_LENGTH,2*TILE_LENGTH, true);
 //		navigator.travelTo(0,0, true);
-		navigator.turnTo(0,true);
+		navigator.turnToDeg(0,true);
 		
 		buttonChoice = Button.waitForAnyPress();
 		while(buttonChoice!=Button.ID_ESCAPE) {
