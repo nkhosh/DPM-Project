@@ -40,13 +40,13 @@ public class Navigator{
 	private Vector unitOrientationVector;
 	
 	// Obstacle avoidance variables (in centimeters)
-	private static final int FRONT_DISTANCE_THRESHOLD = 20, ANGLED_SENSOR_DISTANCE_THRESHOLD = 30, ANGLED_SENSOR_BANDCENTER = /*24*/ 22;
+	private static final int FRONT_DISTANCE_THRESHOLD = 20, ANGLED_SENSOR_DISTANCE_THRESHOLD = 30, ANGLED_SENSOR_BANDCENTER = /*24*/ 21;
 	private static final int FRONT_CORNER_DISTANCE_THRESHOLD = 25;
 	private static final int ANGLED_SENSOR_DISTANCE_BANDWIDTH = 5;
 	private static final int MAX_FRONT_DISTANCE = 30;
 	private static final int MAX_ANGLED_DISTANCE = 45;
-	private static final int UPPER_ANGLED_BANDWIDTH = 2;
-	private static final int LOWER_ANGLED_BANDWIDTH = 2;
+	private static final int UPPER_ANGLED_BANDWIDTH = 5;
+	private static final int LOWER_ANGLED_BANDWIDTH = 5;
 	private static double rotationSpeed;
 	
 	private int[] distance = {255,255,255};
@@ -342,7 +342,6 @@ public class Navigator{
 				
 				// Obstacle to the left
 				if( distance[LEFT] <= ANGLED_SENSOR_BANDCENTER ) {
-					Sound.twoBeeps();
 					do{
 						turn(RIGHT);
 						distance[LEFT] = usController.getFilteredDistance(LEFT);
