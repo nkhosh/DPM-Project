@@ -35,8 +35,20 @@ public class FinalTesting {
 //		{0,0}
 //		};
 	
-	private static double[][] map = {
-		{0,6}
+//	private static double[][] mapA = {
+//		{0,7}
+//	};
+	
+//	private static double[][] mapB = {
+//		{0.5, 2.5},
+//		{-2.5,2.5},
+//		{-2.5,-0.5},
+//		{0,0}
+//	};
+	
+	private static double[][] mapC = {
+		{0,4},
+		{9, 5}
 	};
 	
 
@@ -58,7 +70,7 @@ public class FinalTesting {
 		odoC.start();
 //		
 //		// Avoiding obstacles and returning to start
-		nav.navigateMapTiles(map, true);
+		nav.navigateMapTiles(mapC, true);
 //		nav.turnToDeg(0, true);
 //		nav.turnToDeg(120, true);
 //		nav.turnToDeg(-90, true);
