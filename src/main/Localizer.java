@@ -8,11 +8,12 @@ public class Localizer {
 	private final static int LEFT=0, RIGHT=1, FRONT=2;
 	
 	public static double ROTATION_SPEED = 30;
-	public static final int LIMIT = 70;
+	public static final int FRONTLIMIT = 70;
+	public static final int SIDELIMIT = 55;
 	public static final double OFFSETY = 6.0;
 	public static final double OFFSETX = 4.8;
 	public static final int ERROR = 3;
-	public static final int COMPENSATION = 95;
+	public static final int COMPENSATION = 100;
 	public static int phase;
 	public static double testAngle;
 	public static double distance;
@@ -35,6 +36,7 @@ public class Localizer {
 	public static double average;
 	public static int threshhold =30;
 	public static int filterCount;
+	public static int change;
 	
 	
 	public Localizer(Odometer odo, Navigator nav, UltrasonicSensor[] us, ColorSensor ls) {
@@ -66,42 +68,46 @@ public class Localizer {
 			angle = 0;
 			double xDistance = -1;
 			double yDistance = -1;
-			int delayCountLimit = 75;
+			//int delayCountLimit = 65;
 			int delayCount = 0;
+			distanceFront = 0;
 			
-			
+			change = 0;
 			while(isRunning)
 			{
-					int change = 0;
+					 
 					
 					
 					
 					nav.setRotationSpeed(ROTATION_SPEED);
 
 
-					distanceFront = this.getFilteredData(front);
+					
 					if(distancePrevious == -1)
 					{
-						//Sound.beep();
+						distancePrevious = this.getFilteredData(front);
+						//distanceFront = this.getFilteredData(front);
 					}
 					else
 					{
+						
+						
+						distanceFront = this.getFilteredData(front);
+	
 						change = distanceFront - distancePrevious;
 
-							if (change > 0)
-							{
-								//Sound.beep();
-								if(change >3 && delayCount > delayCountLimit)
+								if(change > 6 && delayCount > 20)
 								{
-									delayCount = 0;
-									Sound.beep();
-									delayCount = 0;
+									
+									//delayCount = 0;
+									//Sound.beep();
+									//delayCount = 0;
 									nav.stop();
 									nav.turnToDeg(odo.getHeadingDeg()-COMPENSATION,true);
 									//Button.waitForAnyPress();
 									 distanceSide = this.getFilteredData(left);
 									
-									 if(distanceSide < LIMIT)
+									 if(distanceSide < SIDELIMIT)
 									 {
 										//Sound.beep();
 										angle = odo.getHeadingDeg();
@@ -109,24 +115,23 @@ public class Localizer {
 										
 										yDistance = distanceSide + OFFSETY;
 										
-										nav.turnToDeg(odo.getHeadingDeg()+ 52 ,true);
+										nav.turnToDeg(odo.getHeadingDeg()+ 47 ,true);
 										//Button.waitForAnyPress();
 										xDistance = this.getFilteredData(front) + OFFSETX;
 										isRunning = false;
 									 }
+									 else
+									 {
+										 nav.turnToDeg(odo.getHeadingDeg()+COMPENSATION,true);
+										 nav.setRotationSpeed(ROTATION_SPEED);
+									 }
 									
 								}
-								
-								isIncreasing = true;
-							}
-							else if (change < 0 )
-							{
-								isIncreasing = false;
-							}
-							delayCount ++;
-							
+
+							distancePrevious = distanceFront;
 					}
-					distancePrevious = distanceFront;
+					delayCount++;
+					
 					
 			}		
 					
@@ -204,7 +209,7 @@ public class Localizer {
 		double delta = (yT/2) + 90 - (gridAngle[3]-180);
 		
 		//update these values, travel to (0,0), and turn to 0 degrees
-		odo.setPosition(new double [] {x + xZero + 0.2, y + yZero + 0.3, pos[2]+delta /*+1*/ }, new boolean [] {true, true, true});
+		odo.setPosition(new double [] {x + xZero + 0.8, y + yZero + 0.3, pos[2]+delta +1.25 }, new boolean [] {true, true, true});
 		
 		//Button.waitForAnyPress();
 		odo.getPosition(pos);
@@ -231,9 +236,9 @@ public class Localizer {
 		// there will be a delay here
 		
 		distance = s.getDistance();
-		if (distance > LIMIT)
+		if (distance > FRONTLIMIT)
 		{
-			distance = LIMIT;
+			distance = FRONTLIMIT;
 		}
 		//I felt that anything above 30 was irrelevant, and 30 allowed for accuracy while letting me test with other bots in the area
 
@@ -258,3 +263,4 @@ public class Localizer {
 
 
 }
+
