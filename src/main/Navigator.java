@@ -12,6 +12,7 @@ public class Navigator{
 	private static double wheelsDistance;
 	
 	// The error and threshold values
+	private final static double TILE_LENGTH = 30.48;
 	private final static double LOW_ANGLE_BANDWIDTH_DEG = 3;
 	private final static double LOW_ANGLE_BANDWIDTH_RAD = Math.toRadians(LOW_ANGLE_BANDWIDTH_DEG);
 	
@@ -24,7 +25,8 @@ public class Navigator{
 	
 
 	// Obstacle avoidance variables (in centimeters)
-	private static final int FRONT_DISTANCE_THRESHOLD = 20, ANGLED_SENSOR_DISTANCE_THRESHOLD = 30, ANGLED_SENSOR_BANDCENTER = /*24*/ 21;
+	private static final int FRONT_DISTANCE_THRESHOLD = 20, ANGLED_SENSOR_DISTANCE_THRESHOLD = 30, ANGLED_SENSOR_BANDCENTER = 20;
+	private static final int VERY_CLOSE_THRESHOLD = 18;
 	private static final int FRONT_CORNER_DISTANCE_THRESHOLD = 25;
 	private static final int MAX_FRONT_DISTANCE = 30;
 	private static final int ANGLED_SENSOR_DISTANCE_BANDWIDTH = 5;
@@ -41,6 +43,7 @@ public class Navigator{
 	// Variables to indicate the position of RobinHood and the destination
 	private Vector position, destination;
 	private Vector unitOrientationVector;
+	
 	
 	private int[] distance = {255,255,255};
 	private double launchAngle = Math.tan(7.4/(5*30.48 + 4));
@@ -181,6 +184,24 @@ public class Navigator{
 		wheels[RIGHT].setSpeed(speed[RIGHT]);	
 	}
 	
+	
+	/**
+	 * Moves the robot to the point that it has to launch the ball.
+	 * It stops and turns to the target. Then calls the launcher to launch a ball.
+	 * @param x
+	 * @param y
+	 * @param xMin
+	 * @param xMax
+	 * @param yMin
+	 * @param yMax
+	 * @param numBalls Number of ping pong balls to shoot
+	 */
+	public void fireAtTiles(double x, double y, double xMin, double xMax, double yMin, double yMax,int numBalls)
+	{
+		fireAt(x*TILE_LENGTH, y*TILE_LENGTH, xMin*TILE_LENGTH, xMax*TILE_LENGTH, yMin*TILE_LENGTH, yMax*TILE_LENGTH, numBalls);
+	}
+	
+	
 	/**
 	 * Stops the robot
 	 */
@@ -226,6 +247,7 @@ public class Navigator{
 			if( Odometer.minimizeAngle(targetAngle-heading) < 0){
 				wheels[LEFT].backward();
 				wheels[RIGHT].forward();
+
 			}
 			// Else if the robot has to turn clockwise
 			else{
@@ -241,6 +263,7 @@ public class Navigator{
 		if( stop )
 			this.stop();	
 	}
+			
 
 	
 	
@@ -267,20 +290,20 @@ public class Navigator{
 			if(obstacleAvoidance && !position.approxEquals(destination, HIGH_POSITION_BANDWIDTH ) ) {			
 				
 				// Obstacle to the left
-				if( distance[LEFT] <= ANGLED_SENSOR_BANDCENTER ) {
+				if( distance[LEFT] <= VERY_CLOSE_THRESHOLD ) {
 					do{
 						turn(RIGHT);
 						distance[LEFT] = usController.getFilteredDistance(LEFT);
-					}while(distance[LEFT] < ANGLED_SENSOR_BANDCENTER);
+					}while(distance[LEFT] < VERY_CLOSE_THRESHOLD);
 					avoidObstacle();
 				}
 				
 				// Obstacle to the right
-				else if( distance[RIGHT] <= ANGLED_SENSOR_DISTANCE_THRESHOLD ) {
+				else if( distance[RIGHT] <= VERY_CLOSE_THRESHOLD ) {
 					do{
 						turn(LEFT);
 						distance[RIGHT] = usController.getFilteredDistance(RIGHT);
-					}while(distance[RIGHT] < ANGLED_SENSOR_DISTANCE_THRESHOLD);
+					}while(distance[RIGHT] < VERY_CLOSE_THRESHOLD);
 					avoidObstacle();
 				}
 				
@@ -355,7 +378,7 @@ public class Navigator{
 	public void navigateMapTiles(double[][]map, boolean obstacleAvoidance) {
 		for(int i = 0; i < map.length ; i++)
 		{
-			travelTo(map[i][0]*30.48,map[i][1]*30.48, obstacleAvoidance);
+			travelTo(map[i][0]*TILE_LENGTH,map[i][1]*TILE_LENGTH, obstacleAvoidance);
 		}
 	}
 	
@@ -454,6 +477,20 @@ public class Navigator{
 				break;
 			}
 			
+			// Corner in front (Special case where distance gets to around 23-24 centimeters and then reads 255
+			else if( distance[FRONT] <= FRONT_CORNER_DISTANCE_THRESHOLD && distance[FRONT] > FRONT_DISTANCE_THRESHOLD ) {
+				Delay.msDelay(200);
+				distance[FRONT] = usController.getFilteredDistance(FRONT);
+				if(distance[FRONT] > MAX_FRONT_DISTANCE){
+					Sound.beep();
+					
+					turn(followingSide);
+					
+					Delay.msDelay(1000);
+
+					avoidObstacle();
+				}
+			}
 			
 			// Case 1: Positive error, moving too far from wall
 			if (distanceError > ANGLED_SENSOR_DISTANCE_BANDWIDTH /*UPPER_ANGLED_DISTANCE_BANDWIDTH*/) { // so the robot doesn't turn into the wall as much

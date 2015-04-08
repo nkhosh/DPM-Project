@@ -46,12 +46,14 @@ public class FinalTesting {
 //		{0,0}
 //	};
 	
-	private static double[][] mapC = {
-		{0,4},
-		{9, 5}
-	};
+//	private static double[][] mapC = {
+//		{0,4},
+//		{9, 5}
+//	};
 	
-
+	private static double[][] integrationMap1 = {
+		{0 - 7.5, 10*TILE_LENGTH - 1}
+	};
 	public static void main(String[] args) {
 		RobinHood robin = new RobinHood();
 		loc = robin.getLocalizer();
@@ -59,24 +61,27 @@ public class FinalTesting {
 		odo = robin.getOdometer();
 		odoC = robin.getOdometryCorrector();
 		lcd = robin.getLCDPrinter();
+		LCDInfo lcdInfo = new LCDInfo(odo);
 		odo.start();
 		
 		Button.waitForAnyPress();
-		lcd.start();
+//		lcd.start();
 		
 		// Localizing
-//		loc.doLocalization();
+		loc.doLocalization();
 		
 		odoC.start();
 //		
 //		// Avoiding obstacles and returning to start
-		nav.navigateMapTiles(mapC, true);
-//		nav.turnToDeg(0, true);
-//		nav.turnToDeg(120, true);
-//		nav.turnToDeg(-90, true);
-//		nav.turnToDeg(360, true);
-//		nav.turnToDeg(180, true);
-//		nav.turnToDeg(-180, true);
+		nav.navigateMap(integrationMap1, true);
+		
+		odoC.setActive(false);
+		loc.doLSLocalization(0, 10 * TILE_LENGTH);
+		odoC.setActive(true);
+		
+		
+		nav.fireAtTiles(4, 9, -0.5, 1.5, 8.5, 10.5, 3);
+		nav.travelTo(0,0, true);
 		
 		Button.waitForAnyPress();
 		System.exit(0);
