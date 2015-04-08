@@ -8,10 +8,10 @@ import lejos.nxt.UltrasonicSensor;
 public class RobinHood {
 	private final static SensorPort lsPort = SensorPort.S1,
 									usLeftPort = SensorPort.S2, usFrontPort = SensorPort.S3, usRightPort = SensorPort.S4; 
-	private final static NXTRegulatedMotor[] wheelMotor = {Motor.A, Motor.B};
-	private final static NXTRegulatedMotor launcherMotor = Motor.C;
+	private final static NXTRegulatedMotor[] WHEEL_MOTOR = {Motor.A, Motor.B};
+	private final static NXTRegulatedMotor LAUNCHER_MOTOR = Motor.C;
+	private static int numberOfPingPongBalls = 5;
 	private final static int LEFT=0, RIGHT=1, FRONT=2;
-	public final static double wheelRadius = 2.08, wheelsDistance = 16.09; // do we need this?
 	private Object lock;
 	private Odometer odometer;
 	private OdometryCorrector odometryCorrector;
@@ -38,21 +38,21 @@ public class RobinHood {
 		
 		lsController = new LSController(lightSensor);
 		usController = new USController(usSensors);
-		odometer = new Odometer(wheelMotor, lock);
+		odometer = new Odometer(WHEEL_MOTOR, lock);
 		odometryCorrector = new OdometryCorrector(odometer, lsController, lock);
-		navigator = new Navigator(odometer, wheelMotor, usController, launcher);
-		launcher = new Launcher(launcherMotor, 5);
+		navigator = new Navigator(odometer, WHEEL_MOTOR, usController, launcher);
+		launcher = new Launcher(LAUNCHER_MOTOR, numberOfPingPongBalls);
 		lcdPrinter = new LCDPrinter(odometer, navigator, usController, lock);
-		localizer = new Localizer(odometer,navigator,usSensors,lightSensor);
+		localizer = new Localizer(odometer,navigator,usController,lightSensor);
 	}
 	
 	public Odometer getOdometer() {
 		return odometer;
 	}
+	
 	public Localizer getLocalizer() {
 		return localizer;
 	}
-	
 	
 	public OdometryCorrector getOdometryCorrector() {
 		return odometryCorrector;
@@ -75,7 +75,6 @@ public class RobinHood {
 	}
 
 	public LSController getLScontroller() {
-		// TODO Auto-generated method stub
 		return lsController;
 	}
 }

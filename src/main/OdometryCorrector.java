@@ -1,7 +1,5 @@
 package main;
 
-import lejos.nxt.Sound;
-
 public class OdometryCorrector extends Thread { //TODO heading correction
 	private final static long CORRECTION_PERIOD = 10;
 	private final static double TILE_LENGTH = 30.48; // in centimeters\
@@ -23,7 +21,7 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 	
 	// light sensor data
 	private int lsData;
-	private int sensorData;
+//	private int sensorData;
 	
 	// Position and position error of light sensors
 	private double sensorX;
@@ -34,21 +32,21 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 	private boolean isActive;
 	
 	// Variables determining movement while odometry correcting
-	private boolean mustTurnLeft;
-	private boolean mustTurnRight;
+//	private boolean mustTurnLeft;
+//	private boolean mustTurnRight;
 
 	Object lock;
 	Odometer odometer;
 	LSController lsController;
 	
-	public boolean getMustTurnLeft(){
-		return mustTurnLeft;
-	}
-	
-	public boolean getMustTurnRight(){
-		return mustTurnRight;
-	}
-	
+//	public boolean getMustTurnLeft(){
+//		return mustTurnLeft;
+//	}
+//	
+//	public boolean getMustTurnRight(){
+//		return mustTurnRight;
+//	}
+//	
 	
 	/**
 	 * Constructor to build and initials the variables of odometry corrector

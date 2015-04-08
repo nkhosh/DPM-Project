@@ -3,10 +3,8 @@ import lejos.nxt.NXTRegulatedMotor;
 
 public class Odometer extends Thread {	
 	private static final long ODOMETER_PERIOD = 25;
-	private static double wheelRadius=2.055, wheelsDistance=16.05;
-//	Previous values in Navigator: (Check for errors)
-//	private final static double RADIUS = 2.085; 
-//	private final static double WHEELS_DISTANCE = 16.2;
+	private final static int LEFT=0, RIGHT=1, HEADING=2;
+	private static final double wheelRadius=2.055, wheelsDistance=16.05;
 	private double x, y, heading;
 	private Object lock;
 	private final NXTRegulatedMotor[] wheels;
@@ -19,11 +17,11 @@ public class Odometer extends Thread {
 		y = 0;
 		heading = 0.0;
 		tachometer = new double[2];
-		tachometer[0] = 0;
-		tachometer[1] = 0;
+		tachometer[LEFT] = 0;
+		tachometer[RIGHT] = 0;
 		this.wheels = wheels;
-		wheels[0].resetTachoCount();
-		wheels[1].resetTachoCount();
+		wheels[LEFT].resetTachoCount();
+		wheels[RIGHT].resetTachoCount();
 	}
 	
 	public void setX(double x) {
@@ -44,16 +42,8 @@ public class Odometer extends Thread {
 		}
 	}
 	
-	public void setRadius(double r) {
-		wheelRadius = r;
-	}
-	
 	public double getRadius() {
 		return wheelRadius;
-	}
-	
-	public void setWidth(double w) {
-		wheelsDistance = w;
 	}
 	
 	public double getWheelsDistance() {
@@ -85,15 +75,11 @@ public class Odometer extends Thread {
 		}
 	}
 	
-	public static double minAngleFromTo(double fromAngle, double toAngle) {
-		double d = fixDegAngle(toAngle - fromAngle);
-		
-		if (d < 180.0)
-			return d;
-		else
-			return d - 360.0;
-	}
-	
+	/**
+	 * Sets the angle to its equivalent value in the range of 0 to 360 degrees
+	 * @param angle in degrees
+	 * @return angle in range of 0 to 360 degrees
+	 */
 	public static double fixDegAngle(double angle) {		
 		if (angle < 0.0)
 			angle = 360.0 + (angle % 360.0);
@@ -101,6 +87,11 @@ public class Odometer extends Thread {
 		return angle % 360.0;
 	}
 	
+	/**
+	 * Sets the angle to its equivalent value in the range of 0 to 2PI rad
+	 * @param angle in rad
+	 * @return angle in range of 0 to 2PI
+	 */
 	public static double fixRadAngle(double angle) {		
 		if (angle < 0.0)
 			angle = Math.PI*2 + (angle % (Math.PI*2));
@@ -108,26 +99,30 @@ public class Odometer extends Thread {
 		return angle % (Math.PI*2);
 	}
 	
-	public void getPosition(double [] pos) {
+	/**
+	 * Fill the array with position variables
+	 * @param pos the array with entries x, y and heading
+	 */
+	public void getPosition(double [] position) {
 		synchronized (lock) {
-			pos[0] = x;
-			pos[1] = y;
-			pos[2] = fixDegAngle(Math.toDegrees(heading));
+			position[LEFT] = x;
+			position[RIGHT] = y;
+			position[HEADING] = fixDegAngle(Math.toDegrees(heading));
 		}
 	}
 	
-	public void setPosition(double [] pos, boolean [] update) {
+	/**
+	 * Sets the position of the robot
+	 * @param pos array of x, y, heading
+	 */
+	public void setPosition(double [] position) {
 		synchronized (lock) {
-			if (update[0]) x = pos[0];
-			if (update[1]) y = pos[1];
-			if (update[2]) heading = fixRadAngle(Math.toRadians(pos[2]));
+			x = position[LEFT];
+			y = position[RIGHT];
+			heading = fixRadAngle(Math.toRadians(position[HEADING]));
 		}
 	}
 
-	public boolean isTurning(){
-		return !(wheels[0].getSpeed() == wheels[1].getSpeed());
-	}
-	
 	/**
 	 * Minimizes an angle so that it is within the range from -PI to PI if not already in that range
 	 * @param angle in radians
@@ -146,28 +141,31 @@ public class Odometer extends Thread {
 		return minimizedAngle;
 	}
 	
+	/**
+	 * Runs the odometer thread.
+	 * 
+	 */
 	public void run() {
 		long updateStart, updateEnd;
-
+	
 		while (true) {
 			updateStart = System.currentTimeMillis();
-			double tachoCounterL = (wheels[0].getTachoCount())*Math.PI/180;
-			double tachoCounterR = (wheels[1].getTachoCount())*Math.PI/180;
-			tachometer[0] = tachoCounterL - tachometer[0];
-			tachometer[1] = tachoCounterR - tachometer[1];
-			dc = (tachometer[1]*wheelRadius + tachometer[0]*wheelRadius)/2;
-			dt = (tachometer[1]*wheelRadius - tachometer[0]*wheelRadius)/wheelsDistance;
+			double tachoCounterL = (wheels[LEFT].getTachoCount())*Math.PI/180;
+			double tachoCounterR = (wheels[RIGHT].getTachoCount())*Math.PI/180;
+			tachometer[LEFT] = tachoCounterL - tachometer[LEFT];
+			tachometer[RIGHT] = tachoCounterR - tachometer[RIGHT];
+			dc = (tachometer[RIGHT]*wheelRadius + tachometer[LEFT]*wheelRadius)/2;
+			dt = (tachometer[RIGHT]*wheelRadius - tachometer[LEFT]*wheelRadius)/wheelsDistance;
 			
 			synchronized (lock) {
-				// don't use the variables x, y, or theta anywhere but here!
 				y += dc * Math.cos(heading + dt/2);
 				x += dc * Math.sin(heading + dt/2);
 				heading -= dt;
 				heading = minimizeAngle(heading);
 			}
 			
-			tachometer[0] = tachoCounterL;
-			tachometer[1] = tachoCounterR;
+			tachometer[LEFT] = tachoCounterL;
+			tachometer[RIGHT] = tachoCounterR;
 			
 			// this ensures that the odometer only runs once every period
 			updateEnd = System.currentTimeMillis();

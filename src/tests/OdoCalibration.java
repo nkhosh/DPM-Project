@@ -159,11 +159,11 @@ public class OdoCalibration {
 		for(int j=0; j<4; j++) {
 //			robinhood.getNavigator().travelTo((j%2)*FORWARD_DISTANCE, ((j+1)%2)*FORWARD_DISTANCE);
 //			robinhood.getNavigator().turnTo(ROTATION_ANGLE*(j+1), true);
-			wheelMotor[0].rotate((int)Navigator.convertDistance(radius, FORWARD_DISTANCE), true);
-			wheelMotor[1].rotate((int)Navigator.convertDistance(radius, FORWARD_DISTANCE), false);
+			wheelMotor[0].rotate((int)Navigator.convertDistanceToAngle(radius, FORWARD_DISTANCE), true);
+			wheelMotor[1].rotate((int)Navigator.convertDistanceToAngle(radius, FORWARD_DISTANCE), false);
 
-			wheelMotor[0].rotate((int)Navigator.convertAngle(radius, width, ROTATION_ANGLE), true);
-			wheelMotor[1].rotate(-(int)Navigator.convertAngle(radius, width, ROTATION_ANGLE), false);
+			wheelMotor[0].rotate((int)Navigator.convertHeadingToWheelAngle(radius, width, ROTATION_ANGLE), true);
+			wheelMotor[1].rotate(-(int)Navigator.convertHeadingToWheelAngle(radius, width, ROTATION_ANGLE), false);
 		}
 	}
 	public static void goForward() {
@@ -206,7 +206,7 @@ public class OdoCalibration {
 
 //		robinhood.getNavigator().turnTo(ROTATION_ANGLE, true);
 
-		wheelMotor[0].rotate((int)Navigator.convertAngle(radius, width, ROTATION_ANGLE), true);
-		wheelMotor[1].rotate(-(int)Navigator.convertAngle(radius, width, ROTATION_ANGLE), false);
+		wheelMotor[0].rotate((int)Navigator.convertHeadingToWheelAngle(radius, width, ROTATION_ANGLE), true);
+		wheelMotor[1].rotate(-(int)Navigator.convertHeadingToWheelAngle(radius, width, ROTATION_ANGLE), false);
 	}
 }
