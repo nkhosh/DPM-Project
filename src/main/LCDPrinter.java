@@ -39,9 +39,9 @@ public class LCDPrinter extends Thread {
 			LCD.drawString(formattedDoubleToString(odometer.getX(), 2), 3, 0);
 			LCD.drawString(formattedDoubleToString(odometer.getY(), 2), 3, 1);
 			LCD.drawString(formattedDoubleToString(odometer.getHeading()*180/Math.PI, 2), 3, 2);
-			LCD.drawString(formattedDoubleToString(usC.getDistance(LEFT), 2), 3, 4);
-			LCD.drawString(formattedDoubleToString(usC.getDistance(RIGHT), 2), 3, 5);
-			LCD.drawString(formattedDoubleToString(usC.getDistance(FRONT), 2), 3, 6);
+//			LCD.drawString(formattedDoubleToString(usC.getDistance(LEFT), 2), 3, 4);
+//			LCD.drawString(formattedDoubleToString(usC.getDistance(RIGHT), 2), 3, 5);
+//			LCD.drawString(formattedDoubleToString(usC.getDistance(FRONT), 2), 3, 6);
 //			LCD.drawString(formattedDoubleToString(usC.getFilteredDistance(LEFT), 2), 3, 4);
 //			LCD.drawString(formattedDoubleToString(usC.getFilteredDistance(RIGHT), 2), 3, 5);
 //			LCD.drawString(formattedDoubleToString(usC.getFilteredDistance(FRONT), 2), 3, 6);

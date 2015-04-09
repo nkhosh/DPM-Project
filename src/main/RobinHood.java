@@ -40,8 +40,8 @@ public class RobinHood {
 		usController = new USController(usSensors);
 		odometer = new Odometer(WHEEL_MOTOR, lock);
 		odometryCorrector = new OdometryCorrector(odometer, lsController, lock);
-		navigator = new Navigator(odometer, WHEEL_MOTOR, usController, launcher);
 		launcher = new Launcher(LAUNCHER_MOTOR, numberOfPingPongBalls);
+		navigator = new Navigator(odometer, WHEEL_MOTOR, usController, launcher);
 		lcdPrinter = new LCDPrinter(odometer, navigator, usController, lock);
 		localizer = new Localizer(odometer,navigator,usSensors,lightSensor);
 	}

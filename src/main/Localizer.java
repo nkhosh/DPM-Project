@@ -218,7 +218,7 @@ public class Localizer {
 		
 		//Button.waitForAnyPress();
 		odo.getPosition(pos);
-		nav.travelTo(0, 0,false);
+		nav.travelTo(xZero, yZero,false);
 		//Button.waitForAnyPress();
 		odo.getPosition(pos);
 		nav.turnToDeg(0,true);

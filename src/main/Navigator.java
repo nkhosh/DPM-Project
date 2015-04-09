@@ -25,11 +25,11 @@ public class Navigator{
 	
 
 	// Obstacle avoidance variables (in centimeters)
-	private static final int FRONT_DISTANCE_THRESHOLD = 20, ANGLED_SENSOR_DISTANCE_THRESHOLD = 30, ANGLED_SENSOR_BANDCENTER = 20;
-	private static final int VERY_CLOSE_THRESHOLD = 18;
+	private static final int FRONT_DISTANCE_THRESHOLD = 20, ANGLED_SENSOR_BANDCENTER = 24; // 22 
+	private static final int VERY_CLOSE_THRESHOLD = 9;
 	private static final int FRONT_CORNER_DISTANCE_THRESHOLD = 25;
 	private static final int MAX_FRONT_DISTANCE = 30;
-	private static final int ANGLED_SENSOR_DISTANCE_BANDWIDTH = 5;
+	private static final int ANGLED_SENSOR_DISTANCE_BANDWIDTH = 1;
 	
 	// Useful flags
 	private final static int LEFT=0, RIGHT=1, FRONT=2;
@@ -54,7 +54,8 @@ public class Navigator{
 	
 	private int followingSide;
 	private int oppositeSide;
-	private static final int P_SPEED_COEFFICIENT = 15;
+	private static final int P_INNER_WHEEL_SPEED_COEFFICIENT = 9; // 5
+	private static final int P_OUTER_WHEEL_SPEED_COEFFICIENT = 10; // 6
 	
 	public Navigator(Odometer odometer, NXTRegulatedMotor[] wheels, USController usController, Launcher launch)	{
 		this.launcher = launch;
@@ -139,12 +140,12 @@ public class Navigator{
 		wheels[RIGHT].forward();
 		
 		if(orientation == LEFT){
-			speed[LEFT]=NORMAL_SPEED - pAddedSpeed(difference);
-			speed[RIGHT]=NORMAL_SPEED + pAddedSpeed(difference);
+			speed[LEFT]=NORMAL_SPEED - pInnerAddedSpeed(difference);
+			speed[RIGHT]=NORMAL_SPEED + pOuterAddedSpeed(difference);
 		}
 		else if(orientation == RIGHT){
-			speed[LEFT]=NORMAL_SPEED + pAddedSpeed(difference);
-			speed[RIGHT]=NORMAL_SPEED - pAddedSpeed(difference);
+			speed[LEFT]=NORMAL_SPEED + pOuterAddedSpeed(difference);
+			speed[RIGHT]=NORMAL_SPEED - pInnerAddedSpeed(difference);
 		}
 		else if(orientation == FRONT){
 			speed[LEFT]=NORMAL_SPEED;
@@ -158,8 +159,17 @@ public class Navigator{
 	 * @param difference of the robot's distance to the wall/obstacle from the band center
 	 * @return the speed based on the difference value
 	 */
-	private int pAddedSpeed(int difference){
-		return Math.abs(difference)*P_SPEED_COEFFICIENT;
+	private int pInnerAddedSpeed(int difference){
+		return Math.abs(difference)*P_INNER_WHEEL_SPEED_COEFFICIENT;
+	}
+	
+	/**
+	 * Calculates speed of the robot based on p-controller method.
+	 * @param difference of the robot's distance to the wall/obstacle from the band center
+	 * @return the speed based on the difference value
+	 */
+	private int pOuterAddedSpeed(int difference){
+		return Math.abs(difference)*P_OUTER_WHEEL_SPEED_COEFFICIENT;
 	}
 	
 	/**
@@ -338,8 +348,17 @@ public class Navigator{
 					}
 				}
 				
+				else if (distance[LEFT] < ANGLED_SENSOR_BANDCENTER){
+					avoidObstacle();
+				}
+				
+				else if (distance[RIGHT] < ANGLED_SENSOR_BANDCENTER){
+					avoidObstacle();
+				}
+				
 				// No obstacles
 				else {
+					avoidObstacle();
 					turnToRad(relativeTargetOrientation, false);
 					move(FRONT);
 				}
@@ -446,7 +465,8 @@ public class Navigator{
 		updatePosition();
 		double relativeTargetOrientation = destination.subtract(position).getOrientation();
 		double heading = odometer.getHeading();
-		int distanceError;
+		int followingDistanceError;
+		int oppositeDistanceError;
 							
 		while(true){
 			// Obstacles on left and right, pick following side based on destination
@@ -459,7 +479,8 @@ public class Navigator{
 			distance[oppositeSide] = usController.getFilteredDistance(oppositeSide);
 			distance[FRONT] = usController.getFilteredDistance(FRONT);
 			
-			distanceError = distance[followingSide]-ANGLED_SENSOR_BANDCENTER;
+			followingDistanceError = distance[followingSide]-ANGLED_SENSOR_BANDCENTER;
+			oppositeDistanceError = distance[oppositeSide]-ANGLED_SENSOR_BANDCENTER;
 			
 			// If the way is clear ahead of the robot (including close left/right obstacles)
 			if( Math.abs(relativeTargetOrientation - heading ) <= HIGH_ANGLE_BANDWIDTH_RAD 
@@ -477,32 +498,37 @@ public class Navigator{
 				break;
 			}
 			
-			// Corner in front (Special case where distance gets to around 23-24 centimeters and then reads 255
-			else if( distance[FRONT] <= FRONT_CORNER_DISTANCE_THRESHOLD && distance[FRONT] > FRONT_DISTANCE_THRESHOLD ) {
-				Delay.msDelay(200);
-				distance[FRONT] = usController.getFilteredDistance(FRONT);
-				if(distance[FRONT] > MAX_FRONT_DISTANCE){
-					Sound.beep();
-					
-					turn(followingSide);
-					
-					Delay.msDelay(1000);
-
-					avoidObstacle();
+			// Obstacle very close on following side
+			else if( distance[followingSide] <= VERY_CLOSE_THRESHOLD ) {
+				break;
+			}
+			
+			// Obstacle very close on opposite side
+			else if( distance[oppositeSide] <= VERY_CLOSE_THRESHOLD ) {
+				break;
+			}
+			
+			// Obstacle within bandwidth on opposite side
+			else if (oppositeDistanceError < -ANGLED_SENSOR_DISTANCE_BANDWIDTH /*-LOWER_ANGLED_DISTANCE_BANDWIDTH*/) {
+				if(oppositeDistanceError == LEFT){
+					pMove(RIGHT, oppositeDistanceError);
+				}
+				else if(oppositeDistanceError == RIGHT){
+					pMove(LEFT, oppositeDistanceError);
 				}
 			}
 			
 			// Case 1: Positive error, moving too far from wall
-			if (distanceError > ANGLED_SENSOR_DISTANCE_BANDWIDTH /*UPPER_ANGLED_DISTANCE_BANDWIDTH*/) { // so the robot doesn't turn into the wall as much
-				pMove(followingSide, distanceError);
+			if (followingDistanceError > ANGLED_SENSOR_DISTANCE_BANDWIDTH /*UPPER_ANGLED_DISTANCE_BANDWIDTH*/) { // so the robot doesn't turn into the wall as much
+				pMove(followingSide, followingDistanceError);
 			}
 			// Case 2: Negative error, moving too close to wall
-			else if (distanceError < -ANGLED_SENSOR_DISTANCE_BANDWIDTH /*-LOWER_ANGLED_DISTANCE_BANDWIDTH*/) {
+			else if (followingDistanceError < -ANGLED_SENSOR_DISTANCE_BANDWIDTH /*-LOWER_ANGLED_DISTANCE_BANDWIDTH*/) {
 				if(followingSide == LEFT){
-					pMove(RIGHT, distanceError);
+					pMove(RIGHT, followingDistanceError);
 				}
 				else if(followingSide == RIGHT){
-					pMove(LEFT, distanceError);
+					pMove(LEFT, followingDistanceError);
 				}
 			}
 			// Case 3:  Error in bounds
