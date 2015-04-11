@@ -4,7 +4,7 @@ import lejos.nxt.NXTRegulatedMotor;
 public class Odometer extends Thread {	
 	private static final long ODOMETER_PERIOD = 25;
 	private final static int LEFT=0, RIGHT=1, HEADING=2;
-	private static final double wheelRadius=2.055, wheelsDistance=16.05;
+	private static double wheelRadius=2.055, wheelsDistance=15.85/*16.05*/;
 	private double x, y, heading;
 	private Object lock;
 	private final NXTRegulatedMotor[] wheels;
@@ -22,6 +22,15 @@ public class Odometer extends Thread {
 		this.wheels = wheels;
 		wheels[LEFT].resetTachoCount();
 		wheels[RIGHT].resetTachoCount();
+	}
+	
+
+	public void setRadius(double radius){
+		wheelRadius = radius;
+	}
+	
+	public void setWidth(double width){
+		wheelsDistance = width;
 	}
 	
 	public void setX(double x) {

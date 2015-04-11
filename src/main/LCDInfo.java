@@ -34,9 +34,9 @@ public class LCDInfo implements TimerListener{
 		LCD.drawInt((int)((pos[0] * 1000)/3048), 3, 0);
 		LCD.drawInt((int)((pos[1] * 1000)/3048), 3, 1);
 		LCD.drawInt((int)pos[2], 3, 2);
-		LCD.drawInt((int)Localizer.change, 3, 4);
-		LCD.drawInt((int)Localizer.distanceFront, 3, 5);
-		LCD.drawInt((int)Localizer.distancePrevious, 3, 6);
+		LCD.drawInt((int)Localizer.lightValue, 3, 4);
+		LCD.drawInt((int)Localizer.gridCounter, 3, 5);
+		LCD.drawInt((int)Localizer.average, 3, 6);
 
 		
 	}

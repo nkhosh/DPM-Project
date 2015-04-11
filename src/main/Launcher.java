@@ -2,7 +2,8 @@ package main;
 import lejos.nxt.NXTRegulatedMotor;
 
 public class Launcher {
-	private static final int[] reloadSpeeds = {235,375,367,374,380};
+//	private static final int[] reloadSpeeds = {235,375,367,374,380};
+	private static final int[] reloadSpeeds = {100,375,367,374,380};
 	
 	private static final int shootingSpeed = 200;
 	private NXTRegulatedMotor launcherMotor;
@@ -23,21 +24,31 @@ public class Launcher {
 		for(int i=0; i<balls; i++){
 			launcherMotor.setSpeed(shootingSpeed);
 			launcherMotor.rotate(-180);
-			if(ballsInQuiver!=0)
-				reload();
+//			if(ballsInQuiver!=0)
+			reload();
 		}
 		
 		// return to initial position
-		launcherMotor.rotate(-180);
+//		launcherMotor.rotate(-180);
 		
 		// reset balls in quiver (for testing)
-		ballsInQuiver = 5;
+//		ballsInQuiver = 5;
 	}
 	
 	private void reload(){
-		launcherMotor.setSpeed(reloadSpeeds[ballsInQuiver - 1]);
-		launcherMotor.rotate(-180);
-		ballsInQuiver--;
+		if(ballsInQuiver!=0){
+			launcherMotor.setSpeed(reloadSpeeds[ballsInQuiver - 1]);
+			launcherMotor.rotate(-180);
+			ballsInQuiver--;
+		}
+		else{
+			launcherMotor.rotate(-180);
+			ballsInQuiver = 5;
+		}
+	}
+	
+	public void setBallsInQuiver(int balls){
+		this.ballsInQuiver = balls;
 	}
 	
 	

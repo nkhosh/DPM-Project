@@ -32,7 +32,7 @@ public class DemoTest {
 		Button.waitForAnyPress();
 
 		robin.getOdometryCorrector().start();
-		navigator.navigateMap(demo);
+		navigator.navigateMap(demo, true);
 		Button.waitForAnyPress();
 		//navigator.fireAt(9*segment, 9*segment, xMin, xMax, yMin, yMax, numBalls);
 		

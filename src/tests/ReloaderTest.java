@@ -20,10 +20,15 @@ public class ReloaderTest {
 		
 		while(buttonChoice!=Button.ID_ESCAPE){
 			if(buttonChoice == Button.ID_ENTER){
-				launcher.launch(6);
+				launcher.launch(3);
 			}
-				
 			buttonChoice = Button.waitForAnyPress();
+			
+			if(buttonChoice == Button.ID_ENTER){
+				launcher.launch(3);
+			}
+			buttonChoice = Button.waitForAnyPress();
+				
 		}
 		
 		buttonChoice = Button.waitForAnyPress();

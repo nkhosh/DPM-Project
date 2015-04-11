@@ -18,7 +18,7 @@ public class USMedianFilter extends Thread
 	{
 		//setting up the initial variables
 		this.us = us;
-		windowSize = 0;
+		windowSize = 1;
 		inputDistances = new int[windowSize];
 		sortedDistances = new int[windowSize];
 		movingIndex = 0;

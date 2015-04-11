@@ -8,7 +8,7 @@ import main.RobinHood;
 public class LightSensorTests {
 	Odometer odometer;
 	private static LSController lsController;
-	static int[] data;
+	static int data;
 	
 
 	public static void main(String[] args) {
@@ -20,8 +20,7 @@ public class LightSensorTests {
 		while(true){
 			data = lsController.readFilteredCSdata();
 			
-			LCD.drawString("LEFT:  "+ data[0], 0, 0);
-			LCD.drawString("RIGHT: "+ data[1], 0, 1);
+			LCD.drawString("LS:  "+ data, 0, 0);
 		}
 
 	}

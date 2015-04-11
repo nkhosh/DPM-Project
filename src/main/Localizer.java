@@ -9,7 +9,7 @@ public class Localizer {
 	
 	public static double ROTATION_SPEED = 50;
 	public static final int FRONTLIMIT = 60;
-	public static final int SIDELIMIT = 50;
+	public static final int SIDELIMIT = 45;
 	public static final double OFFSETY = 6.0;
 	public static final double OFFSETX = 4.8;
 	public static final int ERROR = 3;
@@ -71,6 +71,8 @@ public class Localizer {
 			//int delayCountLimit = 65;
 			int delayCount = 0;
 			distanceFront = 0;
+			average = 0;
+			filterCount = 0;
 			
 			change = 0;
 			while(isRunning)
@@ -147,20 +149,23 @@ public class Localizer {
 			double[] pos = {0,0,0};
 			odo.getPosition(pos);
 			odo.setPosition(new double [] {xDistance-30.48, yDistance-30.48, 270  });
-			//nav.travelTo(-7.5, -1,false);
-			nav.travelTo(-7.5, -1,false);
-			nav.turnToDeg(0, true);
+			nav.travelTo(-5, -1,false);
+			//nav.travelTo(0, 0,false);
+			nav.turnToDeg(30, true);
 	}
+	
 			
 	public void doLSLocalization(double xZero, double yZero){
 		
+		ls.setFloodlight(true);
 		ROTATION_SPEED = 30;
 		gridCounter = 0;
 		double dupCounter = 0;
 		int i = 0;
 		double gridAngle[] = {0,0,0,0};
-		average = 0;
-
+		
+		
+		
 		boolean isRunning = true;
 		
 		//first, start rotating. Then, each time you run through the loop, increment dupCounter. 
@@ -188,6 +193,7 @@ public class Localizer {
 			 
 			else if((checkAgainstAvg(lightValue))&&(dupCounter > 50))
 			{
+				Sound.beep();
 				odo.getPosition(pos);
 				gridAngle[i] = pos[2];
 				gridCounter ++;
@@ -214,7 +220,7 @@ public class Localizer {
 		double delta = (yT/2) + 90 - (gridAngle[3]-180);
 		
 		//update these values, travel to (0,0), and turn to 0 degrees
-		odo.setPosition(new double [] {x + xZero + 0.8, y + yZero + 0.3, pos[2]+delta -1.25 });
+		odo.setPosition(new double [] {x + xZero , y + yZero , pos[2]+delta  });
 		
 		//Button.waitForAnyPress();
 		odo.getPosition(pos);

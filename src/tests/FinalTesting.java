@@ -1,6 +1,7 @@
 package tests;
 
 import lejos.nxt.Button;
+import lejos.nxt.Sound;
 import main.*;
 
 public class FinalTesting {
@@ -12,6 +13,7 @@ public class FinalTesting {
 	private static Odometer odo;
 	private static OdometryCorrector odoC;
 	private static LCDPrinter lcd;
+	private static int firstTargetX = 13, firstTargetY = 13, secondTargetX = 9, secondTargetY = 14;
 	
 //	private static double[][] map = {
 //			{2,2},
@@ -55,15 +57,29 @@ public class FinalTesting {
 //		{5*TILE_LENGTH - 7.5, 5*TILE_LENGTH -1 }
 //	};
 	
-	private static double[][] integrationMap2 = {
-		{0, 10}
-	};
+//	private static double[][] integrationMap2 = {
+//		{0, 10}
+//	};
+//	
+//	private static double[][] calibrationMap = {
+//		{0,3},
+//		{1,1},
+//		{2,2},
+//		{0,0}
+//	};
+//	
+//	
 	
-	private static double[][] calibrationMap = {
-		{0,3},
-		{1,1},
-		{2,2},
+	private static double[][] map1 = {
+		{1.5, 2.5},
+		{1.5, 4.5},
+		{-0.5, 4.5},
+		{-0.5, 6.5},
+		{0.5, 6.5},
+		{2.5, 7.5},
+		{2.5, 10.5},
 		{0,0}
+		
 	};
 	
 	
@@ -73,8 +89,8 @@ public class FinalTesting {
 		nav = robin.getNavigator();
 		odo = robin.getOdometer();
 		odoC = robin.getOdometryCorrector();
-		lcd = robin.getLCDPrinter();
-//		LCDInfo lcdInfo = new LCDInfo(odo);
+		//lcd = robin.getLCDPrinter();
+		LCDInfo lcdInfo = new LCDInfo(odo);
 		
 		
 		Button.waitForAnyPress();
@@ -82,23 +98,43 @@ public class FinalTesting {
 //		lcd.start();
 		
 		// Localizing
-//		loc.doLocalization();
-		
-		odoC.start();
+		loc.doLocalization();
+		Sound.beepSequence();
+		//Button.waitForAnyPress();
+//		odoC.start();
 //		
 //		// Avoiding obstacles and returning to start
-		nav.navigateMapTiles(calibrationMap, false);
-//		nav.turnToDeg(0, true);
-		Button.waitForAnyPress();
+//		nav.navigateMapTiles(calibrationMap, false);
+		nav.travelToTiles(3.5, 2.5, true);
+		nav.travelTo(8*TILE_LENGTH , 8*TILE_LENGTH , true);
+		nav.travelTo(10*TILE_LENGTH , 10*TILE_LENGTH , false);
 		
-		odoC.setActive(false);
-		loc.doLSLocalization(5*TILE_LENGTH, 5 * TILE_LENGTH);
-		odoC.setActive(true);
+	//	Button.waitForAnyPress();
+		
+//		odoC.setActive(false);
+		loc.doLocalization();
+		odo.setPosition(new double[]{10*TILE_LENGTH,10*TILE_LENGTH,180});
+//		odoC.setActive(true);
+		
+//		Button.waitForAnyPress();
 //		
 //		
-		nav.fireAtTiles(9, 9, 3.5, 6.5, 3.5, 6.5, 6);
+		nav.fireAtTiles(firstTargetX, firstTargetY, 8.5, 10.5, 8.5, 10.5, 3);
 		
-		Button.waitForAnyPress();
+		nav.fireAtTiles(secondTargetX, secondTargetY, 8.25 ,10.4, 8.25, 10.4, 3);
+		
+//		Button.waitForAnyPress();
+		
+		nav.travelTo(0 , 0 , true);
+		//nav.turnToDeg(30, true);
+	//	Button.waitForAnyPress();
+		
+//		odoC.setActive(false);
+		loc.doLocalization();
+//		odoC.setActive(true);
+		
+		
+		
 		nav.travelTo(0,0, true);
 		nav.turnToDeg(0, true);
 		

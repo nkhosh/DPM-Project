@@ -13,6 +13,9 @@ public class Navigator{
 	
 	// The error and threshold values
 	private final static double TILE_LENGTH = 30.48;
+	
+	private final static double FIRING_ANGLE_BANDWIDTH_DEG = 1;
+	
 	private final static double LOW_ANGLE_BANDWIDTH_DEG = 3;
 	private final static double LOW_ANGLE_BANDWIDTH_RAD = Math.toRadians(LOW_ANGLE_BANDWIDTH_DEG);
 	
@@ -26,7 +29,7 @@ public class Navigator{
 
 	// Obstacle avoidance variables (in centimeters)
 	private static final int FRONT_DISTANCE_THRESHOLD = 20, ANGLED_SENSOR_BANDCENTER = 24; // 22 
-	private static final int VERY_CLOSE_THRESHOLD = 9;
+	private static final int VERY_CLOSE_THRESHOLD = 10;
 	private static final int FRONT_CORNER_DISTANCE_THRESHOLD = 25;
 	private static final int MAX_FRONT_DISTANCE = 30;
 	private static final int ANGLED_SENSOR_DISTANCE_BANDWIDTH = 1;
@@ -46,8 +49,13 @@ public class Navigator{
 	
 	
 	private int[] distance = {255,255,255};
-	private double launchAngle = Math.tan(7.4/(5*30.48 + 4));
-	private double launchDistance = Math.sqrt(Math.pow(-7.4, 2) + Math.pow(5*30.48 + 4, 2));
+	private double xMean = -7.1;
+	private double yMean = 5;
+	
+	//private double launchAngle = Math.tan(xMean/(5*30.48 + yMean));
+	private double launchAngle = Math.toDegrees( Math.atan2(-xMean,  (5*30.48 + yMean)) );
+//	private double launchDistance = Math.sqrt(Math.pow(-7.4, 2) + Math.pow(5*30.48 + 4, 2));
+	private double launchDistance = Math.sqrt(Math.pow(xMean, 2) + Math.pow(5*30.48 + yMean, 2));
 	private Launcher launcher;
 	private double targetX;
 	private double targetY;
@@ -304,7 +312,8 @@ public class Navigator{
 					do{
 						turn(RIGHT);
 						distance[LEFT] = usController.getFilteredDistance(LEFT);
-					}while(distance[LEFT] < VERY_CLOSE_THRESHOLD);
+						distance[FRONT] = usController.getFilteredDistance(FRONT);
+					}while(distance[LEFT] <= VERY_CLOSE_THRESHOLD || distance[FRONT] <= MAX_FRONT_DISTANCE);
 					avoidObstacle();
 				}
 				
@@ -312,8 +321,9 @@ public class Navigator{
 				else if( distance[RIGHT] <= VERY_CLOSE_THRESHOLD ) {
 					do{
 						turn(LEFT);
+						distance[FRONT] = usController.getFilteredDistance(FRONT);
 						distance[RIGHT] = usController.getFilteredDistance(RIGHT);
-					}while(distance[RIGHT] < VERY_CLOSE_THRESHOLD);
+					}while(distance[RIGHT] <= VERY_CLOSE_THRESHOLD || distance[FRONT] <= MAX_FRONT_DISTANCE);
 					avoidObstacle();
 				}
 				
@@ -342,7 +352,7 @@ public class Navigator{
 						
 						turn(followingSide);
 						
-						Delay.msDelay(1000);
+						Delay.msDelay(1500);
 
 						avoidObstacle();
 					}
@@ -358,7 +368,6 @@ public class Navigator{
 				
 				// No obstacles
 				else {
-					avoidObstacle();
 					turnToRad(relativeTargetOrientation, false);
 					move(FRONT);
 				}
@@ -377,6 +386,10 @@ public class Navigator{
 		// If the robot reached its destination
 		wheels[LEFT].stop();
 		wheels[RIGHT].stop();
+	}
+	
+	public void travelToTiles(double x, double y, boolean obstacleAvoidance){
+		travelTo(x*TILE_LENGTH,y*TILE_LENGTH,obstacleAvoidance);
 	}
 	
 	/**
@@ -438,10 +451,10 @@ public class Navigator{
 		targetAngle = -1;
 		targetX = 0;
 	    targetY = 0;
-		for (int i = 0; i<90 ; i++)
+		for (int i = 0; i<270 ; i++)
 		{
-			double testX = -(Math.cos(Math.toRadians(i))*launchDistance);
-			double testY = -(Math.sin(Math.toRadians(i))*launchDistance);
+			double testX = (Math.cos(Math.toRadians(i+90))*launchDistance);
+			double testY = (Math.sin(Math.toRadians(i+90))*launchDistance);
 			
 			testX = testX + x;
 			testY = testY + y;
@@ -449,7 +462,7 @@ public class Navigator{
 			{
 				targetX = testX;
 				targetY = testY;
-				targetAngle = 90-i;
+				targetAngle = 180-i;
 				break;
 			}
 		}
@@ -484,9 +497,9 @@ public class Navigator{
 			
 			// If the way is clear ahead of the robot (including close left/right obstacles)
 			if( Math.abs(relativeTargetOrientation - heading ) <= HIGH_ANGLE_BANDWIDTH_RAD 
-					 && /* distance[followingSide] > ANGLED_SENSOR_DISTANCE_THRESHOLD
-					 && distance[oppositeSide] > ANGLED_SENSOR_DISTANCE_THRESHOLD
-					 && */ distance[FRONT] > MAX_FRONT_DISTANCE ){
+					 &&  distance[followingSide] > ANGLED_SENSOR_BANDCENTER
+					 && distance[oppositeSide] > ANGLED_SENSOR_BANDCENTER
+					 &&  distance[FRONT] > MAX_FRONT_DISTANCE ){
 				break;
 			}
 			// If the robot is close enough to the destination
