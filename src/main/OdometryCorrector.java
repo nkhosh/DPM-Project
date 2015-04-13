@@ -1,52 +1,38 @@
 package main;
 
-public class OdometryCorrector extends Thread { //TODO heading correction
-	private final static long CORRECTION_PERIOD = 10;
-	private final static double TILE_LENGTH = 30.48; // in centimeters\
+/**
+ * This class runs along with the Odometer to correct the reported values in case of minor errors.
+ * It scans the gridlines on the map by a light sensor to correct the position information of odometer.
+ * @author Niloofar Khoshsiyar
+ *
+ */
+public class OdometryCorrector extends Thread {
 
 	// Threshold between the light value of the line and that of the wooden floor
-	private final static int LIGHT_THRESHOLD = 50; 	
+	private final static int LIGHT_THRESHOLD = 50;
 	
-	// x and y components of the distance between the midpoint between the wheels and each sensor (when the robot is facing 0 degrees)
-//	private final static double X_LEFT_LS_DISTANCE = 3;
-//	private final static double X_RIGHT_LS_DISTANCE = 3.55;
-//	private final static double LS_DISTANCE = 12.65;
-	private final static double LS_DISTANCE = 11.8;
-//	private final static double LS_DISTANCE = 12;
+	private final static long CORRECTION_PERIOD = 10; //ms
+	private final static double LS_TO_CENTER_DISTANCE = 11.8; //cm
+	private final static double TILE_LENGTH = 30.48; //cm
 	
-	// odometer position of the robot 
+	// odometer position variables of the robot 
 	private double odometerX;
 	private double odometerY;
 	private double heading;
 	
-	// light sensor data
-	private int lsData;
-//	private int sensorData;
+	// Class variables
+	private boolean isActive;
+	private Odometer odometer;
 	
-	// Position and position error of light sensors
+	// Light sensor variables
+	private LSController lsController;	
+	private int lsData;
+	
+	// Position and position error of light sensor
 	private double sensorX;
 	private double sensorY;
 	private double errorX;
 	private double errorY;
-	
-	private boolean isActive;
-	
-	// Variables determining movement while odometry correcting
-//	private boolean mustTurnLeft;
-//	private boolean mustTurnRight;
-
-	Object lock;
-	Odometer odometer;
-	LSController lsController;
-	
-//	public boolean getMustTurnLeft(){
-//		return mustTurnLeft;
-//	}
-//	
-//	public boolean getMustTurnRight(){
-//		return mustTurnRight;
-//	}
-//	
 	
 	/**
 	 * Constructor to build and initials the variables of odometry corrector
@@ -55,13 +41,8 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 	 * @param lock
 	 */
 	public OdometryCorrector(Odometer odometer, LSController lsController, Object lock) {
-		this.lock = lock;
 		this.odometer = odometer;
 		this.lsController = lsController;
-		
-//		xRightLSdistance = 3.45;
-//		xLeftLSdistance = 2.8;
-//		yLSdistance = 12.7;
 	}
 	
 	/**
@@ -76,7 +57,7 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 		while (true) {
 			if(isActive){
 				correctionStart = System.currentTimeMillis();
-				lsData = lsController.readFilteredCSdata();
+				lsData = lsController.readCSdata();
 				
 				errorX = 0;
 				errorY = 0;
@@ -87,8 +68,8 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 					odometerY = odometer.getY();
 					heading = odometer.getHeading();
 					
-					sensorX = odometerX - LS_DISTANCE*Math.sin(heading);
-					sensorY = odometerY - LS_DISTANCE*Math.cos(heading);
+					sensorX = odometerX - LS_TO_CENTER_DISTANCE*Math.sin(heading);
+					sensorY = odometerY - LS_TO_CENTER_DISTANCE*Math.cos(heading);
 						
 						if(sensorX%TILE_LENGTH > TILE_LENGTH/2)
 							errorX = (sensorX%TILE_LENGTH) - TILE_LENGTH;
@@ -138,17 +119,17 @@ public class OdometryCorrector extends Thread { //TODO heading correction
 	 * Corrects the x-position of the odometer (between the wheels) based on the sensor x-position
 	 * It rounds the sensor position to the closest odd multiple of 15, and updates the odometer position based on 
 	 * the distance between the sensor and the point between the wheels
-	 * @param sensorX The x-position of the color sensor
+	 * @param errorX The x-position of the color sensor
 	 */
 	private void xCorrection(double errorX) {
 		odometer.setX(odometerX - errorX);
 	}
 	
 	/**
-	 * Corrects the x-position of the odometer (between the wheels) based on the sensor x-position
+	 * Corrects the y-position of the odometer (between the wheels) based on the sensor y-position
 	 * It rounds the sensor position to the closest odd multiple of 15, and updates the odometer position based on 
 	 * the distance between the sensor and the point between the wheels
-	 * @param sensorX The x-position of the color sensor
+	 * @param errorY The y-position of the color sensor
 	 */
 	private void yCorrection(double errorY) {
 		odometer.setY(odometerY - errorY);

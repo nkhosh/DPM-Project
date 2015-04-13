@@ -5,6 +5,11 @@ import lejos.nxt.LCD;
 import main.Launcher;
 import main.RobinHood;
 
+/**
+ * Test class for the functionality of the reloader of the launcher component.
+ * @author Niloofar Khoshsiyar
+ *
+ */
 public class ReloaderTest {
 	
 	static Launcher launcher;

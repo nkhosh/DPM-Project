@@ -1,53 +1,66 @@
 package tests;
 
-import lejos.nxt.*;
+import lejos.nxt.Button;
+import lejos.nxt.Sound;
 import main.*;
 
+/**
+ * This is the class used for the final demo run.
+ * @author Niloofar Khoshsiyar
+ *
+ */
 public class DemoTest {
-	public static void main (String[] args) {
+	
+	private static final double TILE_LENGTH = 30.48;
+	
+	private static Localizer loc;
+	private static Navigator nav;
+	private static Odometer odo;
+	private static OdometryCorrector odoC;
+	private static LCDPrinter lcd;
+	private static int firstTargetX = 13, firstTargetY = 13, secondTargetX = 9, secondTargetY = 14;
+	
+	public static void main(String[] args) {
 		RobinHood robin = new RobinHood();
-		Navigator navigator;
-		SensorPort port = SensorPort.S4;
-		double segment = 30.48;
-//		TouchSensor touchSensor = new TouchSensor(port);
-//		double[][] destination = {{0,60.96},{60.96,60.96},{0,0},{30,30}};
-		double[][] demo = {{-.5*segment,2*segment},{-.5*segment, 5.5*segment},{1.5*segment,5.5*segment},{1.5*segment,6.5*segment},{4.5*segment,6.5*segment}};
-//		double[][] destination = {{-30.48/2,60.96},{30.48/2,30.48/2},{60.96,60.96},{60.96,30.48/2},{0,0}};
-//		while(!touchSensor.isPressed());
+		loc = robin.getLocalizer();
+		nav = robin.getNavigator();
+		odo = robin.getOdometer();
+		odoC = robin.getOdometryCorrector();
+		lcd = robin.getLCDPrinter();
 		
-		navigator = robin.getNavigator();
-		robin.getOdometer().start();
-		robin.getLCDPrinter().start();
-//		navigator.setDestinationArray(destination);
-
-		int buttonChoice = Button.waitForAnyPress();
-		while(buttonChoice!=Button.ID_ENTER){
-			buttonChoice = Button.waitForAnyPress();
-		}
-//		navigator.turnTo(0,true);
-//		for(int i=0;i<4;i++){
-//			navigator.travelTo(destination[i][0], destination[i][1]);
-//		}
-		robin.getLocalizer().doLocalization();
+		
 		Button.waitForAnyPress();
-
-		robin.getOdometryCorrector().start();
-		navigator.navigateMap(demo, true);
+		odo.start();
+		lcd.start();
+		
+		// Localizing
+		loc.doLocalization();
+		Sound.beepSequence();
+		odoC.start();
+		
+		// Avoiding obstacles and returning to start
+		nav.travelToTiles(3.5, 2.5, true);
+		nav.travelTo(8*TILE_LENGTH , 8*TILE_LENGTH , true);
+		nav.travelTo(10*TILE_LENGTH , 10*TILE_LENGTH , false);
+		
+		// Localizing at the launching zone
+		loc.doLocalization();
+		odo.setPosition(new double[]{10*TILE_LENGTH,10*TILE_LENGTH,180});
+		
+		//Move to the appropriate position to fire at the targets
+		nav.fireAtTiles(firstTargetX, firstTargetY, 8.5, 10.5, 8.5, 10.5, 3);
+		nav.fireAtTiles(secondTargetX, secondTargetY, 8.25 ,10.4, 8.25, 10.4, 3);
+		
+		// Navigate back to the origin
+		nav.travelTo(0 , 0 , true);
+		loc.doLocalization();
+		nav.travelTo(0,0, true);
+		nav.turnToDeg(0, true);
+		
 		Button.waitForAnyPress();
-		//navigator.fireAt(9*segment, 9*segment, xMin, xMax, yMin, yMax, numBalls);
-		
-		
-//		navigator.travelTo(60.96,60.96, true);
-//		navigator.travelTo(0,0, true);
-		navigator.turnToDeg(0,true);
-		
-		buttonChoice = Button.waitForAnyPress();
-		while(buttonChoice!=Button.ID_ESCAPE) {
-			robin.getOdometer().setX(0);
-			robin.getOdometer().setY(0);
-			robin.getOdometer().setHeading(0);
-//			navigator.setDestinationArray(destination);
-			buttonChoice = Button.waitForAnyPress();
-		}
+		System.exit(0);
+
 	}
+
 }
+

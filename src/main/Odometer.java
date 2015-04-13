@@ -1,15 +1,27 @@
 package main;
 import lejos.nxt.NXTRegulatedMotor;
 
+/**
+ * This object keeps track of how much the robot has moved by measuring the tacho count of its motors.
+ * It extends thread so that it can run throughout all the movements
+ * and operations of the robot to keep the position information updated.
+ * @author Niloofar Khoshsiyar
+ *
+ */
 public class Odometer extends Thread {	
-	private static final long ODOMETER_PERIOD = 25;
+	// Constants
+	private static final long ODOMETER_PERIOD = 25; //ms
 	private final static int LEFT=0, RIGHT=1, HEADING=2;
-	private static double wheelRadius=2.055, wheelsDistance=15.85/*16.05*/;
+	
+	// properties finalized by calibration
+	private static double wheelRadius=2.055, wheelsDistance=15.85; //cm
+	
+	// Class variables
 	private double x, y, heading;
 	private Object lock;
 	private final NXTRegulatedMotor[] wheels;
 	private double[] tachometer;
-	private double dc, dt;
+	private double centerDisplacement, headingDisplacement;
 	
 	public Odometer(NXTRegulatedMotor[] wheels, Object lock) {
 		this.lock = lock;
@@ -135,7 +147,7 @@ public class Odometer extends Thread {
 	/**
 	 * Minimizes an angle so that it is within the range from -PI to PI if not already in that range
 	 * @param angle in radians
-	 * @return
+	 * @return the equivalent angle in -pi and pi range
 	 */
 	protected static double minimizeAngle(double angle){
 		double pi = Math.PI;
@@ -152,7 +164,7 @@ public class Odometer extends Thread {
 	
 	/**
 	 * Runs the odometer thread.
-	 * 
+	 * Updates the position parameters based on the readings of the tacho counter of the motors.
 	 */
 	public void run() {
 		long updateStart, updateEnd;
@@ -163,13 +175,13 @@ public class Odometer extends Thread {
 			double tachoCounterR = (wheels[RIGHT].getTachoCount())*Math.PI/180;
 			tachometer[LEFT] = tachoCounterL - tachometer[LEFT];
 			tachometer[RIGHT] = tachoCounterR - tachometer[RIGHT];
-			dc = (tachometer[RIGHT]*wheelRadius + tachometer[LEFT]*wheelRadius)/2;
-			dt = (tachometer[RIGHT]*wheelRadius - tachometer[LEFT]*wheelRadius)/wheelsDistance;
+			centerDisplacement = (tachometer[RIGHT]*wheelRadius + tachometer[LEFT]*wheelRadius)/2;
+			headingDisplacement = (tachometer[RIGHT]*wheelRadius - tachometer[LEFT]*wheelRadius)/wheelsDistance;
 			
 			synchronized (lock) {
-				y += dc * Math.cos(heading + dt/2);
-				x += dc * Math.sin(heading + dt/2);
-				heading -= dt;
+				y += centerDisplacement * Math.cos(heading + headingDisplacement/2);
+				x += centerDisplacement * Math.sin(heading + headingDisplacement/2);
+				heading -= headingDisplacement;
 				heading = minimizeAngle(heading);
 			}
 			

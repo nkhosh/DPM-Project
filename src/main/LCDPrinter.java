@@ -1,19 +1,18 @@
 package main;
-
 import lejos.nxt.LCD;
 
+/**
+ * This class is responsible for printing the information on the NXT screen.
+ * It is mostly used for testing and debugging. 
+ * @author Niloofar Khoshsiyar
+ *
+ */
 public class LCDPrinter extends Thread {
 	private static final long DISPLAY_PERIOD = 100;
-	private final static int LEFT=0, RIGHT=1, FRONT=2;
 	private Odometer odometer;
-//	private Navigator nav;
-	private USController usC;
-//	private Object lock;
 	
 	public LCDPrinter(Odometer odometer, Navigator nav, USController usC, Object lock) {
 		this.odometer = odometer;
-//		this.nav = nav;
-		this.usC = usC;
 	}
 	
 	/**
@@ -39,14 +38,6 @@ public class LCDPrinter extends Thread {
 			LCD.drawString(formattedDoubleToString(odometer.getX(), 2), 3, 0);
 			LCD.drawString(formattedDoubleToString(odometer.getY(), 2), 3, 1);
 			LCD.drawString(formattedDoubleToString(odometer.getHeading()*180/Math.PI, 2), 3, 2);
-//			LCD.drawString(formattedDoubleToString(usC.getDistance(LEFT), 2), 3, 4);
-//			LCD.drawString(formattedDoubleToString(usC.getDistance(RIGHT), 2), 3, 5);
-//			LCD.drawString(formattedDoubleToString(usC.getDistance(FRONT), 2), 3, 6);
-//			LCD.drawString(formattedDoubleToString(usC.getFilteredDistance(LEFT), 2), 3, 4);
-//			LCD.drawString(formattedDoubleToString(usC.getFilteredDistance(RIGHT), 2), 3, 5);
-//			LCD.drawString(formattedDoubleToString(usC.getFilteredDistance(FRONT), 2), 3, 6);
-//			LCD.drawString(formattedDoubleToString((double)Localizer.distanceFront,2),3,3);
-//			LCD.drawString(formattedDoubleToString((double)Localizer.distanceSide,2),3,4);
 
 
 			// throttle the OdometryDisplay

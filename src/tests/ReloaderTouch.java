@@ -1,12 +1,17 @@
 package tests;
 
-import lejos.nxt.Button;
 import lejos.nxt.LCD;
 import lejos.nxt.SensorPort;
 import lejos.nxt.TouchSensor;
 import main.Launcher;
 import main.RobinHood;
 
+/**
+ * Test class for the reloader component.
+ * Using touch sensor for the ease of use.
+ * @author Niloofar Khoshsiyar
+ *
+ */
 public class ReloaderTouch {
 	static Launcher launcher;
 	

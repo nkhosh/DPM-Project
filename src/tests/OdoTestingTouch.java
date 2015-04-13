@@ -1,15 +1,20 @@
 package tests;
 
-import lejos.nxt.Button;
 import lejos.nxt.LCD;
 import lejos.nxt.Motor;
 import lejos.nxt.NXTRegulatedMotor;
 import lejos.nxt.SensorPort;
 import lejos.nxt.TouchSensor;
-import main.LCDPrinter;
 import main.Odometer;
 import main.RobinHood;
 
+/**
+ * Testing of the odometer by using touch sensor for ease of the use.
+ * This class was subject to change and addition and deletion of many lines of code for different tests.
+ * For the different versions of the test class please refer to Git.
+ * @author Nil
+ *
+ */
 public class OdoTestingTouch {
 	private static double radius;
 	private static double width;
@@ -17,9 +22,7 @@ public class OdoTestingTouch {
 	private static int rotationSpeed;
 	private static double forwardDistance;
 	private static double rotationAngle;
-	private static int buttonChoice;
 	private static Odometer odometer;
-	private static LCDPrinter lcdPrinter;
 	private static TouchSensor touchSensor;
 
 	private final static NXTRegulatedMotor[] wheelMotor = { Motor.A, Motor.B };
@@ -28,7 +31,6 @@ public class OdoTestingTouch {
 		RobinHood robinHood = new RobinHood();
 		touchSensor = new TouchSensor(SensorPort.S4);
 		odometer = robinHood.getOdometer();
-		lcdPrinter = robinHood.getLCDPrinter();
 
 		radius = odometer.getRadius();
 		width = odometer.getWheelsDistance();

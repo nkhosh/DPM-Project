@@ -4,12 +4,15 @@ import lejos.nxt.Button;
 import lejos.nxt.LCD;
 import lejos.nxt.Motor;
 import lejos.nxt.NXTRegulatedMotor;
-import lejos.nxt.SensorPort;
-import lejos.nxt.TouchSensor;
-import main.LCDPrinter;
 import main.Odometer;
 import main.RobinHood;
-
+/**
+ * Test class for odometer functionality and the accuracy of the reported values.
+ * This class was subject to change and addition and deletion of many lines of code for different tests.
+ * For the different versions of the test class please refer to Git.
+ * @author Niloofar Khoshsiyar
+ *
+ */
 public class OdoTesting {
 	private static double radius;
 	private static double width;
@@ -19,15 +22,12 @@ public class OdoTesting {
 	private static double rotationAngle;
 	private static int buttonChoice;
 	private static Odometer odometer;
-	private static LCDPrinter lcdPrinter;
-	private static TouchSensor touchSensor = new TouchSensor(SensorPort.S4);
 
 	private final static NXTRegulatedMotor[] wheelMotor = {Motor.A, Motor.B};
 	
 	public static void main(String[] args){
 		RobinHood robinHood = new RobinHood();
 		odometer = robinHood.getOdometer();
-		lcdPrinter = robinHood.getLCDPrinter();
 		
 		radius = odometer.getRadius();
 		width = odometer.getWheelsDistance();

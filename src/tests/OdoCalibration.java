@@ -7,11 +7,18 @@ import lejos.util.Delay;
 import main.Navigator;
 import main.RobinHood;
 
+/**
+ * Test class to determine the constants defined in the odometer, like radius of the wheels and the distance of the wheels.
+ * This class was subject to change and addition and deletion of many lines of code for different tests.
+ * For the different versions of the test class please refer to Git.
+ * @author Niloofar Khoshsiyar
+ *
+ */
 public class OdoCalibration {
-	private static double radius = 2.055, width = 15.85; // 16.37    2.09, wheelsDistance=16.35
+	
+	private static double radius = 2.055, wheelsDistance = 15.85; // 16.37    2.09, wheelsDistance=16.35
 	private static int buttonChoice;
 	private final static NXTRegulatedMotor[] wheelMotor = {Motor.A, Motor.B};
-	private double[] tachometer;
 	private static Navigator nav;
 	
 	private static RobinHood robinhood;
@@ -34,11 +41,7 @@ public class OdoCalibration {
 				break;
 			LCD.clear();
 			LCD.drawString(" Radius="+radius, 0, 2);
-			LCD.drawString(" Width="+width, 0, 3);
-//			if(buttonChoice==Button.ID_ENTER)
-//				squareDrive();
-//			if( Button.waitForAnyPress()==Button.ID_ESCAPE)
-//				break;
+			LCD.drawString(" Width="+wheelsDistance, 0, 3);
 		}
 		System.exit(0);
 	}
@@ -98,20 +101,20 @@ public class OdoCalibration {
 		LCD.drawString("       |        ", 0, 1);
 		LCD.drawString("< Left | Right >", 0, 2);
 		LCD.drawString(" -0.1  |  +0.1  ", 0, 3);
-		LCD.drawString("    "+width, 0, 5);
+		LCD.drawString("    "+wheelsDistance, 0, 5);
 		
 		buttonChoice = Button.waitForAnyPress();
 		while (buttonChoice != Button.ID_ESCAPE) {
 			if( buttonChoice == Button.ID_RIGHT ) {
-				width += 0.1;
+				wheelsDistance += 0.1;
 			}
 			else if( buttonChoice == Button.ID_LEFT ) {
-				width -= 0.1;
+				wheelsDistance -= 0.1;
 			}
 			else if( buttonChoice == Button.ID_ENTER ) {
 				break;
 			}
-			LCD.drawString("    "+width, 0, 5);
+			LCD.drawString("    "+wheelsDistance, 0, 5);
 			buttonChoice = Button.waitForAnyPress();
 		}
 		LCD.clear();
@@ -119,27 +122,27 @@ public class OdoCalibration {
 		LCD.drawString("       |        ", 0, 1);
 		LCD.drawString("< Left | Right >", 0, 2);
 		LCD.drawString(" -0.01 |  +0.01 ", 0, 3);
-		LCD.drawString("    "+width, 0, 5);
+		LCD.drawString("    "+wheelsDistance, 0, 5);
 		
 		buttonChoice = Button.waitForAnyPress();
 		
 		while( buttonChoice != Button.ID_ESCAPE ) {
 			if( buttonChoice == Button.ID_RIGHT ) {
-				width += 0.01;
+				wheelsDistance += 0.01;
 			}
 			else if( buttonChoice == Button.ID_LEFT ) {
-				width -= 0.01;
+				wheelsDistance -= 0.01;
 			}
 			else if( buttonChoice == Button.ID_ENTER ) {
 				Delay.msDelay(500);
 				robinhood.getOdometer().start();
-				robinhood.getOdometer().setWidth(width);
+				robinhood.getOdometer().setWidth(wheelsDistance);
 				Delay.msDelay(500);
 				turnAngle();
 //				squareDrive();
 				return;
 			}
-			LCD.drawString("    "+width, 0, 5);
+			LCD.drawString("    "+wheelsDistance, 0, 5);
 			buttonChoice = Button.waitForAnyPress();
 		}
 	}
@@ -160,56 +163,23 @@ public class OdoCalibration {
 
 		// drive forward two tiles
 		for(int j=0; j<4; j++) {
-//			robinhood.getNavigator().travelTo((j%2)*FORWARD_DISTANCE, ((j+1)%2)*FORWARD_DISTANCE);
-//			robinhood.getNavigator().turnTo(ROTATION_ANGLE*(j+1), true);
 			wheelMotor[0].rotate((int)Navigator.convertDistanceToAngle(radius, FORWARD_DISTANCE), true);
 			wheelMotor[1].rotate((int)Navigator.convertDistanceToAngle(radius, FORWARD_DISTANCE), false);
 
-			wheelMotor[0].rotate((int)Navigator.convertHeadingToWheelAngle(radius, width, ROTATION_ANGLE), true);
-			wheelMotor[1].rotate(-(int)Navigator.convertHeadingToWheelAngle(radius, width, ROTATION_ANGLE), false);
+			wheelMotor[0].rotate((int)Navigator.convertHeadingToWheelAngle(radius, wheelsDistance, ROTATION_ANGLE), true);
+			wheelMotor[1].rotate(-(int)Navigator.convertHeadingToWheelAngle(radius, wheelsDistance, ROTATION_ANGLE), false);
 		}
 	}
 	public static void goForward() {
 		final double FORWARD_DISTANCE = (9*30.48);
 		nav.travelTo(0, FORWARD_DISTANCE, false);
-//		wheelMotor[0].setSpeed(200);
-//		wheelMotor[1].setSpeed(200);
-//		// wait 5 seconds
-//		try {
-//			Thread.sleep(2000);
-//		} catch (InterruptedException e) {
-//			// there is nothing to be done here because it is not expected that
-//			// the odometer will be interrupted by another thread
-//		}
-//
-////		robinhood.getNavigator().travelTo(0, FORWARD_DISTANCE);
-//		wheelMotor[0].rotate((int)Navigator.convertDistance(radius, FORWARD_DISTANCE), true);
-//		wheelMotor[1].rotate((int)Navigator.convertDistance(radius, FORWARD_DISTANCE), false);
 	}
 	public static void turnAngle() {
-//		nav.turnTo(90, true);
-//		Delay.msDelay(500);
-//		nav.turnTo(180, true);
-//		Delay.msDelay(500);
-//		nav.turnTo(270, true);
-//		Delay.msDelay(500);
-//		nav.turnTo(0, true);
 		final double ROTATION_ANGLE = 360.0*3;
-//
 		wheelMotor[0].setSpeed(123);
 		wheelMotor[1].setSpeed(123);
 
-		// wait 5 seconds
-//		try {
-//			Thread.sleep(2000);
-//		} catch (InterruptedException e) {
-//			// there is nothing to be done here because it is not expected that
-//			// the odometer will be interrupted by another thread
-//		}
-
-//		robinhood.getNavigator().turnTo(ROTATION_ANGLE, true);
-
-		wheelMotor[0].rotate((int)Navigator.convertHeadingToWheelAngle(radius, width, ROTATION_ANGLE), true);
-		wheelMotor[1].rotate(-(int)Navigator.convertHeadingToWheelAngle(radius, width, ROTATION_ANGLE), false);
+		wheelMotor[0].rotate((int)Navigator.convertHeadingToWheelAngle(radius, wheelsDistance, ROTATION_ANGLE), true);
+		wheelMotor[1].rotate(-(int)Navigator.convertHeadingToWheelAngle(radius, wheelsDistance, ROTATION_ANGLE), false);
 	}
 }
